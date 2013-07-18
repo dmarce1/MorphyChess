@@ -1,0 +1,811 @@
+locale = en_US.UTF-8
+recognized 'normal' (-1) as variant normal
+recognized 'normal' (-1) as variant normal
+recognized 'normal' (-1) as variant normal
+shuffleOpenings = 0
+Requested font set for list -*-helvetica-medium-r-normal--14-*-*-*-*-*-*-*,-misc-fixed-medium-r-normal--14-*-*-*-*-*-*-*,-*-*-*-*-*-*-14-*-*-*-*-*-*-*
+ got list -*-helvetica-medium-r-normal--14-*-*-*-*-*-*-*,-misc-fixed-medium-r-normal--14-*-*-*-*-*-*-*,-*-*-*-*-*-*-14-*-*-*-*-*-*-*, locale en_US.UTF-8
+ got charset -adobe-helvetica-medium-r-normal--14-101-100-100-p-0-iso8859-1
+ got charset -adobe-helvetica-medium-r-normal--14-101-100-100-p-0-iso8859-1
+ got charset -adobe-helvetica-medium-r-normal--14-101-100-100-p-0-iso8859-2
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-3
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-4
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-5
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-koi8-r
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-7
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-9
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-13
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso8859-14
+ got charset -adobe-helvetica-medium-r-normal--14-101-100-100-p-0-iso8859-15
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-140-jisx0208.1983-0
+ got charset -daewoo-gothic-medium-r-normal--14-101-100-100-c-0-ksc5601.1987-0
+ got charset -isas-fangsong ti-medium-r-normal--14-101-100-100-c-0-gb2312.1980-0
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-jisx0201.1976-0
+ got charset -misc-fixed-medium-r-normal--14-130-75-75-c-70-iso10646-1
+Requested font set for list -*-helvetica-bold-r-normal--34-*-*-*-*-*-*-*,-misc-fixed-bold-r-normal--34-*-*-*-*-*-*-*,-*-*-*-*-*-*-34-*-*-*-*-*-*-*
+ got list -*-helvetica-bold-r-normal--34-*-*-*-*-*-*-*,-misc-fixed-bold-r-normal--34-*-*-*-*-*-*-*,-*-*-*-*-*-*-34-*-*-*-*-*-*-*, locale en_US.UTF-8
+ got charset -adobe-helvetica-bold-r-normal--34-246-100-100-p-0-iso8859-1
+ got charset -adobe-helvetica-bold-r-normal--34-246-100-100-p-0-iso8859-1
+ got charset -adobe-helvetica-bold-r-normal--34-246-100-100-p-0-iso8859-2
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-3
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-4
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-5
+ got charset -misc-fixed-medium-r-normal--34-246-100-100-c-0-koi8-r
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-7
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-9
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-13
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso8859-14
+ got charset -adobe-helvetica-bold-r-normal--34-246-100-100-p-0-iso8859-15
+ got charset -jis-fixed-medium-r-normal--34-246-100-100-c-0-jisx0208.1983-0
+ got charset -daewoo-gothic-medium-r-normal--34-246-100-100-c-0-ksc5601.1987-0
+ got charset -isas-fangsong ti-medium-r-normal--34-246-100-100-c-0-gb2312.1980-0
+ got charset -misc-fixed-medium-r-normal--34-246-100-100-c-0-jisx0201.1976-0
+ got charset -misc-fixed-bold-r-normal--34-246-100-100-c-0-iso10646-1
+Requested font set for list -*-helvetica-bold-r-normal--12-*-*-*-*-*-*-*,-misc-fixed-bold-r-normal--12-*-*-*-*-*-*-*,-*-*-*-*-*-*-12-*-*-*-*-*-*-*
+ got list -*-helvetica-bold-r-normal--12-*-*-*-*-*-*-*,-misc-fixed-bold-r-normal--12-*-*-*-*-*-*-*,-*-*-*-*-*-*-12-*-*-*-*-*-*-*, locale en_US.UTF-8
+ got charset -adobe-helvetica-bold-r-normal--12-87-100-100-p-0-iso8859-1
+ got charset -adobe-helvetica-bold-r-normal--12-87-100-100-p-0-iso8859-1
+ got charset -adobe-helvetica-bold-r-normal--12-87-100-100-p-0-iso8859-2
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-3
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-4
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-5
+ got charset -misc-fixed-medium-r-semicondensed--12-110-75-75-c-60-koi8-r
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-7
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-9
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-13
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso8859-14
+ got charset -adobe-helvetica-bold-r-normal--12-87-100-100-p-0-iso8859-15
+ got charset -jis-fixed-medium-r-normal--12-87-100-100-c-0-jisx0208.1983-0
+ got charset -daewoo-gothic-medium-r-normal--12-87-100-100-c-0-ksc5601.1987-0
+ got charset -isas-fangsong ti-medium-r-normal--12-87-100-100-c-0-gb2312.1980-0
+ got charset -misc-fixed-medium-r-normal--12-87-100-100-c-0-jisx0201.1976-0
+ got charset -misc-fixed-bold-r-normal--12-87-100-100-c-0-iso10646-1
+xboard 4.6.2 + morphy
+Reset(1, 0) from gameMode 0
+recognized 'normal' (-1) as variant normal
+GameEnds(0, (null), 2)
+shuffleOpenings = 0
+StartChildProcess (dir=".") ./morphy
+505 >first : xboard
+protover 2
+shuffleOpenings = 0
+568 <first : 
+568 <first : Morphy Chess 1.0.5
+568 <first : Copyright (C) 2007,2008 Dominic C. Marcello
+568 <first : ALL RIGHTS RESERVED
+568 <first : 
+568 <first : feature analyze=1
+568 >first : accepted analyze
+568 <first : feature colors=0
+568 >first : accepted colors
+568 <first : feature done=1
+568 >first : accepted done
+568 <first : feature draw=1
+568 >first : accepted draw
+568 <first : feature ics=1
+568 >first : accepted ics
+568 <first : feature myname="Morphy Chess 1.0.5"
+568 >first : accepted myname
+570 <first : feature name=1
+570 >first : accepted name
+570 <first : feature pause=0
+570 >first : accepted pause
+570 <first : feature ping=1
+570 >first : accepted ping
+570 <first : feature playother=1
+570 >first : accepted playother
+570 <first : feature reuse=1
+570 >first : accepted reuse
+570 <first : feature san=0
+570 >first : accepted san
+570 <first : feature setboard=1
+570 >first : accepted setboard
+570 <first : feature sigint=0
+570 >first : accepted sigint
+570 <first : feature sigterm=1
+570 >first : accepted sigterm
+570 <first : feature time=1
+570 >first : accepted time
+570 <first : feature usermove=0
+570 >first : accepted usermove
+570 <first : feature variants="normal"
+571 >first : accepted variants
+571 >first : new
+random
+571 >first : ics -
+571 >first : level 40 5 0
+571 >first : post
+571 >first : hard
+571 >first : easy
+571 >first : ping 1
+599 <first : pong 1
+nps: w=-1, b=-1
+2413 >first : name dmarce1
+nps: w=-1, b=-1
+2413 >first : time 30000
+2413 >first : otim 30000
+book hit = (NULL)
+2413 >first : e2e4
+2447 <first : speed = 0 kn/s
+2475 <first : move e7e5
+4195 >first : time 29993
+4195 >first : otim 29828
+book hit = (NULL)
+4195 >first : d2d4
+4223 <first : speed = 0 kn/s
+4251 <first : move e5d4
+8101 >first : time 29988
+8101 >first : otim 29443
+book hit = (NULL)
+8101 >first : f1c4
+8136 <first :  1   56     3      425   Nb8-c6 
+8141 <first :  3   48     3     2888   Nb8-c6   Ng1-f3   Bf8-c5 
+8148 <first :  2   32     4     2889   Nb8-c6   Ng1-f3 
+8154 <first :  4   40     5    11727   Nb8-c6   Ng1-f3   Bf8-c5   Nb1-d2 
+8163 <first :  5   48     6    25488   Nb8-c6   Ng1-f3   Ng8-f6   Nf3xd4   Nf6xe4 
+8286 <first :  6   40    18   142975   Nb8-c6   Ng1-f3   Ng8-f6   Nf3xd4   Nf6xe4      O-O 
+8570 <first :  7   40    46   420605   Nb8-c6   Ng1-f3   Bf8-c5      O-O   Ng8-f6    e4-e5 
+9028 <first :  8   40    92   982771   Nb8-c6   Ng1-f3   Bf8-c5    c2-c3   Qd8-f6      O-O   Ng8-e7   Bc1-g5 
+10540 <first :  9   32   243  2544318   Nb8-c6   Ng1-f3   Bf8-c5    c2-c3   Qd8-f6      O-O   Ng8-e7   Bc1-g5   Qf6-g6 
+16905 <first : 10   40   880  9578683   Nb8-c6   Ng1-f3  Bf8-b4+   Bc1-d2  Bb4xd2+   Nb1xd2   Ng8-f6    e4-e5   Qd8-e7      O-O   Nc6xe5   Nf3xd4 
+16914 <first : speed = 1561 kn/s
+16949 <first : move b8c6
+26028 >first : time 29103
+26028 >first : otim 28535
+book hit = (NULL)
+26028 >first : c2c3
+26059 <first :  1   88     3      258    d4xc3 
+26059 <first :  2   72     3      873    d4xc3   Qd1-d5 
+26061 <first :  3   80     3     1844    d4xc3   Qd1-d5   Qd8-f6 
+26063 <first :  4   72     3     5505    d4xc3   Qd1-d5   Qd8-f6   Nb1xc3 
+26077 <first :  5   88     4    24155    d4xc3   Qd1-d5   Qd8-f6   Nb1xc3   Ng8-e7 
+26119 <first :  6   64     9    79000    d4xc3   Qd1-d5   Qd8-f6   Nb1xc3   Ng8-e7   Qd5-g5 
+26370 <first :  7   88    34   446590    d4xc3   Qd1-d5   Qd8-f6   Nb1xc3   Ng8-e7   Qd5-g5   Qf6xg5 
+26883 <first :  8   88    85  1213504   Ng8-f6   Bc1-g5   Bf8-e7   Bg5xf6   Be7xf6   Ng1-f3    d4xc3   Nb1xc3 
+28400 <first :  9   96   237  2847604   Ng8-f6   Bc1-g5   Bf8-e7   Bg5xf6   Be7xf6   Ng1-e2    d4xc3   Nb1xc3      O-O 
+33368 <first : 10   80   733  8695847   Ng8-f6    c3xd4   Nf6xe4  Bc4xf7+   Ke8xf7  Qd1-h5+    g7-g6  Qh5-d5+   Kf7-g7   Qd5xe4  Bf8-b4+   Bc1-d2   Rh8-e8 
+33384 <first : speed = 1562 kn/s
+33420 <first : move g8f6
+49306 >first : time 28364
+49306 >first : otim 26946
+book hit = (NULL)
+49306 >first : c4d5
+49342 <first :  1  120     3      146    d4xc3 
+49344 <first :  2   96     3      905    d4xc3   Nb1xc3 
+49355 <first :  3  112     4     3628    d4xc3   Nb1xc3   Nf6xd5 
+49360 <first :  4   96     5    12124    d4xc3   Nb1xc3   Nf6xd5   Qd1xd5 
+49363 <first :  5   96     5    19392    d4xc3   Nb1xc3   Nf6xd5   Qd1xd5    d7-d6 
+49390 <first :  6   96     8    45748    d4xc3   Nb1xc3   Nf6xd5   Qd1xd5    d7-d6   Ng1-f3 
+49472 <first :  7   96    16   126296    d4xc3   Nb1xc3   Nf6xd5   Qd1xd5    d7-d6   Ng1-f3   Bc8-e6 
+51098 <first :  8   96   179  1533982    d4xc3   Nb1xc3   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3    d7-d6   Nf3xe5 
+53312 <first :  9   96   400  3537533    d4xc3   Nb1xc3   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3      O-O      O-O 
+56790 <first : 10   88   748  8112052    d4xc3   Nb1xc3   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3      O-O      O-O   Bc8-e6 
+56799 <first : speed = 1601 kn/s
+56839 <first : move d4c3
+60110 >first : time 27610
+60110 >first : otim 26619
+book hit = (NULL)
+60110 >first : b1c3
+60144 <first :  1   96     3       95   Bf8-b4 
+60144 <first :  2   96     3       97   Bf8-b4   Ng1-f3 
+60144 <first :  3   96     3       99   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3 
+60145 <first :  4   96     3      101   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6 
+60145 <first :  5   96     3      103   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3 
+60145 <first :  6   96     3      105   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3      O-O 
+60146 <first :  7   96     3      107   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3      O-O      O-O 
+60146 <first :  8   96     3      109   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3      O-O      O-O   Bc8-e6 
+60146 <first :  9   96     3      111   Bf8-b4   Ng1-f3  Bb4xc3+    b2xc3    d7-d6   Bc1-e3      O-O      O-O   Bc8-e6   Rf1-e1 
+64039 <first : 10   88   392  3909029   Bf8-b4   Bc1-g5  Bb4xc3+    b2xc3      O-O   Ng1-f3    h7-h6   Bg5-h4    d7-d6      O-O   Bc8-d7 
+64057 <first : speed = 1372 kn/s
+64098 <first : move f8b4
+66788 >first : time 27212
+66788 >first : otim 26350
+book hit = (NULL)
+66788 >first : c1d2
+66821 <first :  1   96     3      139   Nf6xd5 
+66821 <first :  2   96     3      421   Nf6xd5    e4xd5 
+66824 <first :  3   96     3     4115   Nf6xd5    e4xd5   Nc6-e5 
+66839 <first :  4   96     3     6896   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3 
+66839 <first :  5   96     4     9505   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3  Ne5-d3+ 
+66856 <first :  6  112     6    48444   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3  Ne5-d3+ 
+66960 <first :  7  104    17   171543   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3  Ne5-d3+ 
+67092 <first :  8  112    30   407873   Nf6xd5    e4xd5   Nc6-e5   Ke1-f1      O-O   Ng1-f3   Ne5xf3   Qd1xf3 
+68041 <first :  9  112   125  1450049   Nf6xd5    e4xd5   Nc6-e5   Bd2-f4  Bb4xc3+    b2xc3    d7-d6   Bf4xe5    d6xe5   Ng1-f3 
+68739 <first : 10  112   195  2728158   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3  Ne5xf3+   Qd1xf3      O-O      O-O    d7-d6   Rf1-e1   Bc8-d7 
+76167 <first : 11  112   937 11254061   Nf6xd5    e4xd5   Nc6-e5   Ng1-f3   Bb4xc3   Bd2xc3  Ne5xf3+   Qd1xf3      O-O      O-O    d7-d6   Ra1-e1 
+76185 <first : speed = 1487 kn/s
+76224 <first : move e8g8
+78544 >first : time 26268
+78544 >first : otim 26118
+book hit = (NULL)
+78544 >first : g1f3
+78572 <first :  1  112     2       57   Rf8-e8 
+78573 <first :  2  112     2       59   Rf8-e8   Bd2-g5 
+78573 <first :  3  112     2       61   Rf8-e8   Bd2-g5  Bb4xc3+    b2xc3 
+78573 <first :  4  112     3       63   Rf8-e8   Bd2-g5  Bb4xc3+    b2xc3    d7-d6 
+78590 <first :  5  112     4    22606   Rf8-e8   Bd2-g5  Bb4xc3+    b2xc3    d7-d6      O-O 
+78666 <first :  6  128    12    88673   Rf8-e8   Bd2-g5  Bb4xc3+    b2xc3    d7-d6      O-O   Bc8-e6 
+78863 <first :  7  128    31   395743   Rf8-e8   Bd2-g5  Bb4xc3+    b2xc3    d7-d6      O-O   Bc8-e6   Bd5xc6 
+79748 <first :  8  136   120  1255685   Rf8-e8   Bd2-g5  Bb4xc3+    b2xc3   Nf6xe4  Bd5xf7+   Kg8xf7  Qd1-b3+    d7-d5   Bg5xd8  Ne4-c5+ 
+81386 <first :  9  128   284  3399034   Rf8-e8   Qd1-b3   Nf6xd5   Qb3xd5   Qd8-e7   Nf3-g5    h7-h6 
+81398 <first : speed = 1560 kn/s
+81437 <first : move f8e8
+85657 >first : time 25979
+85657 >first : otim 25696
+book hit = (NULL)
+85657 >first : e1g1
+85691 <first :  2  168     3     1146   Bb4xc3   Bd2xc3 
+85693 <first :  3  168     3     3986   Bb4xc3   Bd2xc3   Nf6xe4 
+85698 <first :  4  184     4    12612   Bb4xc3   Bd2xc3   Nf6xe4   Bc3-e1 
+85704 <first :  1  168     4    15633   Bb4xc3 
+85710 <first :  5  208     5    31216   Bb4xc3   Bd2xc3   Nf6xe4   Qd1-b3   Re8-e7 
+85747 <first :  6  192     8    89194   Bb4xc3   Bd2xc3   Nf6xe4   Qd1-b3   Re8-e7   Bc3-e1 
+85848 <first :  7  208    19   260478   Bb4xc3   Bd2xc3   Nf6xe4   Qd1-b3   Re8-e7   Bd5xe4   Re7xe4 
+85976 <first :  8  200    31   512256   Bb4xc3   Bd2xc3   Nf6xe4   Qd1-b3   Re8-e7   Bd5xe4   Re7xe4   Ra1-c1 
+86815 <first :  9  208   115  1583921   Bb4xc3   Bd2xc3   Nf6xe4   Qd1-b3   Re8-e7   Ra1-e1   Ne4xc3   Qb3xc3   Re7xe1 
+88647 <first : 10  208   298  4412384   Bb4xc3   Bd2xc3   Nf6xe4   Qd1-b3   Re8-e7   Ra1-e1   Ne4xc3   Qb3xc3   Re7xe1   Rf1xe1 
+88649 <first : speed = 1860 kn/s
+88680 <first : move b4c3
+90275 >first : time 25676
+90275 >first : otim 25537
+book hit = (NULL)
+90275 >first : b2c3
+90305 <first :  1  192     3      871   Nf6xe4 
+90307 <first :  2  200     3     1524   Nf6xe4   Ra1-b1 
+90309 <first :  3  216     3     2929   Nf6xe4   Ra1-b1   Ne4xd2 
+90313 <first :  4  192     3     5699   Nf6xe4   Qd1-b3   Re8-e7   Bd2-f4 
+90319 <first :  5  200     4    13612   Nf6xe4   Qd1-b3   Re8-e7   Bd2-f4    d7-d6 
+90327 <first :  6  200     5    27642   Nf6xe4   Qd1-b3   Re8-e7   Bd2-f4    d7-d6   Ra1-e1 
+90384 <first :  7  208    10    84694   Nf6xe4   Qd1-b3   Re8-e7   Bd2-e3   Ne4-f6   Ra1-e1 
+90697 <first :  8  216    42   396409   Nf6xe4   Qd1-b3   Re8-e7   Bd2-e3   Ne4-f6   Be3-g5   Nf6xd5   Qb3xd5 
+91698 <first :  9  232   142  1606760   Nf6xe4   Qd1-b3   Re8-e7   Bd2-e3   Qd8-e8   Qb3-c2 
+92682 <first : 10  192   240  3674809   Nf6xe4   Qd1-b3   Re8-e7   Bd2-e3   Qd8-e8   Qb3-c2    d7-d6 
+92692 <first : speed = 1837 kn/s
+92726 <first : move f6e4
+97388 >first : time 25431
+97388 >first : otim 25070
+book hit = (NULL)
+97389 >first : f3d4
+97424 <first :  1  240     3      264   Ne4xd2 
+97425 <first :  2  240     3      752   Ne4xd2   Qd1xd2 
+97427 <first :  3  256     3     2753   Ne4xd2   Qd1xd2   Nc6xd4 
+97439 <first :  4  248     5    20704   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4 
+97440 <first :  5  264     5    23519   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4    d7-d6 
+97471 <first :  6  256     8    69277   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4    d7-d6   Ra1-c1 
+97587 <first :  7  264    19   230775   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4    c7-c6   Bd5-c4    d7-d5 
+97964 <first :  8  296    57   899529   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1 
+98811 <first :  9  288   142  2275992   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1 
+101504 <first : 10  288   411  6541495   Ne4xd2   Qd1xd2   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd2-g5 
+101510 <first : speed = 1954 kn/s
+101541 <first : move e4d2
+103091 >first : time 25016
+103091 >first : otim 24915
+book hit = (NULL)
+103091 >first : d1d2
+103121 <first :  1  288     3      225   Nc6xd4 
+103121 <first :  2  288     3      258   Nc6xd4    c3xd4 
+103122 <first :  3  288     3      298   Nc6xd4    c3xd4    c7-c6 
+103122 <first :  4  288     3      456   Nc6xd4    c3xd4    c7-c6   Bd5-f3 
+103122 <first :  6  288     3      736   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1 
+103128 <first :  5  288     3     1691   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5 
+103141 <first :  7  288     4     5593   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7 
+103175 <first :  8  288     8    18004   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd2-g5 
+103239 <first :  9  288    14    45586   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd2-g5   Bc8-e6 
+104976 <first : 10  296   188  2557781   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd2-g5   Bc8-e6 
+108607 <first : 11  296   551  8150110   Nc6xd4    c3xd4    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd2-g5    h7-h6   Qg5-f4   Bc8-e6 
+108624 <first : speed = 1886 kn/s
+108660 <first : move c6d4
+110951 >first : time 24459
+110951 >first : otim 24686
+book hit = (NULL)
+110951 >first : d2d4
+110980 <first :  1  280     3      112    c7-c6 
+110981 <first :  2  280     3      226    c7-c6   Bd5-b3 
+110982 <first :  3  288     3     1515    c7-c6   Bd5-f3    d7-d5 
+110983 <first :  4  288     3     3029    c7-c6   Bd5-f3    d7-d5   Ra1-b1 
+110986 <first :  5  288     3     7819    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7 
+110992 <first :  6  288     4    18043    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd4-d3 
+111014 <first :  7  288     6    48196    c7-c6   Bd5-f3    d7-d5   Ra1-b1   Re8-e7   Qd4-d3   Bc8-e6 
+111141 <first :  8  296    19   232651    c7-c6   Bd5-f3    d7-d5   Ra1-b1    b7-b6   Rf1-d1   Bc8-f5 
+111869 <first :  9  304    91   756477    c7-c6   Bd5-f3    d7-d5   Ra1-b1    b7-b5   Rf1-d1   Bc8-f5 
+112607 <first : 10  304   165  1502589    c7-c6   Bd5-f3    d7-d5   Ra1-b1    b7-b5   Rf1-d1   Bc8-f5 
+118665 <first : 11  304   771  8736997    c7-c6   Bd5-f3    d7-d5   Ra1-b1    b7-b5   Rf1-d1   Bc8-f5   Rb1-b2    a7-a5 
+118678 <first : speed = 1887 kn/s
+118716 <first : move c7c6
+124695 >first : time 23683
+124695 >first : otim 24088
+book hit = (NULL)
+124695 >first : d5c4
+124728 <first :  1  304     3       71    d7-d5 
+124729 <first :  2  304     3       73    d7-d5   Bc4-d3 
+124729 <first :  3  304     3       75    d7-d5   Bc4-d3   Qd8-a5 
+124729 <first :  4  304     3       77    d7-d5   Bc4-d3   Qd8-a5 
+124729 <first :  5  304     3       79    d7-d5   Bc4-d3   Qd8-a5 
+124729 <first :  6  304     3       81    d7-d5   Bc4-d3   Qd8-a5 
+124730 <first :  7  304     3       83    d7-d5   Bc4-d3   Qd8-a5 
+124730 <first :  8  304     3       85    d7-d5   Bc4-d3   Qd8-a5 
+125081 <first :  9  312    38   315902    d7-d5   Bc4-d3   Qd8-a5   Rf1-c1   Bc8-e6   Rc1-e1    b7-b6 
+125566 <first : 10  312    87  1103504    d7-d5   Bc4-d3   Qd8-a5   Rf1-c1   Bc8-e6   Qd4-h4    f7-f5   Qh4-f4    g7-g6   Ra1-b1 
+127853 <first : 11  312   315  4076871    d7-d5   Bc4-d3   Qd8-a5   Rf1-c1   Bc8-e6   Qd4-h4    f7-f5   Qh4-f4    g7-g6   Ra1-b1   Re8-e7 
+127867 <first : speed = 1731 kn/s
+127902 <first : move d7d5
+130457 >first : time 23362
+130458 >first : otim 23833
+book hit = (NULL)
+130458 >first : c4b3
+130487 <first :  2  312     2      858   Bc8-f5   Ra1-d1 
+130487 <first :  3  320     2     1268   Bc8-f5   Ra1-d1    a7-a5 
+130487 <first :  1  320     2     1401   Bc8-f5 
+130490 <first :  4  320     3     4582   Bc8-f5   Ra1-d1   Re8-e2 
+130496 <first :  5  320     3    15472   Bc8-f5   Ra1-d1   Re8-e2 
+130532 <first :  6  312     7    49319   Bc8-f5   Ra1-d1   Re8-e2   Bb3-c4   Re2-e4 
+130797 <first :  7  312    34   314105   Bc8-f5   Rf1-d1   Re8-e2    c3-c4 
+130856 <first :  8  312    39   476161   Bc8-f5   Rf1-d1    b7-b6 
+131130 <first :  9  320    67   824109   Bc8-f5   Rf1-d1    b7-b6   Qd4-f4   Qd8-f6   Qf4-f3    a7-a6 
+132546 <first : 10  320   208  2876815   Bc8-f5   Rf1-d1    b7-b6   Qd4-f4   Qd8-d7   Ra1-c1   Re8-e2   Bb3-c4   Re2-e4 
+132555 <first : speed = 1819 kn/s
+132585 <first : move c8f5
+141706 >first : time 23149
+141706 >first : otim 22921
+book hit = (NULL)
+141706 >first : f1e1
+141742 <first :  1  320     3      213  Re8xe1+   Ra1xe1 
+141743 <first :  2  320     3      607  Re8xe1+   Ra1xe1   Bf5-e4 
+141745 <first :  3  320     3     2255  Re8xe1+   Ra1xe1   Bf5-e4 
+141747 <first :  4  320     4     4982  Re8xe1+   Ra1xe1   Bf5-e4 
+141758 <first :  5  328     5    21203  Re8xe1+   Ra1xe1   Bf5-e4 
+141859 <first :  6  320    15   126249  Re8xe1+   Ra1xe1   Bf5-e4    f2-f3   Qd8-h4   Re1-f1 
+141949 <first :  7  320    24   189059  Re8xe1+   Ra1xe1   Bf5-e4    f2-f3   Qd8-h4   Re1-f1 
+142882 <first :  8  320   117  1080114  Re8xe1+   Ra1xe1   Bf5-e4    f2-f3   Qd8-h4   Re1-f1 
+143773 <first :  9  328   206  2245982  Re8xe1+   Ra1xe1   Bf5-e4    f2-f3   Be4-g6   Qd4-d2  Qd8-b6+   Kg1-h1   Qb6-a6   Re1-e7  Qa6-f1# 
+143789 <first : speed = 1539 kn/s
+143819 <first : move d8d7
+146422 >first : time 22938
+146422 >first : otim 22661
+book hit = (NULL)
+146422 >first : e1e8
+146453 <first :  1  336     3      110   Qd7xe8 
+146454 <first :  2  328     3      116   Qd7xe8   Ra1-d1 
+146454 <first :  3  328     3      421   Qd7xe8   Ra1-d1   Qe8-e4 
+146454 <first :  4  328     3      617   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-d2 
+146456 <first :  5  328     3     1771   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5    a7-a5 
+146460 <first :  6  328     3     6182   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5    a7-a5    f2-f3 
+146473 <first :  7  328     5    15636   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5   Ra8-e8   Qc5xa7  Qe4-e1+ 
+146576 <first :  8  328    15    92456   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5   Ra8-e8   Qc5xa7  Qe4-e1+ 
+146935 <first :  9  328    51   654169   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5   Ra8-e8   Qc5xa7  Qe4-e1+ 
+147070 <first : 10  328    64   879936   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5   Ra8-e8   Qc5xa7  Qe4-e1+ 
+150802 <first : 11  336   438  4584338   Qd7xe8   Ra1-d1   Qe8-e4   Qd4-c5   Ra8-e8   Qc5xa7  Qe4-e1+ 
+150810 <first : speed = 1819 kn/s
+150844 <first : move d7e8
+154392 >first : time 22495
+154392 >first : otim 22306
+book hit = (NULL)
+154393 >first : d4f4
+154426 <first :  1  328     3      521   Qe8-e4 
+154426 <first :  2  328     3      523   Qe8-e4   Qf4-c7 
+154427 <first :  3  328     3      525   Qe8-e4   Qf4-c7   Ra8-e8 
+154427 <first :  4  328     3      527   Qe8-e4   Qf4-c7   Ra8-e8   Qc7xb7 
+154427 <first :  5  328     3      529   Qe8-e4   Qf4-c7   Ra8-e8   Qc7xb7  Qe4-e1+   Ra1xe1 
+154428 <first :  6  328     3      531   Qe8-e4   Qf4-c7   Ra8-e8   Qc7xb7  Qe4-e1+   Ra1xe1  Re8xe1# 
+154463 <first :  7  344     7    35854   Qe8-e4   Qf4-c7   Ra8-e8   Qc7xb7  Qe4-e1+   Ra1xe1  Re8xe1# 
+154536 <first :  8  344    14   139041   Qe8-e4   Qf4-c7   Ra8-e8   Qc7xb7  Qe4-e1+   Ra1xe1  Re8xe1# 
+154739 <first :  9  344    34   443722   Qe8-e4   Qf4-c7   Ra8-e8   Qc7xb7  Qe4-e1+   Ra1xe1  Re8xe1# 
+155673 <first : 10  344   128  1598009   Qe8-e4   Qf4-c7   Ra8-e8    h2-h3   Qe4-d3   Qc7-a5    b7-b6   Qa5-b4   Re8-e2   Ra1-d1 
+157102 <first : 11  344   271  3521814   Qe8-e4   Qf4-d2   Ra8-e8   Ra1-d1    b7-b6 
+160250 <first : 12  344   585  6827928   Qe8-e4   Qf4-d2   Ra8-e8   Ra1-d1    b7-b6 
+160260 <first : speed = 1635 kn/s
+160297 <first : move e8e4
+161674 >first : time 21905
+161674 >first : otim 22168
+book hit = (NULL)
+161674 >first : f4e4
+161705 <first :  1  392     3      170    d5xe4 
+161705 <first :  2  376     3      552    d5xe4   Ra1-e1 
+161706 <first :  3  384     3      956    d5xe4   Ra1-d1    a7-a6 
+161708 <first :  4  368     3     3098    d5xe4   Ra1-d1    a7-a6    c3-c4 
+161712 <first :  5  376     3     8313    d5xe4   Ra1-d1    a7-a5   Bb3-c4    b7-b5 
+161714 <first :  6  376     3    11530    d5xe4   Ra1-d1    a7-a5   Bb3-c4    b7-b5 
+161724 <first :  7  376     5    30107    d5xe4   Ra1-d1    a7-a5   Bb3-c4    b7-b5 
+161762 <first :  8  376     8    87729    d5xe4   Ra1-d1    a7-a5   Bb3-c4    b7-b5 
+161816 <first :  9  376    14   145755    d5xe4   Ra1-d1    a7-a5    a2-a4    c6-c5   Bb3-c4 
+162119 <first : 10  376    44   581751    d5xe4   Ra1-d1    a7-a5    a2-a4   Ra8-b8   Rd1-d6    b7-b5   Rd6xc6    b5xa4 
+162209 <first : 11  376    53   831944    d5xe4   Ra1-d1    a7-a5    a2-a4   Ra8-b8   Bb3-c4    b7-b5    a4xb5    c6xb5   Bc4xb5   Rb8xb5 
+163948 <first : 12  368   227  2775304    d5xe4   Ra1-d1    a7-a5    a2-a4   Ra8-e8   Bb3-c4   Re8-b8   Rd1-d2    b7-b6 
+163951 <first : speed = 1864 kn/s
+163982 <first : move d5e4
+167112 >first : time 21674
+167112 >first : otim 21855
+book hit = (NULL)
+167112 >first : a1e1
+167142 <first :  2  384     3      731   Ra8-e8    a2-a4 
+167143 <first :  3  392     3      806   Ra8-e8    a2-a4   Re8-e7 
+167146 <first :  4  392     3     2555   Ra8-e8    a2-a4   Re8-e7 
+167151 <first :  1  392     3     5747   Ra8-e8 
+167151 <first :  5  392     3     8828   Ra8-e8    a2-a4   Re8-e7 
+167164 <first :  6  392     5    28491   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    e4-e3   Bc2xg6 
+167167 <first :  7  392     5    36109   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    e4-e3   Bc2xg6    h7xg6 
+167261 <first :  8  392    14   129848   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    e4-e3   Bc2xg6    h7xg6    f2xe3 
+167373 <first :  9  384    26   262495   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    e4-e3   Bc2xg6    h7xg6    f2xe3   Re8xe3 
+168122 <first : 10  376   100   875704   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    a7-a5   Rd1-d7    e4-e3 
+168847 <first : 11  376   173  2107822   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    a7-a5    c3-c4    e4-e3   Bc2xg6    f7xg6    f2xe3   Re8xe3 
+170063 <first : 12  376   295  4240047   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    a7-a5    c3-c4    e4-e3   Bc2xg6    f7xg6    f2xe3   Re8xe3   Kg1-f2 
+179724 <first : 13  376  1261 15367308   Ra8-e8   Bb3-c2   Bf5-g6   Re1-d1    b7-b5   Rd1-d7    a7-a5 
+179734 <first : speed = 1812 kn/s
+179776 <first : move a7a6
+180953 >first : time 20408
+180953 >first : otim 21737
+book hit = (NULL)
+180953 >first : b3c2
+180981 <first :  1  384     2      137   Ra8-d8 
+180982 <first :  2  376     2      200   Ra8-d8    a2-a4 
+180982 <first :  3  376     2      317   Ra8-d8    a2-a4   Bf5-g6 
+180984 <first :  5  376     3      699   Ra8-d8    a2-a4   Bf5-g6   Bc2xe4   Bg6xe4 
+180985 <first :  4  376     3      886   Ra8-d8    a2-a4   Bf5-g6   Bc2xe4 
+180993 <first :  6  376     4     2193   Ra8-d8    a2-a4   Bf5-g6   Bc2xe4   Bg6xe4   Re1xe4 
+181021 <first :  7  376     6    38871   Ra8-d8    a2-a4   Bf5-g6   Bc2xe4   Bg6xe4   Re1xe4  Rd8-d1+ 
+181068 <first :  8  376    11    98303   Ra8-d8    a2-a4   Bf5-g6   Bc2xe4   Bg6xe4   Re1xe4  Rd8-d1+ 
+181186 <first :  9  376    23   277778   Ra8-d8    a2-a4   Bf5-g6   Bc2xe4   Bg6xe4   Re1xe4  Rd8-d1+ 
+181456 <first : 10  376    50   579208   Ra8-d8    a2-a4   Bf5-g6    g2-g4   Rd8-e8   Re1-d1    e4-e3   Bc2xg6 
+181670 <first : 11  376    71   924899   Ra8-d8    a2-a4   Bf5-g6    g2-g4   Rd8-e8   Re1-d1    e4-e3   Bc2xg6 
+185690 <first : 12  368   473  6859239   Ra8-d8    a2-a4   Bf5-g6    g2-g4   Rd8-e8   Re1-d1    b7-b5   Rd1-d7    e4-e3 
+185704 <first : speed = 1848 kn/s
+185746 <first : move a8d8
+198180 >first : time 19928
+198180 >first : otim 20494
+book hit = (NULL)
+198180 >first : g2g4
+198214 <first :  1  440     3      227   Bf5xg4 
+198216 <first :  3  448     3      914   Bf5xg4   Bc2xe4   Rd8-d2 
+198216 <first :  2  440     3      948   Bf5xg4   Bc2xe4 
+198223 <first :  4  432     4     4281   Bf5xg4   Re1xe4    f7-f5  Bc2-b3+   Kg8-h8 
+198228 <first :  5  448     4    10468   Bf5xg4   Re1xe4    f7-f5  Bc2-b3+   Kg8-h8   Re4-e7 
+198240 <first :  6  432     6    30550   Bf5xg4   Bc2xe4   Bg4-e6   Re1-b1   Be6xa2   Rb1xb7 
+198259 <first :  7  440     7    69768   Bf5xg4   Bc2xe4   Bg4-e6   Re1-b1   Be6xa2   Rb1xb7  Rd8-d1+   Kg1-g2 
+198316 <first :  8  448    13   147025   Bf5xg4   Bc2xe4   Bg4-e6   Re1-b1   Be6xa2   Rb1xb7  Rd8-d1+   Kg1-g2    c6-c5 
+198467 <first :  9  432    28   317923   Bf5xg4   Bc2xe4   Bg4-e6   Re1-b1    f7-f5   Be4-f3   Rd8-d3 
+198675 <first : 10  440    49   658818   Bf5xg4   Bc2xe4   Bg4-e6   Re1-b1    f7-f5   Be4-g2   Rd8-d7    a2-a4    f5-f4    f2-f3 
+199086 <first : 11  440    90  1328370   Bf5xg4   Bc2xe4   Bg4-e6   Re1-b1    f7-f5   Be4-g2   Rd8-d7    a2-a4   Be6-a2   Rb1-b2  Rd7-d1+   Bg2-f1 
+200200 <first : 12  432   202  2635726   Bf5xg4   Bc2xe4   Bg4-e6    a2-a4   Be6-b3    a4-a5   Rd8-d2   Be4xc6    b7xc6  Re1-e8# 
+202856 <first : 13  432   467  6416468   Bf5xg4   Bc2xe4   Bg4-e6    a2-a4   Be6-b3    a4-a5   Rd8-d2   Be4xc6    b7xc6  Re1-e8# 
+202862 <first : speed = 1861 kn/s
+202894 <first : move f5g4
+203714 >first : time 19457
+203714 >first : otim 20412
+book hit = (NULL)
+203714 >first : e1e4
+203744 <first :  1  448     2      164   Bg4-f5 
+203744 <first :  3  456     3      325   Bg4-f5   Re4-e2   Bf5xc2 
+203748 <first :  2  456     3     1081   Bg4-f5   Re4-e2 
+203748 <first :  4  456     3     1083   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2 
+203749 <first :  5  464     3     4714   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    g7-g6 
+203755 <first :  6  448     4    13347   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    g7-g6   Rc2-b2 
+203768 <first :  7  448     5    34568   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    g7-g6   Rc2-b2    b7-b5 
+203821 <first :  8  440    10    91350   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    g7-g6   Rc2-b2    b7-b5   Kg1-g2 
+203965 <first :  9  448    25   272786   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    g7-g6   Rc2-b2    b7-b5   Kg1-g2    f7-f5 
+204334 <first : 10  448    61   742668   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    g7-g6   Rc2-b2    b7-b5   Kg1-f1    f7-f5   Kf1-e2 
+205368 <first : 11  440   165  2062185   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    f7-f5   Rc2-b2    b7-b5   Kg1-g2   Rd8-d3   Rb2-b3   Kg8-f7 
+206231 <first : 12  448   251  3810153   Bg4-f5   Re4-e2   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    f2-f4   Rd8-d3   Rc2-b2    b7-b5   Rb2-b3 
+206236 <first : speed = 1952 kn/s
+206266 <first : move g4f5
+211212 >first : time 19202
+211212 >first : otim 19917
+book hit = (NULL)
+211212 >first : e4e2
+211243 <first :  3  456     3      215   Bf5xc2   Re2xc2    f7-f5 
+211243 <first :  1  456     3      249   Bf5xc2 
+211243 <first :  2  456     3      284   Bf5xc2   Re2xc2 
+211245 <first :  5  448     3     1180   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7 
+211248 <first :  4  448     3     2178   Bf5xc2   Re2xc2    f7-f5   Kg1-g2 
+211248 <first :  6  448     3     3069   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    f2-f4 
+211265 <first :  7  448     5    10027   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    f2-f4   Rd8-d3 
+211276 <first :  8  448     6    21277   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    f2-f4   Rd8-d3    c3-c4 
+211311 <first :  9  448     9    52280   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    f2-f4   Rd8-d3    c3-c4   Kf7-e7 
+211447 <first : 10  448    23   144960   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    c3-c4   Kf7-f6   Kg2-f3    g7-g6   Rc2-b2 
+211826 <first : 11  448    61   331031   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7    c3-c4   Kf7-f6   Kg2-f3    g7-g6   Rc2-b2 
+214681 <first : 12  448   346  5019991   Bf5xc2   Re2xc2    f7-f5   Kg1-g2   Kg8-f7   Kg2-f3   Kf7-f6   Kf3-e3    c6-c5   Rc2-b2  Rd8-e8+   Ke3-d3    b7-b5 
+214686 <first : speed = 1861 kn/s
+214718 <first : move f5c2
+215673 >first : time 18851
+215673 >first : otim 19822
+book hit = (NULL)
+215673 >first : e2c2
+215704 <first :  1  448     3      128    f7-f5 
+215704 <first :  2  448     3      173    f7-f5   Kg1-g2 
+215705 <first :  5  448     3      226    f7-f5   Kg1-g2   Kg8-f7   Kg2-f3   Kf7-f6 
+215705 <first :  3  448     3      253    f7-f5   Kg1-g2   Kg8-f7 
+215707 <first :  4  448     3     1014    f7-f5   Kg1-g2   Kg8-f7   Kg2-f3 
+215733 <first :  6  448     6     8777    f7-f5   Kg1-g2   Kg8-f7   Kg2-f3   Kf7-f6   Kf3-e3 
+215825 <first :  7  440    15    40817    f7-f5    f2-f4   Kg8-f7   Kg1-f2    c6-c5    c3-c4    g7-g6 
+216054 <first :  8  440    38   133640    f7-f5    f2-f4   Kg8-f7   Kg1-f2    c6-c5    c3-c4    g7-g6   Rc2-b2 
+216882 <first :  9  440   120   445605    f7-f5    f2-f4   Kg8-f7   Kg1-f2    c6-c5    c3-c4    g7-g6   Rc2-b2   Rd8-d7 
+219264 <first : 10  440   359  3472775    f7-f5    f2-f4   Kg8-f7   Kg1-f2    c6-c5    c3-c4    g7-g6   Rc2-b2   Rd8-d7   Kf2-e3 
+219268 <first : speed = 2046 kn/s
+219299 <first : move f7f5
+223111 >first : time 18489
+223111 >first : otim 19441
+book hit = (NULL)
+223111 >first : c2b2
+223139 <first :  1  448     2      169    b7-b5 
+223139 <first :  3  456     2      267    b7-b5   Kg1-g2   Rd8-d3 
+223144 <first :  4  448     3      904    b7-b5   Kg1-g2   Rd8-d3   Rb2-c2 
+223152 <first :  2  456     4      906    b7-b5   Kg1-g2 
+223152 <first :  5  448     4     2421    b7-b5   Kg1-g2   Rd8-d3   Rb2-c2   Kg8-f7 
+223165 <first :  7  456     5     6988    b7-b5   Kg1-g2   Rd8-d3   Rb2-c2   Kg8-f7    c3-c4   Kf7-e6 
+223165 <first :  6  448     5    11955    b7-b5   Kg1-g2   Rd8-d3   Rb2-c2   Kg8-f7    c3-c4 
+223300 <first :  8  456    18   199629    b7-b5   Kg1-g2   Rd8-d3   Rb2-c2   Kg8-f7    c3-c4   Kf7-e6    c4xb5 
+223645 <first :  9  464    53   556119    b7-b5   Kg1-g2   Kg8-f7   Rb2-c2   Kf7-e6  Rc2-e2+   Ke6-f6   Kg2-f3  Rd8-d3+   Re2-e3  Rd3xe3+ 
+225594 <first : 10  456   248  3070313    b7-b5   Rb2-c2   Kg8-f7    f2-f3   Kf7-e6   Kg1-f2    f5-f4    c3-c4    b5xc4   Rc2xc4 
+228889 <first : 11  456   577  8047192    b7-b5   Rb2-c2   Kg8-f7    c3-c4   Rd8-d6   Kg1-g2   Kf7-e6   Kg2-f3    b5xc4   Rc2xc4   Ke6-d5 
+228896 <first : speed = 1862 kn/s
+228933 <first : move b7b5
+238288 >first : time 17906
+238288 >first : otim 18505
+book hit = (NULL)
+238288 >first : b2b4
+238322 <first :  1  464     3      197   Kg8-f8 
+238322 <first :  2  464     3      461   Kg8-f8   Kg1-g2 
+238323 <first :  3  480     3     1972   Kg8-f8   Kg1-g2    c6-c5 
+238325 <first :  4  480     3     3860   Kg8-f8   Kg1-g2    c6-c5   Rb4-b1 
+238340 <first :  5  480     5    22471   Kg8-f8    a2-a3    c6-c5   Rb4-h4  Rd8-d1+   Kg1-g2 
+238362 <first :  6  480     7    59637   Kg8-f8    a2-a3    c6-c5   Rb4-b2  Rd8-d1+   Kg1-g2   Rd1-d3 
+238445 <first :  7  488    15   183882   Kg8-f8    a2-a3    c6-c5   Rb4-b2   Rd8-d3   Rb2-c2   Kf8-e7 
+238620 <first :  8  488    33   478046   Kg8-f8   Rb4-b1   Rd8-d3   Rb1-b3   Kf8-e7   Kg1-g2   Rd3-d2   Rb3-a3 
+239257 <first :  9  488    96  1561838   Rd8-d2    a2-a3   Rd2-d3   Rb4-b3    c6-c5   Kg1-g2    c5-c4 
+240824 <first : 10  504   253  4043482   Rd8-d2    a2-a4   Rd2-c2    a4xb5    c6xb5   Rb4-b3   Kg8-f7   Rb3-a3 
+240836 <first : speed = 1959 kn/s
+240872 <first : move d8d2
+248196 >first : time 17648
+248196 >first : otim 17773
+book hit = (NULL)
+248196 >first : b4f4
+248230 <first :  1  504     3      148    g7-g6 
+248231 <first :  2  504     3      199    g7-g6    a2-a4 
+248231 <first :  3  504     3      421    g7-g6    a2-a4   Rd2-c2 
+248233 <first :  4  504     3     1266    g7-g6    a2-a4   Rd2-c2    a4xb5 
+248236 <first :  5  504     4     5638    g7-g6    a2-a4   Rd2-c2    a4xb5    c6xb5 
+248246 <first :  6  504     5    22101    g7-g6    a2-a4   Rd2-c2    a4xb5    c6xb5   Rf4-f3 
+248278 <first :  7  520     8    65477    g7-g6    a2-a4   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4 
+248391 <first :  8  512    19   264269    g7-g6    a2-a4   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4   Kg1-g2 
+248720 <first :  9  536    52   788688    g7-g6    a2-a4   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4   Kg1-g2    b4-b3 
+249975 <first : 10  528   177  2621348    g7-g6   Rf4-d4   Rd2xa2  Rd4-d8+   Kg8-f7  Rd8-d7+   Kf7-e6   Rd7xh7   Ra2-c2   Rh7-h6   Ke6-d5   Rh6-h3 
+249979 <first : speed = 1994 kn/s
+250008 <first : move g7g6
+255525 >first : time 17467
+255525 >first : otim 17221
+book hit = (NULL)
+255525 >first : a2a4
+255556 <first :  1  536     3      132   Rd2-d3 
+255556 <first :  2  536     3      134   Rd2-d3    a4xb5 
+255556 <first :  3  536     3      136   Rd2-d3    a4xb5    a6xb5 
+255556 <first :  4  536     3      138   Rd2-d3    a4xb5    a6xb5    c3-c4 
+255557 <first :  5  536     3      140   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4 
+255557 <first :  6  536     3      142   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4   Kg1-g2 
+255557 <first :  7  536     3      144   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4   Kg1-g2    b4-b3 
+255557 <first :  8  536     3      146   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4   Kg1-g2    b4-b3    f2-f3 
+255967 <first :  9  544    44   609130   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3   Rf4-b4   Kg8-f7 
+257172 <first : 10  520   164  2521359   Rd2-d3    a4xb5    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3   Rf4-b4   Kg8-f8  Rb4-b8+   Kf8-g7 
+257175 <first : speed = 2037 kn/s
+257204 <first : move d2d3
+279117 >first : time 17299
+279117 >first : otim 15030
+book hit = (NULL)
+279117 >first : a4b5
+279153 <first :  2  520     3      143    a6xb5    c3-c4 
+279153 <first :  3  520     3      145    a6xb5    c3-c4    b5-b4 
+279153 <first :  4  520     3      147    a6xb5    c3-c4    b5-b4    c4-c5 
+279153 <first :  5  520     3      149    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3 
+279154 <first :  6  520     3      151    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3   Rf4-b4 
+279154 <first :  7  520     3      153    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3   Rf4-b4   Kg8-f8 
+279154 <first :  8  520     3      155    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3   Rf4-b4   Kg8-f8  Rb4-b8+   Kf8-g7 
+279155 <first :  9  520     3      157    a6xb5    c3-c4    b5-b4    c4-c5    b4-b3   Rf4-b4   Kg8-f8  Rb4-b8+   Kf8-g7  Rb8-b7+   Kg7-h6 
+279155 <first :  1  520     3      158    a6xb5 
+280531 <first : 10  512   141  2516854    c6xb5    c3-c4    b5-b4    c4-c5    a6-a5   Rf4-c4   Rd3-c3   Rc4xc3    b4xc3    f2-f3 
+280536 <first : speed = 1957 kn/s
+280565 <first : move a6b5
+294485 >first : time 17154
+294485 >first : otim 13638
+book hit = (NULL)
+294485 >first : f4d4
+294518 <first :  1  680     3      339   Rd3xc3 
+294521 <first :  2  664     3      607   Rd3xc3   Rd4-d7 
+294521 <first :  3  672     3     1465   Rd3xc3  Rd4-d8+   Kg8-f7  Rd8-d7+   Kf7-g8 
+294521 <first :  4  656     3     3281   Rd3xc3  Rd4-d8+   Kg8-f7  Rd8-d7+   Kf7-g8   Kg1-g2 
+294531 <first :  5  680     4    12398   Rd3xc3  Rd4-d8+   Kg8-f7  Rd8-d7+   Kf7-g8   Kg1-g2   Kg8-h8 
+294534 <first :  6  680     4    20514   Rd3xc3  Rd4-d8+   Kg8-f7  Rd8-d7+   Kf7-g8   Kg1-g2   Kg8-h8   Kg2-f1 
+294556 <first :  7  704     7    66386   Rd3xd4    c3xd4    b5-b4   Kg1-g2    b4-b3    f2-f3    b3-b2 
+294732 <first :  8 1592    24   419955   Rd3xd4    c3xd4    b5-b4   Kg1-f1    b4-b3    d4-d5    b3-b2   Kf1-e2 
+294921 <first :  9 1680    43   764086   Rd3xd4    f2-f3   Rd4-d3   Kg1-g2   Rd3xc3   Kg2-g3    c6-c5   Kg3-f4    b5-b4 
+295432 <first : 10 1680    94  1666837   Rd3xd4    f2-f3   Rd4-d3   Kg1-f2   Rd3xc3    h2-h3   Kg8-f7   Kf2-g3    c6-c5   Kg3-f4 
+296656 <first : 11 1696   217  3774325   Rd3xd4    f2-f3   Rd4-d3   Kg1-f2   Rd3xc3   Kf2-g3    c6-c5   Kg3-f4    b5-b4    h2-h3    c5-c4 
+296666 <first : speed = 2084 kn/s
+296698 <first : move d3d4
+298139 >first : time 16933
+298139 >first : otim 13494
+book hit = (NULL)
+298139 >first : c3d4
+298174 <first :  2 1608     3      327    b5-b4   Kg1-f1 
+298174 <first :  3 1608     3      329    b5-b4   Kg1-f1    b4-b3 
+298174 <first :  4 1608     3      331    b5-b4   Kg1-f1    b4-b3    d4-d5 
+298174 <first :  5 1608     3      333    b5-b4   Kg1-f1    b4-b3    d4-d5    b3-b2 
+298174 <first :  6 1608     3      335    b5-b4   Kg1-f1    b4-b3    d4-d5    b3-b2   Kf1-e2 
+298174 <first :  1 1608     3      352    b5-b4 
+298224 <first :  7 1808     8    77829    b5-b4   Kg1-f1    b4-b3    d4-d5    b3-b2   Kf1-e2  b2-b1=Q 
+298316 <first :  8 1912    17   241651    b5-b4   Kg1-f1    b4-b3    d4-d5    b3-b2   Kf1-e2  b2-b1=Q    d5xc6 
+298482 <first :  9 2072    34   515154    b5-b4   Kg1-f1    b4-b3    d4-d5    c6xd5   Kf1-e2    b3-b2 
+298637 <first : 10 2096    49   823234    b5-b4   Kg1-f1    b4-b3    f2-f3    b3-b2   Kf1-e1 b2-b1=Q+   Ke1-d2   Qb1-g1   Kd2-d3   Qg1xh2 
+298849 <first : 11 2128    70  1194668    b5-b4   Kg1-f1    b4-b3    f2-f3    b3-b2   Kf1-e1 b2-b1=Q+   Ke1-d2  Qb1-b2+   Kd2-d3   Qb2-f2    h2-h4  Qf2xf3+   Kd3-d2 
+299663 <first : 12 2160   152  2687297    b5-b4   Kg1-f1    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4xd4    f2-f3  Qd4-d3+   Kf1-g2    c6-c5 
+299668 <first : speed = 1938 kn/s
+299697 <first : move b5b4
+300321 >first : time 16777
+300321 >first : otim 13431
+book hit = (NULL)
+300322 >first : g1f1
+300353 <first :  1 2160     3      339    b4-b3 
+300353 <first :  3 2160     3      343    b4-b3   Kf1-e1    b3-b2 
+300353 <first :  4 2160     3      345    b4-b3   Kf1-e1    b3-b2   Ke1-d1 
+300353 <first :  5 2160     3      347    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2 
+300353 <first :  6 2160     3      349    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1 
+300354 <first :  7 2160     3      351    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4xd4 
+300354 <first :  8 2160     3      353    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4xd4    f2-f3 
+300354 <first :  9 2160     3      355    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4xd4    f2-f3  Qd4-d3+   Kf1-g2 
+300355 <first : 10 2160     3      357    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4xd4    f2-f3  Qd4-d3+   Kf1-g2    c6-c5 
+300355 <first :  2 2160     3      360    b4-b3   Kf1-e1 
+301268 <first : 11 2184    94  1506175    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1   Qg4xd4   Ke1-f1   Qd4-g4 
+305250 <first : 12 2216   492  9864836    b4-b3   Kf1-e1    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1   Qg4xd4   Ke1-f1   Qd4-g4   Kf1-e1 
+305253 <first : speed = 2200 kn/s
+305286 <first : move b4b3
+305915 >first : time 16281
+305915 >first : otim 13368
+book hit = (NULL)
+305915 >first : f1e1
+305945 <first :  1 2216     3      344    b3-b2 
+305946 <first :  3 2216     3      347    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2 
+305946 <first :  4 2216     3      349    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1 
+305946 <first :  5 2216     3      351    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4 
+305946 <first :  6 2216     3      353    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1 
+305947 <first :  7 2216     3      355    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1   Qg4xd4 
+305947 <first :  8 2216     3      357    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1   Qg4xd4   Ke1-f1 
+305947 <first :  9 2216     3      359    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1   Qg4xd4   Ke1-f1   Qd4-g4 
+305948 <first : 10 2216     3      361    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-f1   Qe4-g4   Kf1-e1   Qg4xd4   Ke1-f1   Qd4-g4   Kf1-e1 
+305948 <first :  2 2216     3      364    b3-b2   Ke1-d1 
+319949 <first : 11 2344  1403 22752725    b3-b2   Ke1-d1 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2  Qd4-e4+   Ke2-d2    f4-f3    h2-h3  Qe4-e2+   Kd2-c1 
+319952 <first : speed = 2243 kn/s
+319983 <first : move b3b2
+321441 >first : time 14874
+321441 >first : otim 13223
+book hit = (NULL)
+321441 >first : e1d1
+321473 <first :  1 2384     3      368 b2-b1=Q+   Kd1-e2 
+321473 <first :  3 2384     3      372 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1 
+321473 <first :  4 2384     3      374 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4 
+321474 <first :  5 2384     3      376 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2 
+321474 <first :  6 2384     3      378 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2  Qd4-e4+   Ke2-d2 
+321474 <first :  7 2384     3      380 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2  Qd4-e4+   Ke2-d2    f4-f3 
+321475 <first :  8 2384     3      382 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2  Qd4-e4+   Ke2-d2    f4-f3    h2-h3 
+321475 <first :  9 2384     3      384 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2  Qd4-e4+   Ke2-d2    f4-f3    h2-h3  Qe4-e2+   Kd2-c1 
+321476 <first : 10 2384     3      386 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2  Qe4xd4+   Kd2-e1    f5-f4   Ke1-e2  Qd4-e4+   Ke2-d2    f4-f3    h2-h3  Qe4-e2+   Kd2-c1   Kg8-h8 
+321478 <first :  2 2384     3      394 b2-b1=Q+   Kd1-e2  Qb1-e4+   Ke2-d2 
+339931 <first : speed = 2259 kn/s
+339962 <first : move b2b1q
+341681 >first : time 13022
+341681 >first : otim 13051
+book hit = (NULL)
+341681 >first : d1d2
+341709 <first :  1 2400     2      708  Qb1-b2+   Kd2-e3 
+341710 <first :  3 2400     2      711  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4 
+341710 <first :  4 2400     2      713  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4   Ke2-d1 
+341711 <first :  5 2400     3      715  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4   Ke2-d1    f4-f3 
+341711 <first :  6 2400     3      717  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4   Ke2-d1    f4-f3    d4-d5 
+341712 <first :  2 2400     3      745  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2 
+341712 <first :  7 2584     3     1162  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4   Ke2-d1    f4-f3    d4-d5  Qc3-d3+   Kd1-c1 
+341811 <first :  8 2584    13   116405  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4   Ke2-d1    f4-f3    d4-d5  Qc3-d3+   Kd1-c1  Qd3-f1+   Kc1-b2 
+342400 <first :  9 2584    71   934835  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4   Ke2-d1    f4-f3    d4-d5  Qc3-d3+   Kd1-c1  Qd3-f1+   Kc1-b2  Qf1xf2+   Kb2-b1 
+348505 <first : 10 2584   682 10949654  Qb1-b2+   Kd2-e3  Qb2-c3+   Ke3-e2    f5-f4    f2-f3  Qc3-e3+   Ke2-f1  Qe3xf3+   Kf1-e1  Qf3-e4+   Ke1-f1    f4-f3    h2-h4   Qe4xd4 
+348509 <first : speed = 2257 kn/s
+348539 <first : move b1b2
+350011 >first : time 12336
+350011 >first : otim 12903
+book hit = (NULL)
+350011 >first : d2d3
+350044 <first :  1 2360     3      960  Qb2-b3+   Kd3-e2 
+350044 <first :  2 2584     3     1212   Qb2xf2    h2-h3 
+350044 <first :  3 2584     3     1426   Qb2xf2    h2-h3 
+350045 <first :  4 2584     3     2411   Qb2xf2    h2-h3 
+350048 <first :  5 2584     3     4335   Qb2xf2    h2-h3 
+350051 <first :  6 2584     3    10221   Qb2xf2    h2-h3 
+350062 <first :  7 2584     5    30070   Qb2xf2    h2-h3 
+350092 <first :  8 2584     8    88585   Qb2xf2    h2-h3 
+351022 <first :  9 2584   101  1917558   Qb2xf2    h2-h3  Qf2-f3+   Kd3-c4    f5-f4    h3-h4  Qf3-e2+   Kc4-c5    f4-f3    h4-h5    f3-f2 
+351028 <first : speed = 2206 kn/s
+351057 <first : move b2f2
+352760 >first : time 12231
+352760 >first : otim 12733
+book hit = (NULL)
+352760 >first : d3c4
+352792 <first :  1 2384     3     1066   Qf2xh2 
+352793 <first :  2 2384     3     1894  Qf2-c2+   Kc4-b4   Qc2xh2 
+352800 <first :  3 2384     3     6080  Qf2-c2+   Kc4-b4   Qc2xh2   Kb4-c5 
+352811 <first :  4 2384     5    23195  Qf2-c2+   Kc4-b4   Qc2xh2   Kb4-c5  Qh2-c2+   Kc5-d6 
+352852 <first :  5 2384     9   110314  Qf2-c2+   Kc4-b4    f5-f4    h2-h4    f4-f3    d4-d5 
+353042 <first :  6 2408    28   470104  Qf2-c2+   Kc4-b4    f5-f4    h2-h4    f4-f3    h4-h5    f3-f2 
+353604 <first :  7 2776    84  1475664  Qf2-c2+   Kc4-b4    f5-f4    h2-h4    f4-f3    h4-h5    g6xh5    d4-d5 
+359482 <first :  8 3152   672  7037316  Qf2-c2+   Kc4-b4    f5-f4    d4-d5  Qc2-d2+   Kb4-a3    f4-f3    d5xc6    f3-f2   Ka3-b3 
+359491 <first : speed = 2127 kn/s
+359525 <first : move f2c2
+362246 >first : time 11555
+362246 >first : otim 12461
+book hit = (NULL)
+362246 >first : c4b4
+362276 <first :  1 3184     3      720    f5-f4 
+362276 <first :  2 3184     3      722    f5-f4    d4-d5 
+362277 <first :  3 3184     3      724    f5-f4    d4-d5  Qc2-d2+   Kb4-a3 
+362277 <first :  4 3184     3      726    f5-f4    d4-d5  Qc2-d2+   Kb4-a3    f4-f3 
+362277 <first :  5 3184     3      728    f5-f4    d4-d5  Qc2-d2+   Kb4-a3    f4-f3    d5xc6 
+362278 <first :  6 3184     3      730    f5-f4    d4-d5  Qc2-d2+   Kb4-a3    f4-f3    d5xc6    f3-f2 
+362278 <first :  7 3184     3      732    f5-f4    d4-d5  Qc2-d2+   Kb4-a3    f4-f3    d5xc6    f3-f2   Ka3-b3 
+362278 <first :  8 3184     3      734    f5-f4    d4-d5  Qc2-d2+   Kb4-a3    f4-f3    d5xc6    f3-f2   Ka3-b3  f2-f1=Q 
+376933 <first : speed = 2080 kn/s
+376964 <first : move f5f4
+379389 >first : time 10083
+379389 >first : otim 42219
+book hit = (NULL)
+379389 >first : b4a5
+379425 <first :  1 3296     3      802   Qc2-b3 
+379427 <first :  2 3296     3      940   Qc2-b3   Ka5-a6 
+379427 <first :  3 3296     3     1309   Qc2-b3   Ka5-a6    f4-f3 
+379427 <first :  8 3304     3     1683   Qc2-b3   Ka5-a6    f4-f3    d4-d5    f3-f2    d5xc6 f2-f1=Q+ 
+379430 <first :  4 3296     4     6000   Qc2-b3   Ka5-a6    f4-f3    d4-d5 
+379453 <first :  5 3296     6    28884   Qc2-b3   Ka5-a6    f4-f3    d4-d5    f3-f2 
+379539 <first :  6 3296    14   131877   Qc2-b3   Ka5-a6    f4-f3    d4-d5    f3-f2    d5xc6 
+379973 <first :  7 3296    58   673239   Qc2-b3   Ka5-a6    f4-f3    d4-d5    f3-f2    d5xc6 f2-f1=Q+ 
+391933 <first : speed = 1773 kn/s
+391961 <first : move c2b3
+393545 >first : time 38826
+393545 >first : otim 42060
+book hit = (NULL)
+393545 >first : a5a6
+393578 <first :  2 3272     3      734    f4-f3    d4-d5 
+393578 <first :  3 3272     3      736    f4-f3    d4-d5    f3-f2 
+393578 <first :  4 3272     3      738    f4-f3    d4-d5    f3-f2    d5xc6 
+393579 <first :  5 3272     3      740    f4-f3    d4-d5    f3-f2    d5xc6 f2-f1=Q+ 
+393579 <first :  1 3272     3      763    f4-f3 
+393698 <first :  6 9960    15   224360    f4-f3    d4-d5    f3-f2    d5xc6 f2-f1=Q+ 
+394154 <first : speed = 1791 kn/s
+394191 <first : move f4f3
+397077 >first : time 38761
+397077 >first : otim 41772
+book hit = (NULL)
+397077 >first : a6a7
+397105 <first :  1 9680     2     1715    f3-f2 
+397105 <first :  2 9680     2     2283    f3-f2 
+397115 <first :  3 9968     3    13383    f3-f2 
+397145 <first : speed = 716 kn/s
+397181 <first : move f3f2
+398235 >first : time 38751
+398235 >first : otim 41666
+book hit = (NULL)
+398235 >first : a7a8
+398265 <first :  1 9680     3     1839  f2-f1=Q 
+398267 <first :  2 9984     3     2557  f2-f1=Q 
+398267 <first : speed = 133 kn/s
+398301 <first : move f2f1q
+399331 >first : time 38744
+399331 >first : otim 41563
+book hit = (NULL)
+399332 >first : a8a7
+399364 <first :  1 9992     3     1953  Qf1-a1# 
+399365 <first : speed = 66 kn/s
+399395 <first : move f1a1
+GameEnds(26, Xboard adjudication: Checkmate, 4)
+399396 >first : result 0-1 {Xboard adjudication: Checkmate}
+399396 >first : force
+399396 >first : ping 2
+399491 <first : 0-1
+399491 <first : tellics rematch
+399491 <first : tellics seek 15 6 f
+400396 <first : tellics seek 1 15 f
+401396 <first : tellics seek 2 11 f
+401396 <first : pong 2
+GameEnds(26, Xboard adjudication: Checkmate, 2)
+405771 >first : quit
