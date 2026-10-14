@@ -1,4 +1,4 @@
-icc -use_msasm -fast -pthread *.c -DTHREADCOUNT=8
-cp ./a.out ../morphy
-
-
+#!/bin/sh
+set -eu
+project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec sh "$project_dir/icc_compile.sh" "$@"

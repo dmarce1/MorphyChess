@@ -1,2 +1,4 @@
-gcc *.c -pthread -lm -O2 
-cp ./a.out ./morphy
+#!/bin/sh
+set -eu
+project_dir=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec sh "$project_dir/gcc_compile.sh" "$@"
