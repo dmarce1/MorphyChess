@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <morphychess/board.hpp>
 #include <morphychess/history.hpp>
 #include <morphychess/params.hpp>
@@ -31,8 +32,8 @@ public:
 	bool moveIsFutile(int materialBalance, int testValue) const;
 
 private:
-	Move list[maxMoves]{};
-	int scores[maxMoves]{};
+	std::array<Move, maxMoves> list{};
+	std::array<int, maxMoves> scores{};
 	GenStage mgStage{GenStage::start};
 	Search *search;
 	int totalMovesGenerated{};

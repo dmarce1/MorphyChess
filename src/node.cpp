@@ -64,7 +64,7 @@ tryAgain:
 		[[fallthrough]];
 	case GenStage::table:
 		mgStage = GenStage::promotions;
-		movesInQueue = (search->boardPtr)->genPseudolegalPromotions(list);
+		movesInQueue = (search->boardPtr)->genPseudolegalPromotions(list.data());
 		[[fallthrough]];
 	case GenStage::promotions:
 		if (movesInQueue > 0) {
@@ -72,7 +72,7 @@ tryAgain:
 			move = list[movesInQueue];
 			break;
 		}
-		movesInQueue = (search->boardPtr)->genPseudolegalCaptures(list);
+		movesInQueue = (search->boardPtr)->genPseudolegalCaptures(list.data());
 		mgStage = GenStage::captures;
 		for (i = 0; i < movesInQueue; i++) {
 			scores[i] = captureMoveValue(search->boardPtr, list[i]);
@@ -138,7 +138,7 @@ tryAgain:
 			scores[bestI] = scores[movesInQueue];
 			break;
 		}
-		movesInQueue = (search->boardPtr)->genPseudolegalNoncaptures(list);
+		movesInQueue = (search->boardPtr)->genPseudolegalNoncaptures(list.data());
 		mgStage = GenStage::noncaptures;
 		firstNoncap = true;
 		[[fallthrough]];
@@ -197,7 +197,7 @@ int Node::doNextNonquiescentMove(Move *branch) {
 tryAgain:
 	switch (mgStage) {
 	case GenStage::start:
-		movesInQueue = (search->boardPtr)->genPseudolegalPromotions(list);
+		movesInQueue = (search->boardPtr)->genPseudolegalPromotions(list.data());
 		mgStage = GenStage::promotions;
 		[[fallthrough]];
 	case GenStage::promotions:
@@ -206,7 +206,7 @@ tryAgain:
 			move = list[movesInQueue];
 			break;
 		}
-		movesInQueue = (search->boardPtr)->genPseudolegalCaptures(list);
+		movesInQueue = (search->boardPtr)->genPseudolegalCaptures(list.data());
 		mgStage = GenStage::captures;
 		for (i = 0; i < movesInQueue; i++) {
 			scores[i] = captureMoveValue(search->boardPtr, list[i]);
