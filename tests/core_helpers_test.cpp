@@ -51,6 +51,54 @@ TEST(Bits, FlipsAndRotatedBoardsPreserveOccupancy) {
 		EXPECT_EQ(bits, 0);
 	}
 }
+TEST(Bits, FlipsMapEverySquareAndReverseRankOrder) {
+	for (int rank = 0; rank < 8; ++rank) {
+		for (int file = 0; file < 8; ++file) {
+			const U64 original = U64{1} << (8 * rank + file);
+			U64 vertical = original;
+			bitsVerticalFlip(&vertical);
+			EXPECT_EQ(vertical, U64{1} << (8 * (7 - rank) + file));
+			bitsVerticalFlip(&vertical);
+			EXPECT_EQ(vertical, original);
+			U64 horizontal = original;
+			bitsHorizontalFlip(&horizontal);
+			EXPECT_EQ(horizontal, U64{1} << (8 * rank + 7 - file));
+		}
+	}
+	U64 ranks = 0x0123456789ABCDEFULL;
+	bitsVerticalFlip(&ranks);
+	EXPECT_EQ(ranks, 0xEFCDAB8967452301ULL);
+	U64 emptyBoard = 0;
+	bitsVerticalFlip(&emptyBoard);
+	EXPECT_EQ(emptyBoard, 0);
+	U64 fullBoard = ~U64{0};
+	bitsVerticalFlip(&fullBoard);
+	EXPECT_EQ(fullBoard, ~U64{0});
+}
+TEST(Bits, RotatedBoardsMapEverySquareAndOverwritePreviousOccupancy) {
+	initBits();
+	std::array<U64, 4> rotated{};
+	for (int rank = 0; rank < 8; ++rank) {
+		for (int file = 0; file < 8; ++file) {
+			rotated.fill(~U64{0});
+			rotatedBitsCreateSet(rotated.data(), U64{1} << (8 * rank + file));
+			EXPECT_EQ(rotated[kRankIndex], U64{1} << (8 * rank + file));
+			EXPECT_EQ(rotated[kFileIndex], U64{1} << (8 * file + rank));
+			EXPECT_EQ(rotated[kDiag1Index],
+					  U64{1} << (8 * ((file - rank + 8) % 8) + rank));
+			EXPECT_EQ(rotated[kDiag2Index],
+					  U64{1} << (8 * ((7 - file - rank + 8) % 8) + rank));
+		}
+	}
+	rotatedBitsCreateSet(rotated.data(), ~U64{0});
+	for (U64 bits : rotated) {
+		EXPECT_EQ(bits, ~U64{0});
+	}
+	rotatedBitsCreateSet(rotated.data(), 0);
+	for (U64 bits : rotated) {
+		EXPECT_EQ(bits, 0);
+	}
+}
 TEST(MoveData, LeapersAndSlidingBlockers) {
 	initMoveData();
 	EXPECT_EQ(knightAttacks(kA1), (U64{1} << 10) | (U64{1} << 17));

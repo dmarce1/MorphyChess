@@ -26,13 +26,6 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 U64 maskSet[64][4];
 static U64 invMaskSet[64][4];
-static int firstOneTable[128];
-
-static int invFirstOneTable[64] = {
-	96, 53,	 95, 51,  91,  43,	75, 76, 78,	 82, 90,  41,  8,  5,  127, 52,
-	93, 47,	 83, 92,  45,  79,	84, 94, 49,	 87, 35,  124, 46, 81, 88,	37,
-	0,	117, 32, 118, 34,  122, 42, 10, 9,	 7,	 3,	  123, 44, 77, 80,	86,
-	33, 120, 38, 2,	  121, 40,	6,	1,	119, 36, 126, 50,  89, 39, 4,	125};
 
 static const I8 rotatedIndex[4][64] = {
 	{0,	 1,	 2,	 3,	 4,	 5,	 6,	 7,	 8,	 9,	 10, 11, 12, 13, 14, 15,
@@ -96,16 +89,9 @@ void bitsHorizontalFlip(U64 *data) {
 }
 
 void bitsVerticalFlip(U64 *data) {
-	U64 bb;
-
-	assert(data != NULL);
-
-	bb = ((*data & 0xFFFFFFFF00000000LL) >> 32);
-	*data = bb | ((*data & 0x00000000FFFFFFFFLL) << 32);
-	bb = ((*data & 0xFFFF0000FFFF0000LL) >> 16);
-	*data = bb | ((*data & 0x0000FFFF0000FFFFLL) << 16);
-	bb = ((*data & 0xFF00FF00FF00FF00LL) >> 8);
-	*data = bb | ((*data & 0x00FF00FF00FF00FFLL) << 8);
+	assert(data != nullptr);
+	// Each rank occupies one byte; reversing the bytes exchanges the ranks.
+	*data = std::byteswap(*data);
 }
 
 void initBits(void) {
@@ -113,7 +99,6 @@ void initBits(void) {
 	std::call_once(initialized, [] {
 		int k, j;
 		for (j = 0; j < 64; j++) {
-			firstOneTable[invFirstOneTable[j]] = j;
 			for (k = 0; k < 4; k++) {
 				maskSet[j][k] = U64{1} << rotatedIndex[k][j];
 				invMaskSet[j][k] = ~maskSet[j][k];
@@ -137,17 +122,10 @@ void rotatedBitsSet(U64 *q, int i) {
 }
 
 void rotatedBitsCreateSet(U64 *set, U64 q) {
-	int i, j;
-
-	for (j = 0; j < 4; j++) {
-		set[j] = 0LL;
-	}
-	for (i = 0; i < 64; i++) {
-		for (j = 0; j < 4; j++) {
-			if (bitsTest(q, i)) {
-				rotatedBitsSet(set, i);
-			}
-		}
+	rotatedBitsZeroOut(set);
+	while (q != 0) {
+		const int square = bitsRemoveFirstOne(&q);
+		rotatedBitsSet(set, square);
 	}
 }
 

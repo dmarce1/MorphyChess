@@ -49,9 +49,5 @@ int rotatedIndexFromRank(const U64 *, int);
 int rotatedIndexFromFile(const U64 *, int);
 int rotatedIndexFromDiag1(const U64 *, int);
 int rotatedIndexFromDiag2(const U64 *, int);
-void bitsClear(U64 *q, int i);
-void bitsSet(U64 *q, int i);
-bool bitsTest(U64 q, int i);
-U64 bitsMask(int i);
 
 } // namespace morphy_chess
