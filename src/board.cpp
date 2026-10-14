@@ -53,8 +53,8 @@ auto storeMove = [](Move *&list, int from, int to, int promo) {
 	*list++ = Move(from, to, promo);
 };
 
-static const U64 mayAffectCastle[2] = {0x9100000000000000LL,
-									   0x0000000000000091LL};
+static constexpr Bitboard mayAffectCastle[2] = {
+	Bitboard{0x9100000000000000ULL}, Bitboard{0x0000000000000091ULL}};
 
 static int charToPiece(int);
 
@@ -85,12 +85,12 @@ bool Board::isPseudoLegalMove(Move m) {
 	auto *b = this;
 	bool legal;
 	int fromMan, movingColor, to, from;
-	U64 ownMen, toBoard;
+	Bitboard ownMen, toBoard;
 	legal = false;
 	fromMan = b->pieceValuesData[m.from()];
 	movingColor = b->flagsData.sideToMoveValue;
 	ownMen = b->pieceBoardsData[movingColor][0];
-	toBoard = 0LL;
+	toBoard = Bitboard{};
 	to = m.to();
 	from = m.from();
 	if (m.isEmpty()) {
@@ -153,47 +153,48 @@ bool Board::isPseudoLegalMove(Move m) {
 		case king:
 			if ((from == 4) && (to == 6) && (movingColor == white) &&
 				(b->flagsData.whiteKingSideValue == 1)) {
-				toBoard =
-					(b->occupiedSquaresData[0] & (U64)0x0000000000000060LL);
-				if (toBoard == 0x0LL) {
+				toBoard = (b->occupiedSquaresData[0] &
+						   Bitboard{0x0000000000000060ULL});
+				if (!toBoard) {
 					if (!(b)->squareUnderAttackBy(kF1, black) &&
 						!(b)->squareUnderAttackBy(kE1, black)) {
 						legal = true;
 					}
 				}
-				toBoard = 0x0LL;
+				toBoard = Bitboard{};
 			} else if ((from == 60) && (to == 62) && (movingColor == black) &&
 					   (b->flagsData.blackKingSideValue == 1)) {
-				toBoard =
-					(b->occupiedSquaresData[0] & (U64)0x6000000000000000LL);
-				if (toBoard == 0x0LL) {
+				toBoard = (b->occupiedSquaresData[0] &
+						   Bitboard{0x6000000000000000ULL});
+				if (!toBoard) {
 					if (!(b)->squareUnderAttackBy(kF8, white) &&
 						!(b)->squareUnderAttackBy(kE8, white)) {
 						legal = true;
 					}
 				}
-				toBoard = 0x0LL;
+				toBoard = Bitboard{};
 			} else if ((from == 4) && (to == 2) && (movingColor == white) &&
 					   (b->flagsData.whiteQueenSideValue == 1)) {
-				toBoard = (b->occupiedSquaresData[0] & 0x000000000000000ELL);
-				if (toBoard == 0x0LL) {
+				toBoard = (b->occupiedSquaresData[0] &
+						   Bitboard{0x000000000000000EULL});
+				if (!toBoard) {
 					if (!(b)->squareUnderAttackBy(kD1, black) &&
 						!(b)->squareUnderAttackBy(kE1, black)) {
 						legal = true;
 					}
 				}
-				toBoard = 0x0LL;
+				toBoard = Bitboard{};
 			} else if ((from == 60) && (to == 58) && (movingColor == black) &&
 					   (b->flagsData.blackQueenSideValue == 1)) {
-				toBoard =
-					(b->occupiedSquaresData[0] & (U64)0x0E00000000000000LL);
-				if (toBoard == 0x0LL) {
+				toBoard = (b->occupiedSquaresData[0] &
+						   Bitboard{0x0E00000000000000ULL});
+				if (!toBoard) {
 					if (!(b)->squareUnderAttackBy(kD8, white) &&
 						!(b)->squareUnderAttackBy(kE8, white)) {
 						legal = true;
 					}
 				}
-				toBoard = 0x0LL;
+				toBoard = Bitboard{};
 			} else {
 				toBoard = kingAttacks(from) & ~ownMen;
 			}
@@ -202,7 +203,7 @@ bool Board::isPseudoLegalMove(Move m) {
 			assert(false);
 		}
 		if (legal == false) {
-			if (bitsTest(toBoard, to) == true) {
+			if (toBoard.test(to) == true) {
 				legal = true;
 			}
 		}
@@ -278,11 +279,11 @@ bool Board::kingInCheck(int color) const {
 	auto *b = this;
 	bool rc;
 	int square;
-	U64 bb;
+	Bitboard bb;
 	bb = b->pieceBoardsData[color][king];
 	rc = false;
-	assert(bb != 0LL);
-	square = bitsFirstOne(bb);
+	assert(bb);
+	square = bb.firstOne();
 	rc = (b)->squareUnderAttackBy(square, colorFlip(color));
 	return rc;
 }
@@ -346,8 +347,8 @@ bool Board::loadFen(const char *text) {
 			candidate.pieceValuesData[square] = color == white ? piece : -piece;
 			++candidate.pieceCountsData[color][piece];
 			++candidate.pieceCountsData[color][0];
-			bitsSet(&candidate.pieceBoardsData[color][piece], square);
-			bitsSet(&candidate.pieceBoardsData[color][0], square);
+			candidate.pieceBoardsData[color][piece].set(square);
+			candidate.pieceBoardsData[color][0].set(square);
 			rotatedBitsSet(candidate.occupiedSquaresData, square);
 		}
 	}
@@ -492,11 +493,11 @@ bool Board::makeMove(Move move) {
 	opposingColor = colorFlip(movingColor);
 	b->fiftyMoveRuleData++;
 	if (!move.isEmpty()) {
-		bitsClear(&b->pieceBoardsData[movingColor][0], move.from());
-		bitsClear(&b->pieceBoardsData[movingColor][movingPiece], move.from());
+		b->pieceBoardsData[movingColor][0].clear(move.from());
+		b->pieceBoardsData[movingColor][movingPiece].clear(move.from());
 		rotatedBitsClear(b->occupiedSquaresData, move.from());
-		bitsSet(&b->pieceBoardsData[movingColor][0], move.to());
-		bitsSet(&b->pieceBoardsData[movingColor][movingPiece], move.to());
+		b->pieceBoardsData[movingColor][0].set(move.to());
+		b->pieceBoardsData[movingColor][movingPiece].set(move.to());
 		rotatedBitsSet(b->occupiedSquaresData, move.to());
 		b->positionKeyData ^=
 			zobristKey(b->pieceValuesData[move.from()], move.to());
@@ -511,9 +512,8 @@ bool Board::makeMove(Move move) {
 		}
 		if (capturedPiece != 0) {
 			b->fiftyMoveRuleData = 0;
-			bitsClear(&b->pieceBoardsData[opposingColor][0], move.to());
-			bitsClear(&b->pieceBoardsData[opposingColor][capturedPiece],
-					  move.to());
+			b->pieceBoardsData[opposingColor][0].clear(move.to());
+			b->pieceBoardsData[opposingColor][capturedPiece].clear(move.to());
 			b->pieceCountsData[opposingColor][0]--;
 			b->pieceCountsData[opposingColor][capturedPiece]--;
 			b->flagsData.mostRecentCaptureValue = capturedPiece;
@@ -535,9 +535,8 @@ bool Board::makeMove(Move move) {
 
 		if (isCastle) {
 			(b)->handleCastle(move);
-		} else if ((mayAffectCastle[movingColor] & bitsMask(move.from())) |
-				   ((mayAffectCastle[opposingColor] & bitsMask(move.to())) !=
-					0LL)) {
+		} else if (mayAffectCastle[movingColor].test(move.from()) ||
+				   mayAffectCastle[opposingColor].test(move.to())) {
 			(b)->handleCastleRightsChanges(move);
 		}
 
@@ -574,7 +573,7 @@ bool Board::makeMove(Move move) {
 
 bool Board::squareUnderAttackBy(int square, int color) const {
 	auto *b = this;
-	U64 bb1, bb2;
+	Bitboard bb1, bb2;
 	if (color == black) {
 
 		bb2 = b->pieceBoardsData[black][pawn] & whitePawnAttacks(square);
@@ -601,7 +600,7 @@ bool Board::squareUnderAttackBy(int square, int color) const {
 			b->pieceBoardsData[white][queen] | b->pieceBoardsData[white][rook];
 		bb2 |= bb1 & rookAttacks(b->occupiedSquaresData, square);
 	}
-	return (bool)(bb2 != 0LL);
+	return static_cast<bool>(bb2);
 }
 
 bool Board::undoMove() {
@@ -624,18 +623,17 @@ bool Board::undoMove() {
 			;
 			movingColor = b->flagsData.sideToMoveValue;
 			movingPiece = abs(b->pieceValuesData[move.to()]);
-			bitsSet(&b->pieceBoardsData[movingColor][0], move.from());
-			bitsSet(&b->pieceBoardsData[movingColor][movingPiece], move.from());
+			b->pieceBoardsData[movingColor][0].set(move.from());
+			b->pieceBoardsData[movingColor][movingPiece].set(move.from());
 			rotatedBitsSet(b->occupiedSquaresData, move.from());
-			bitsClear(&b->pieceBoardsData[movingColor][0], move.to());
-			bitsClear(&b->pieceBoardsData[movingColor][movingPiece], move.to());
+			b->pieceBoardsData[movingColor][0].clear(move.to());
+			b->pieceBoardsData[movingColor][movingPiece].clear(move.to());
 			rotatedBitsClear(b->occupiedSquaresData, move.to());
 			b->pieceValuesData[move.from()] = b->pieceValuesData[move.to()];
 			b->pieceValuesData[move.to()] = 0;
 			if (capturedPiece != 0) {
-				bitsSet(&b->pieceBoardsData[opposingColor][0], move.to());
-				bitsSet(&b->pieceBoardsData[opposingColor][capturedPiece],
-						move.to());
+				b->pieceBoardsData[opposingColor][0].set(move.to());
+				b->pieceBoardsData[opposingColor][capturedPiece].set(move.to());
 				rotatedBitsSet(b->occupiedSquaresData, move.to());
 				b->pieceCountsData[opposingColor][0]++;
 				b->pieceCountsData[opposingColor][capturedPiece]++;
@@ -739,7 +737,7 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 	auto *b = this;
 	const Move *startPtr = mList;
 	int attackColor, defendColor, from, to;
-	U64 toBoard, fromBoard;
+	Bitboard toBoard, fromBoard;
 
 	assert(b != NULL);
 	assert(mList != NULL);
@@ -753,29 +751,27 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 		toBoard &= b->pieceBoardsData[black][0];
 		toBoard &= ~rank8;
 		toBoard &= ~fileH;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 7, to, 0);
 		}
 		toBoard = b->pieceBoardsData[white][pawn] << 9;
 		toBoard &= b->pieceBoardsData[black][0];
 		toBoard &= ~rank8;
 		toBoard &= ~fileA;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 9, to, 0);
 		}
 		/* ep captures */
 		if (b->flagsData.epCaptureSquareValue != noEpCapture) {
 			to = b->flagsData.epCaptureSquareValue + 8;
 			from = to - 7;
-			if ((from % 8 != 0) &&
-				bitsTest(b->pieceBoardsData[white][pawn], from)) {
+			if ((from % 8 != 0) && b->pieceBoardsData[white][pawn].test(from)) {
 				storeMove(mList, from, to, 0);
 			}
 			from = to - 9;
-			if ((from % 8 != 7) &&
-				bitsTest(b->pieceBoardsData[white][pawn], from)) {
+			if ((from % 8 != 7) && b->pieceBoardsData[white][pawn].test(from)) {
 				storeMove(mList, from, to, 0);
 			}
 		}
@@ -785,220 +781,218 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 		toBoard &= b->pieceBoardsData[white][0];
 		toBoard &= ~rank1;
 		toBoard &= ~fileA;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 7, to, 0);
 		}
 		toBoard = b->pieceBoardsData[black][pawn] >> 9;
 		toBoard &= b->pieceBoardsData[white][0];
 		toBoard &= ~rank1;
 		toBoard &= ~fileH;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 9, to, 0);
 		}
 		/* ep move */
 		if (b->flagsData.epCaptureSquareValue != noEpCapture) {
 			to = b->flagsData.epCaptureSquareValue - 8;
 			from = to + 7;
-			if ((from % 8 != 7) &&
-				bitsTest(b->pieceBoardsData[black][pawn], from)) {
+			if ((from % 8 != 7) && b->pieceBoardsData[black][pawn].test(from)) {
 				storeMove(mList, from, to, 0);
 			}
 			from = to + 9;
-			if ((from % 8 != 0) &&
-				bitsTest(b->pieceBoardsData[black][pawn], from)) {
+			if ((from % 8 != 0) && b->pieceBoardsData[black][pawn].test(from)) {
 				storeMove(mList, from, to, 0);
 			}
 		}
 	}
 	/********* KNIGHT captures********************/
 	fromBoard = b->pieceBoardsData[attackColor][knight];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = knightAttacks(from) & b->pieceBoardsData[defendColor][0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	/********* BISHOP captures********************/
 	fromBoard = b->pieceBoardsData[attackColor][bishop];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = bishopAttacks(b->occupiedSquaresData, from) &
 				  b->pieceBoardsData[defendColor][0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	/********* ROOK captures********************/
 	fromBoard = b->pieceBoardsData[attackColor][rook];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = rookAttacks(b->occupiedSquaresData, from) &
 				  b->pieceBoardsData[defendColor][0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	fromBoard = b->pieceBoardsData[attackColor][queen];
 	/********* QUEEN  captures ********************/
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = queenAttacks(b->occupiedSquaresData, from) &
 				  b->pieceBoardsData[defendColor][0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	/************ KING captures ************************/
 	fromBoard = b->pieceBoardsData[attackColor][king];
-	from = bitsFirstOne(fromBoard);
+	from = fromBoard.firstOne();
 	toBoard = kingAttacks(from) & b->pieceBoardsData[defendColor][0];
-	while (toBoard != 0LL) {
-		to = bitsRemoveFirstOne(&toBoard);
+	while (toBoard) {
+		to = toBoard.removeFirstOne();
 		storeMove(mList, from, to, 0);
 	}
 	storeMove(mList, 0, 0, 1);
 	return (int)(mList - startPtr) - 1;
 }
 
-int Board::pseudolegalMoveCount(U64 *control, int color) const {
+int Board::pseudolegalMoveCount(Bitboard *control, int color) const {
 	auto *b = this;
 	int attackColor, from, count;
-	U64 toBoard, fromBoard, tempBoard;
+	Bitboard toBoard, fromBoard, tempBoard;
 
 	assert(b != NULL);
 
 	count = 0;
 	attackColor = color;
-	*control = 0x0000000000000000LL;
+	*control = Bitboard{};
 	if (attackColor == white) {
 		toBoard = b->pieceBoardsData[white][pawn] << 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		tempBoard = toBoard;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 		toBoard = tempBoard << 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank4;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 		toBoard = b->pieceBoardsData[white][pawn] << 7;
 		toBoard &= ~fileH;
 		toBoard &= b->pieceBoardsData[black][0];
 		*control |= toBoard;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 		toBoard = b->pieceBoardsData[white][pawn] << 9;
 		toBoard &= ~fileA;
 		toBoard &= b->pieceBoardsData[black][0];
 		*control |= toBoard;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	} else {
 		toBoard = b->pieceBoardsData[black][pawn] >> 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		tempBoard = toBoard;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 		toBoard = tempBoard >> 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank5;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 		toBoard = b->pieceBoardsData[black][pawn] >> 7;
 		toBoard &= ~fileA;
 		toBoard &= b->pieceBoardsData[white][0];
 		*control |= toBoard;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 		toBoard = b->pieceBoardsData[black][pawn] >> 9;
 		toBoard &= ~fileH;
 		toBoard &= b->pieceBoardsData[white][0];
 		*control |= toBoard;
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][knight];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = knightAttacks(from);
 		*control |= toBoard;
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][bishop];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = bishopAttacks(b->occupiedSquaresData, from);
 		*control |= toBoard;
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][rook];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = rookAttacks(b->occupiedSquaresData, from);
 		*control |= toBoard;
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][queen];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = queenAttacks(b->occupiedSquaresData, from);
 		*control |= toBoard;
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][king];
-	from = bitsFirstOne(fromBoard);
+	from = fromBoard.firstOne();
 	toBoard = kingAttacks(from);
 	*control |= toBoard;
 	toBoard &= ~b->pieceBoardsData[attackColor][0];
-	count += bitsCountOnes(toBoard);
+	count += toBoard.countOnes();
 	return count;
 }
 
 int Board::pseudolegalPieceMoveCount(int color) const {
 	auto *b = this;
 	int attackColor, from, count;
-	U64 toBoard, fromBoard;
+	Bitboard toBoard, fromBoard;
 
 	assert(b != NULL);
 
 	count = 0;
 	attackColor = color;
 	fromBoard = b->pieceBoardsData[attackColor][knight];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = knightAttacks(from);
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][bishop];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = bishopAttacks(b->occupiedSquaresData, from);
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][rook];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = rookAttacks(b->occupiedSquaresData, from);
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][queen];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = queenAttacks(b->occupiedSquaresData, from);
 		toBoard &= ~b->pieceBoardsData[attackColor][0];
-		count += bitsCountOnes(toBoard);
+		count += toBoard.countOnes();
 	}
 	fromBoard = b->pieceBoardsData[attackColor][king];
-	from = bitsFirstOne(fromBoard);
+	from = fromBoard.firstOne();
 	toBoard = kingAttacks(from);
 	toBoard &= ~b->pieceBoardsData[attackColor][0];
-	count += bitsCountOnes(toBoard);
+	count += toBoard.countOnes();
 	return count;
 }
 
@@ -1006,7 +1000,7 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 	auto *b = this;
 	const Move *startPtr = mList;
 	int attackColor, from, to, cnt;
-	U64 toBoard, fromBoard, tempBoard;
+	Bitboard toBoard, fromBoard, tempBoard;
 
 	assert(b != NULL);
 	assert(mList != NULL);
@@ -1019,21 +1013,22 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= ~rank8;
 		tempBoard = toBoard;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 8, to, 0);
 		}
 		toBoard = tempBoard << 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank4;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 16, to, 0);
 		}
 		/*********** WHITE CASTLE MOVES ******************************/
 		if (b->flagsData.whiteKingSideValue == 1) {
-			tempBoard = (b->occupiedSquaresData[0] & (U64)0x0000000000000060LL);
-			if (tempBoard == 0x0LL) {
+			tempBoard =
+				(b->occupiedSquaresData[0] & Bitboard{0x0000000000000060ULL});
+			if (!tempBoard) {
 				if (!(b)->squareUnderAttackBy(kF1, black) &&
 					!(b)->squareUnderAttackBy(kE1, black)) {
 					storeMove(mList, kE1, kG1, 0);
@@ -1041,8 +1036,9 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 			}
 		}
 		if (b->flagsData.whiteQueenSideValue == 1) {
-			tempBoard = (b->occupiedSquaresData[0] & 0x000000000000000ELL);
-			if (tempBoard == 0x0LL) {
+			tempBoard =
+				(b->occupiedSquaresData[0] & Bitboard{0x000000000000000EULL});
+			if (!tempBoard) {
 				if (!(b)->squareUnderAttackBy(kD1, black) &&
 					!(b)->squareUnderAttackBy(kE1, black)) {
 					storeMove(mList, kE1, kC1, 0);
@@ -1056,21 +1052,22 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= ~rank1;
 		tempBoard = toBoard;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 8, to, 0);
 		}
 		toBoard = tempBoard >> 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank5;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 16, to, 0);
 		}
 		/*********** BLACK CASTLE MOVES ******************************/
 		if (b->flagsData.blackKingSideValue == 1) {
-			tempBoard = (b->occupiedSquaresData[0] & (U64)0x6000000000000000LL);
-			if (tempBoard == 0x0LL) {
+			tempBoard =
+				(b->occupiedSquaresData[0] & Bitboard{0x6000000000000000ULL});
+			if (!tempBoard) {
 				if (!(b)->squareUnderAttackBy(kF8, white) &&
 					!(b)->squareUnderAttackBy(kE8, white)) {
 					storeMove(mList, kE8, kG8, 0);
@@ -1078,8 +1075,9 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 			}
 		}
 		if (b->flagsData.blackQueenSideValue == 1) {
-			tempBoard = (b->occupiedSquaresData[0] & (U64)0x0E00000000000000LL);
-			if (tempBoard == 0x0LL) {
+			tempBoard =
+				(b->occupiedSquaresData[0] & Bitboard{0x0E00000000000000ULL});
+			if (!tempBoard) {
 				if (!(b)->squareUnderAttackBy(kD8, white) &&
 					!(b)->squareUnderAttackBy(kE8, white)) {
 					storeMove(mList, kE8, kC8, 0);
@@ -1089,55 +1087,55 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 	}
 	/********* KNIGHT MOVES ********************/
 	fromBoard = b->pieceBoardsData[attackColor][knight];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = knightAttacks(from) & ~b->occupiedSquaresData[0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	/********* BISHOP MOVES ********************/
 	fromBoard = b->pieceBoardsData[attackColor][bishop];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = bishopAttacks(b->occupiedSquaresData, from) &
 				  ~b->occupiedSquaresData[0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	/********* ROOK MOVES ********************/
 	fromBoard = b->pieceBoardsData[attackColor][rook];
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = rookAttacks(b->occupiedSquaresData, from) &
 				  ~b->occupiedSquaresData[0];
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	fromBoard = b->pieceBoardsData[attackColor][queen];
 	/********* QUEEN MOVES ********************/
-	while (fromBoard != 0LL) {
-		from = bitsRemoveFirstOne(&fromBoard);
+	while (fromBoard) {
+		from = fromBoard.removeFirstOne();
 		toBoard = queenAttacks(b->occupiedSquaresData, from) &
 				  ~b->occupiedSquaresData[0];
 		;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
 		}
 	}
 	/************ KING MOVES ************************/
 	fromBoard = b->pieceBoardsData[attackColor][king];
-	from = bitsFirstOne(fromBoard);
+	from = fromBoard.firstOne();
 	toBoard = kingAttacks(from) & ~b->occupiedSquaresData[0];
 	;
-	while (toBoard != 0LL) {
-		to = bitsRemoveFirstOne(&toBoard);
+	while (toBoard) {
+		to = toBoard.removeFirstOne();
 		storeMove(mList, from, to, 0);
 	}
 	cnt = (int)(mList - startPtr);
@@ -1151,7 +1149,7 @@ int Board::genPseudolegalPromotions(Move *mList) const {
 	auto *b = this;
 	const Move *startPtr = mList;
 	int attackColor, to;
-	U64 toBoard;
+	Bitboard toBoard;
 
 	assert(b != NULL);
 	assert(mList != NULL);
@@ -1163,24 +1161,24 @@ int Board::genPseudolegalPromotions(Move *mList) const {
 		toBoard = b->pieceBoardsData[white][pawn] << 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank8;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 8, to, queen);
 		}
 		toBoard = b->pieceBoardsData[white][pawn] << 7;
 		toBoard &= b->pieceBoardsData[black][0];
 		toBoard &= rank8;
 		toBoard &= ~fileH;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 7, to, queen);
 		}
 		toBoard = b->pieceBoardsData[white][pawn] << 9;
 		toBoard &= b->pieceBoardsData[black][0];
 		toBoard &= rank8;
 		toBoard &= ~fileA;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 9, to, queen);
 		}
 	} else {
@@ -1188,24 +1186,24 @@ int Board::genPseudolegalPromotions(Move *mList) const {
 		toBoard = b->pieceBoardsData[black][pawn] >> 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank1;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 8, to, queen);
 		}
 		toBoard = b->pieceBoardsData[black][pawn] >> 7;
 		toBoard &= b->pieceBoardsData[white][0];
 		toBoard &= rank1;
 		toBoard &= ~fileA;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 7, to, queen);
 		}
 		toBoard = b->pieceBoardsData[black][pawn] >> 9;
 		toBoard &= b->pieceBoardsData[white][0];
 		toBoard &= rank1;
 		toBoard &= ~fileH;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 9, to, queen);
 		}
 	}
@@ -1217,7 +1215,7 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 	auto *b = this;
 	const Move *startPtr = mList;
 	int attackColor, to;
-	U64 toBoard;
+	Bitboard toBoard;
 
 	assert(b != NULL);
 	assert(mList != NULL);
@@ -1229,8 +1227,8 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 		toBoard = b->pieceBoardsData[white][pawn] << 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank8;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 8, to, rook);
 			storeMove(mList, to - 8, to, bishop);
 			storeMove(mList, to - 8, to, knight);
@@ -1239,8 +1237,8 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 		toBoard &= b->pieceBoardsData[black][0];
 		toBoard &= rank8;
 		toBoard &= ~fileH;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 7, to, rook);
 			storeMove(mList, to - 7, to, bishop);
 			storeMove(mList, to - 7, to, knight);
@@ -1249,8 +1247,8 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 		toBoard &= b->pieceBoardsData[black][0];
 		toBoard &= rank8;
 		toBoard &= ~fileA;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 9, to, rook);
 			storeMove(mList, to - 9, to, bishop);
 			storeMove(mList, to - 9, to, knight);
@@ -1260,8 +1258,8 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 		toBoard = b->pieceBoardsData[black][pawn] >> 8;
 		toBoard &= ~b->occupiedSquaresData[0];
 		toBoard &= rank1;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 8, to, rook);
 			storeMove(mList, to + 8, to, bishop);
 			storeMove(mList, to + 8, to, knight);
@@ -1270,8 +1268,8 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 		toBoard &= b->pieceBoardsData[white][0];
 		toBoard &= rank1;
 		toBoard &= ~fileA;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 7, to, rook);
 			storeMove(mList, to + 7, to, bishop);
 			storeMove(mList, to + 7, to, knight);
@@ -1280,8 +1278,8 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 		toBoard &= b->pieceBoardsData[white][0];
 		toBoard &= rank1;
 		toBoard &= ~fileH;
-		while (toBoard != 0LL) {
-			to = bitsRemoveFirstOne(&toBoard);
+		while (toBoard) {
+			to = toBoard.removeFirstOne();
 			storeMove(mList, to + 9, to, rook);
 			storeMove(mList, to + 9, to, bishop);
 			storeMove(mList, to + 9, to, knight);
@@ -1524,14 +1522,10 @@ bool Board::drawByMaterial() const {
 		} else {
 			if ((b->pieceCountsData[white][bishop] == 1) &&
 				(b->pieceCountsData[black][bishop] == 1)) {
-				if (!((((b->pieceBoardsData[white][bishop] & whiteSquares) !=
-						0LL) &&
-					   ((b->pieceBoardsData[black][bishop] & blackSquares) !=
-						0LL)) ||
-					  (((b->pieceBoardsData[white][bishop] & blackSquares) !=
-						0LL) &&
-					   ((b->pieceBoardsData[black][bishop] & whiteSquares) !=
-						0LL)))) {
+				if (!(((b->pieceBoardsData[white][bishop] & whiteSquares) &&
+					   (b->pieceBoardsData[black][bishop] & blackSquares)) ||
+					  ((b->pieceBoardsData[white][bishop] & blackSquares) &&
+					   (b->pieceBoardsData[black][bishop] & whiteSquares)))) {
 					rc = true;
 				}
 			}
@@ -1585,7 +1579,7 @@ bool Board::positionIsRepeat() {
 void Board::adjustRepeatCount() {
 	auto *b = this;
 	int i, start, stop;
-	U64 thisKey;
+	std::uint64_t thisKey;
 
 	b->flagsData.repeatCountValue = 0;
 	start = b->flagsData.halfMoveCountValue - 4;
@@ -1659,7 +1653,10 @@ void Board::debugBoardToStream(FILE *fp) const {
 	for (rank = 6; rank > 3; rank--) {
 		fprintf(fp, "---------------------------------");
 		fprintf(fp, "| %c: %016llx  %016llx\n", pieceChar[6 + j],
-				b->pieceBoardsData[white][j], b->pieceBoardsData[black][j]);
+				static_cast<unsigned long long>(
+					b->pieceBoardsData[white][j].value()),
+				static_cast<unsigned long long>(
+					b->pieceBoardsData[black][j].value()));
 		j--;
 		fprintf(fp, "%i", rank + 1);
 		for (file = 0; file <= 7; file++) {
@@ -1668,18 +1665,30 @@ void Board::debugBoardToStream(FILE *fp) const {
 			fprintf(fp, "| %c ", c);
 		}
 		fprintf(fp, "| %c: %016llx  %016llx\n", pieceChar[6 + j],
-				b->pieceBoardsData[white][j], b->pieceBoardsData[black][j]);
+				static_cast<unsigned long long>(
+					b->pieceBoardsData[white][j].value()),
+				static_cast<unsigned long long>(
+					b->pieceBoardsData[black][j].value()));
 		j--;
 	}
 	for (rank = 3; rank >= 0; rank--) {
 		fprintf(fp, "---------------------------------");
 		if (rank == 3) {
 			fprintf(fp, "| %c: %016llx  %016llx\n", pieceChar[6 + j],
-					b->pieceBoardsData[white][j], b->pieceBoardsData[black][j]);
+					static_cast<unsigned long long>(
+						b->pieceBoardsData[white][j].value()),
+					static_cast<unsigned long long>(
+						b->pieceBoardsData[black][j].value()));
 		} else if (rank == 2) {
 			fprintf(fp, "|%016llx %016llx %016llx %016llx\n",
-					b->occupiedSquaresData[0], b->occupiedSquaresData[1],
-					b->occupiedSquaresData[2], b->occupiedSquaresData[3]);
+					static_cast<unsigned long long>(
+						b->occupiedSquaresData[0].value()),
+					static_cast<unsigned long long>(
+						b->occupiedSquaresData[1].value()),
+					static_cast<unsigned long long>(
+						b->occupiedSquaresData[2].value()),
+					static_cast<unsigned long long>(
+						b->occupiedSquaresData[3].value()));
 		} else if (rank == 1) {
 			fprintf(fp,
 					"|   %i, %i, %i, %i, %i, %i <> %i, %i, %i, %i, %i, %i\n",
@@ -1708,7 +1717,8 @@ void Board::debugBoardToStream(FILE *fp) const {
 		fprintf(fp, "|\n");
 	}
 	fprintf(fp, "---------------------------------");
-	fprintf(fp, "|0x%016llx        %i%i%i%i          %i\n", b->positionKeyData,
+	fprintf(fp, "|0x%016llx        %i%i%i%i          %i\n",
+			static_cast<unsigned long long>(b->positionKeyData),
 			b->flagsData.whiteKingSideValue, b->flagsData.whiteQueenSideValue,
 			b->flagsData.blackKingSideValue, b->flagsData.blackQueenSideValue,
 			b->flagsData.epCaptureSquareValue);
@@ -1719,7 +1729,7 @@ void Board::debugBoardToStream(FILE *fp) const {
 
 void Board::handleCastle(Move move) {
 	auto *b = this;
-	U64 keyChange = 0LL;
+	std::uint64_t keyChange = 0;
 	if (b->flagsData.sideToMoveValue == white) {
 		keyChange =
 			b->flagsData.whiteKingSideValue * zobristKingSideCastleKey(white);
@@ -1729,12 +1739,12 @@ void Board::handleCastle(Move move) {
 		/* King Side */
 		if (move.from() < move.to()) {
 			rotatedBitsClear(b->occupiedSquaresData, kH1);
-			bitsClear(&(b->pieceBoardsData[white][0]), kH1);
-			bitsClear(&(b->pieceBoardsData[white][rook]), kH1);
+			b->pieceBoardsData[white][0].clear(kH1);
+			b->pieceBoardsData[white][rook].clear(kH1);
 			b->pieceValuesData[kH1] = 0;
 			rotatedBitsSet(b->occupiedSquaresData, kF1);
-			bitsSet(&(b->pieceBoardsData[white][0]), kF1);
-			bitsSet(&(b->pieceBoardsData[white][rook]), kF1);
+			b->pieceBoardsData[white][0].set(kF1);
+			b->pieceBoardsData[white][rook].set(kF1);
 			b->pieceValuesData[kF1] = rook;
 			keyChange ^= zobristKey(rook, kH1);
 			keyChange ^= zobristKey(rook, kF1);
@@ -1743,12 +1753,12 @@ void Board::handleCastle(Move move) {
 		/* Qside */
 		else {
 			rotatedBitsClear(b->occupiedSquaresData, kA1);
-			bitsClear(&b->pieceBoardsData[white][0], kA1);
-			bitsClear(&b->pieceBoardsData[white][rook], kA1);
+			b->pieceBoardsData[white][0].clear(kA1);
+			b->pieceBoardsData[white][rook].clear(kA1);
 			b->pieceValuesData[kA1] = 0;
 			rotatedBitsSet(b->occupiedSquaresData, kD1);
-			bitsSet(&b->pieceBoardsData[white][0], kD1);
-			bitsSet(&b->pieceBoardsData[white][rook], kD1);
+			b->pieceBoardsData[white][0].set(kD1);
+			b->pieceBoardsData[white][rook].set(kD1);
 			b->pieceValuesData[kD1] = rook;
 			keyChange ^= zobristKey(rook, kA1);
 			keyChange ^= zobristKey(rook, kD1);
@@ -1762,24 +1772,24 @@ void Board::handleCastle(Move move) {
 		b->flagsData.blackKingSideValue = b->flagsData.blackQueenSideValue = 0;
 		if (move.from() < move.to()) {
 			rotatedBitsClear(b->occupiedSquaresData, kH8);
-			bitsClear(&(b->pieceBoardsData[black][0]), kH8);
-			bitsClear(&(b->pieceBoardsData[black][rook]), kH8);
+			b->pieceBoardsData[black][0].clear(kH8);
+			b->pieceBoardsData[black][rook].clear(kH8);
 			b->pieceValuesData[kH8] = 0;
 			rotatedBitsSet(b->occupiedSquaresData, kF8);
-			bitsSet(&(b->pieceBoardsData[black][0]), kF8);
-			bitsSet(&(b->pieceBoardsData[black][rook]), kF8);
+			b->pieceBoardsData[black][0].set(kF8);
+			b->pieceBoardsData[black][rook].set(kF8);
 			b->pieceValuesData[kF8] = -rook;
 			keyChange ^= zobristKey(-rook, kH8);
 			keyChange ^= zobristKey(-rook, kF8);
 			b->hasKsideCastledData[black] = 1;
 		} else {
 			rotatedBitsClear(b->occupiedSquaresData, kA8);
-			bitsClear(&b->pieceBoardsData[black][0], kA8);
-			bitsClear(&b->pieceBoardsData[black][rook], kA8);
+			b->pieceBoardsData[black][0].clear(kA8);
+			b->pieceBoardsData[black][rook].clear(kA8);
 			b->pieceValuesData[kA8] = 0;
 			rotatedBitsSet(b->occupiedSquaresData, kD8);
-			bitsSet(&b->pieceBoardsData[black][0], kD8);
-			bitsSet(&b->pieceBoardsData[black][rook], kD8);
+			b->pieceBoardsData[black][0].set(kD8);
+			b->pieceBoardsData[black][rook].set(kD8);
 			b->pieceValuesData[kD8] = -rook;
 			keyChange ^= zobristKey(-rook, kA8);
 			keyChange ^= zobristKey(-rook, kD8);
@@ -1865,21 +1875,21 @@ void Board::handleCastleUndo(Move m) {
 	if (b->flagsData.sideToMoveValue == white) {
 		if (m.from() < m.to()) {
 			rotatedBitsSet(b->occupiedSquaresData, kH1);
-			bitsSet(&b->pieceBoardsData[white][0], kH1);
-			bitsSet(&b->pieceBoardsData[white][rook], kH1);
+			b->pieceBoardsData[white][0].set(kH1);
+			b->pieceBoardsData[white][rook].set(kH1);
 			rotatedBitsClear(b->occupiedSquaresData, kF1);
-			bitsClear(&b->pieceBoardsData[white][0], kF1);
-			bitsClear(&b->pieceBoardsData[white][rook], kF1);
+			b->pieceBoardsData[white][0].clear(kF1);
+			b->pieceBoardsData[white][rook].clear(kF1);
 			b->pieceValuesData[kF1] = empty;
 			b->pieceValuesData[kH1] = wRook;
 			b->hasKsideCastledData[white] = 0;
 		} else {
 			rotatedBitsSet(b->occupiedSquaresData, kA1);
-			bitsSet(&b->pieceBoardsData[white][0], kA1);
-			bitsSet(&b->pieceBoardsData[white][rook], kA1);
+			b->pieceBoardsData[white][0].set(kA1);
+			b->pieceBoardsData[white][rook].set(kA1);
 			rotatedBitsClear(b->occupiedSquaresData, kD1);
-			bitsClear(&b->pieceBoardsData[white][0], kD1);
-			bitsClear(&b->pieceBoardsData[white][rook], kD1);
+			b->pieceBoardsData[white][0].clear(kD1);
+			b->pieceBoardsData[white][rook].clear(kD1);
 			b->pieceValuesData[kD1] = empty;
 			b->pieceValuesData[kA1] = wRook;
 			b->hasQsideCastledData[white] = 0;
@@ -1887,21 +1897,21 @@ void Board::handleCastleUndo(Move m) {
 	} else {
 		if (m.from() < m.to()) {
 			rotatedBitsSet(b->occupiedSquaresData, kH8);
-			bitsSet(&b->pieceBoardsData[black][0], kH8);
-			bitsSet(&b->pieceBoardsData[black][rook], kH8);
+			b->pieceBoardsData[black][0].set(kH8);
+			b->pieceBoardsData[black][rook].set(kH8);
 			rotatedBitsClear(b->occupiedSquaresData, kF8);
-			bitsClear(&b->pieceBoardsData[black][0], kF8);
-			bitsClear(&b->pieceBoardsData[black][rook], kF8);
+			b->pieceBoardsData[black][0].clear(kF8);
+			b->pieceBoardsData[black][rook].clear(kF8);
 			b->pieceValuesData[kF8] = empty;
 			b->pieceValuesData[kH8] = bRook;
 			b->hasKsideCastledData[black] = 0;
 		} else {
 			rotatedBitsSet(b->occupiedSquaresData, kA8);
-			bitsSet(&b->pieceBoardsData[black][0], kA8);
-			bitsSet(&b->pieceBoardsData[black][rook], kA8);
+			b->pieceBoardsData[black][0].set(kA8);
+			b->pieceBoardsData[black][rook].set(kA8);
 			rotatedBitsClear(b->occupiedSquaresData, kD8);
-			bitsClear(&b->pieceBoardsData[black][0], kD8);
-			bitsClear(&b->pieceBoardsData[black][rook], kD8);
+			b->pieceBoardsData[black][0].clear(kD8);
+			b->pieceBoardsData[black][rook].clear(kD8);
 			b->pieceValuesData[kD8] = empty;
 			b->pieceValuesData[kA8] = bRook;
 			b->hasQsideCastledData[black] = 0;
@@ -1913,8 +1923,8 @@ void Board::handleEnPassant(Move move) {
 	auto *b = this;
 	if (b->flagsData.sideToMoveValue == white) {
 		rotatedBitsClear(b->occupiedSquaresData, move.to() - 8);
-		bitsClear(&b->pieceBoardsData[black][0], move.to() - 8);
-		bitsClear(&b->pieceBoardsData[black][pawn], move.to() - 8);
+		b->pieceBoardsData[black][0].clear(move.to() - 8);
+		b->pieceBoardsData[black][pawn].clear(move.to() - 8);
 		b->pieceValuesData[move.to() - 8] = empty;
 		b->pieceCountsData[black][0]--;
 		b->pieceCountsData[black][pawn]--;
@@ -1922,8 +1932,8 @@ void Board::handleEnPassant(Move move) {
 		b->pawnKeyData ^= zobristKey(bPawn, move.to() - 8);
 	} else {
 		rotatedBitsClear(b->occupiedSquaresData, move.to() + 8);
-		bitsClear(&b->pieceBoardsData[white][0], move.to() + 8);
-		bitsClear(&b->pieceBoardsData[white][pawn], move.to() + 8);
+		b->pieceBoardsData[white][0].clear(move.to() + 8);
+		b->pieceBoardsData[white][pawn].clear(move.to() + 8);
 		b->pieceValuesData[move.to() + 8] = empty;
 		b->pieceCountsData[white][0]--;
 		b->pieceCountsData[white][pawn]--;
@@ -1936,15 +1946,15 @@ void Board::handleEnPassantUndo(Move move) {
 	auto *b = this;
 	if (b->flagsData.sideToMoveValue == white) {
 		rotatedBitsSet(b->occupiedSquaresData, move.to() - 8);
-		bitsSet(&b->pieceBoardsData[black][0], move.to() - 8);
-		bitsSet(&b->pieceBoardsData[black][pawn], move.to() - 8);
+		b->pieceBoardsData[black][0].set(move.to() - 8);
+		b->pieceBoardsData[black][pawn].set(move.to() - 8);
 		b->pieceValuesData[move.to() - 8] = bPawn;
 		b->pieceCountsData[black][0]++;
 		b->pieceCountsData[black][pawn]++;
 	} else {
 		rotatedBitsSet(b->occupiedSquaresData, move.to() + 8);
-		bitsSet(&b->pieceBoardsData[white][0], move.to() + 8);
-		bitsSet(&b->pieceBoardsData[white][pawn], move.to() + 8);
+		b->pieceBoardsData[white][0].set(move.to() + 8);
+		b->pieceBoardsData[white][pawn].set(move.to() + 8);
 		b->pieceValuesData[move.to() + 8] = wPawn;
 		b->pieceCountsData[white][0]++;
 		b->pieceCountsData[white][pawn]++;
@@ -1965,8 +1975,8 @@ void Board::handlePawnPromotion(Move move) {
 		b->pawnKeyData ^= zobristKey(-pawn, move.to());
 		b->positionKeyData ^= zobristKey(-move.promo(), move.to());
 	}
-	bitsSet(&b->pieceBoardsData[color][move.promo()], move.to());
-	bitsClear(&b->pieceBoardsData[color][pawn], move.to());
+	b->pieceBoardsData[color][move.promo()].set(move.to());
+	b->pieceBoardsData[color][pawn].clear(move.to());
 	b->pieceCountsData[color][pawn]--;
 	b->pieceCountsData[color][move.promo()]++;
 }
@@ -1974,14 +1984,14 @@ void Board::handlePawnPromotion(Move move) {
 void Board::handlePromotionUndo(Move move) {
 	auto *b = this;
 	if (b->flagsData.sideToMoveValue == white) {
-		bitsClear(&b->pieceBoardsData[white][move.promo()], move.from());
-		bitsSet(&b->pieceBoardsData[white][pawn], move.from());
+		b->pieceBoardsData[white][move.promo()].clear(move.from());
+		b->pieceBoardsData[white][pawn].set(move.from());
 		b->pieceCountsData[white][move.promo()]--;
 		b->pieceCountsData[white][pawn]++;
 		b->pieceValuesData[move.from()] = wPawn;
 	} else {
-		bitsClear(&b->pieceBoardsData[black][move.promo()], move.from());
-		bitsSet(&b->pieceBoardsData[black][pawn], move.from());
+		b->pieceBoardsData[black][move.promo()].clear(move.from());
+		b->pieceBoardsData[black][pawn].set(move.from());
 		b->pieceCountsData[black][move.promo()]--;
 		b->pieceCountsData[black][pawn]++;
 		b->pieceValuesData[move.from()] = bPawn;
@@ -2015,7 +2025,7 @@ bool Board::genLvaAttackToSquare(Move *move, int square) {
 	auto *board = this;
 	bool rc;
 	int stm;
-	U64 attackers;
+	Bitboard attackers;
 	rc = false;
 	move->setPromo(empty);
 	move->setTo(square);
@@ -2030,7 +2040,7 @@ bool Board::genLvaAttackToSquare(Move *move, int square) {
 		}
 		if (attackers) {
 			rc = true;
-			move->setFrom(bitsFirstOne(attackers));
+			move->setFrom(attackers.firstOne());
 			if ((move->to() / 8 == 0) || (move->to() / 8 == 7)) {
 				move->setPromo(queen);
 			}
@@ -2040,7 +2050,7 @@ bool Board::genLvaAttackToSquare(Move *move, int square) {
 		attackers = knightAttacks(square) & board->pieceBoardsData[stm][knight];
 		if (attackers) {
 			rc = true;
-			move->setFrom(bitsFirstOne(attackers));
+			move->setFrom(attackers.firstOne());
 		}
 	}
 	if (rc == false) {
@@ -2048,7 +2058,7 @@ bool Board::genLvaAttackToSquare(Move *move, int square) {
 					board->pieceBoardsData[stm][bishop];
 		if (attackers) {
 			rc = true;
-			move->setFrom(bitsFirstOne(attackers));
+			move->setFrom(attackers.firstOne());
 		}
 	}
 	if (rc == false) {
@@ -2056,7 +2066,7 @@ bool Board::genLvaAttackToSquare(Move *move, int square) {
 					board->pieceBoardsData[stm][rook];
 		if (attackers) {
 			rc = true;
-			move->setFrom(bitsFirstOne(attackers));
+			move->setFrom(attackers.firstOne());
 		}
 	}
 	if (rc == false) {
@@ -2064,14 +2074,14 @@ bool Board::genLvaAttackToSquare(Move *move, int square) {
 					board->pieceBoardsData[stm][queen];
 		if (attackers) {
 			rc = true;
-			move->setFrom(bitsFirstOne(attackers));
+			move->setFrom(attackers.firstOne());
 		}
 	}
 	if (rc == false) {
 		attackers = kingAttacks(square) & board->pieceBoardsData[stm][king];
 		if (attackers) {
 			rc = true;
-			move->setFrom(bitsFirstOne(attackers));
+			move->setFrom(attackers.firstOne());
 		}
 	}
 	if (rc) {

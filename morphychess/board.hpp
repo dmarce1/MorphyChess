@@ -1,5 +1,6 @@
 #pragma once
 
+#include <morphychess/bitboard.hpp>
 #include <morphychess/integers.hpp>
 #include <morphychess/params.hpp>
 #include <stdio.h>
@@ -53,23 +54,23 @@ inline constexpr auto kG8 = 62;
 inline constexpr auto kH8 = 63;
 inline constexpr auto maxMoves = 512;
 inline constexpr auto maxHalfMoves = 1024;
-inline constexpr auto fileA = 0x0101010101010101LL;
-inline constexpr auto fileB = 0x0202020202020202LL;
-inline constexpr auto fileC = 0x0404040404040404LL;
-inline constexpr auto fileD = 0x0808080808080808LL;
-inline constexpr auto fileE = 0x1010101010101010LL;
-inline constexpr auto fileF = 0x2020202020202020LL;
-inline constexpr auto fileG = 0x4040404040404040LL;
-inline constexpr auto fileH = 0x8080808080808080LL;
-inline constexpr auto rank1 = 0x00000000000000FFLL;
-inline constexpr auto rank2 = 0x000000000000FF00LL;
-inline constexpr auto rank3 = 0x0000000000FF0000LL;
-inline constexpr auto rank4 = 0x00000000FF000000LL;
-inline constexpr auto rank5 = 0x000000FF00000000LL;
-inline constexpr auto rank6 = 0x0000FF0000000000LL;
-inline constexpr auto rank7 = 0x00FF000000000000LL;
-inline constexpr auto rank8 = 0xFF00000000000000LL;
-inline constexpr auto whiteSquares = 0xAA55AA55AA55AA55LL;
+inline constexpr Bitboard fileA{0x0101010101010101ULL};
+inline constexpr Bitboard fileB{0x0202020202020202ULL};
+inline constexpr Bitboard fileC{0x0404040404040404ULL};
+inline constexpr Bitboard fileD{0x0808080808080808ULL};
+inline constexpr Bitboard fileE{0x1010101010101010ULL};
+inline constexpr Bitboard fileF{0x2020202020202020ULL};
+inline constexpr Bitboard fileG{0x4040404040404040ULL};
+inline constexpr Bitboard fileH{0x8080808080808080ULL};
+inline constexpr Bitboard rank1{0x00000000000000FFULL};
+inline constexpr Bitboard rank2{0x000000000000FF00ULL};
+inline constexpr Bitboard rank3{0x0000000000FF0000ULL};
+inline constexpr Bitboard rank4{0x00000000FF000000ULL};
+inline constexpr Bitboard rank5{0x000000FF00000000ULL};
+inline constexpr Bitboard rank6{0x0000FF0000000000ULL};
+inline constexpr Bitboard rank7{0x00FF000000000000ULL};
+inline constexpr Bitboard rank8{0xFF00000000000000ULL};
+inline constexpr Bitboard whiteSquares{0xAA55AA55AA55AA55ULL};
 inline constexpr auto blackSquares = (~(whiteSquares));
 
 constexpr int colorFlip(int color) noexcept {
@@ -145,16 +146,16 @@ private:
 
 class UndoInfo {
 public:
-	U64 positionKey() const noexcept { return positionKeyData; }
-	U64 pawnKey() const noexcept { return pawnKeyData; }
+	std::uint64_t positionKey() const noexcept { return positionKeyData; }
+	std::uint64_t pawnKey() const noexcept { return pawnKeyData; }
 	int fiftyMoveRule() const noexcept { return fiftyMoveRuleData; }
 	Move move() const noexcept { return moveData; }
 	const BoardFlags &flags() const noexcept { return flagsData; }
 
 private:
 	friend class Board;
-	U64 positionKeyData = 0;
-	U64 pawnKeyData = 0;
+	std::uint64_t positionKeyData = 0;
+	std::uint64_t pawnKeyData = 0;
 	BoardFlags flagsData;
 	Move moveData;
 	int fiftyMoveRuleData = 0;
@@ -192,19 +193,21 @@ public:
 	bool genLvaAttackToSquare(Move *move, int square);
 	bool kingInCheck(int color) const;
 	bool checkForDraw();
-	int pseudolegalMoveCount(U64 *control, int color) const;
+	int pseudolegalMoveCount(Bitboard *control, int color) const;
 	int pieceValue(int square) const noexcept {
 		return pieceValuesData[square];
 	}
 	int pieceCount(int color, int piece) const noexcept {
 		return pieceCountsData[color][piece];
 	}
-	U64 pieceBoard(int color, int piece) const noexcept {
+	Bitboard pieceBoard(int color, int piece) const noexcept {
 		return pieceBoardsData[color][piece];
 	}
-	const U64 *occupiedSquares() const noexcept { return occupiedSquaresData; }
-	U64 positionKey() const noexcept { return positionKeyData; }
-	U64 pawnKey() const noexcept { return pawnKeyData; }
+	const Bitboard *occupiedSquares() const noexcept {
+		return occupiedSquaresData;
+	}
+	std::uint64_t positionKey() const noexcept { return positionKeyData; }
+	std::uint64_t pawnKey() const noexcept { return pawnKeyData; }
 	const BoardFlags &flags() const noexcept { return flagsData; }
 	int fiftyMoveRule() const noexcept { return fiftyMoveRuleData; }
 	int sideToMove() const noexcept { return flagsData.sideToMove(); }
@@ -247,11 +250,11 @@ private:
 	void storeUndoInfo(UndoInfo *undo);
 	UndoInfo undoInfoData[maxHalfMoves]{};
 	I8 pieceCountsData[2][7]{};
-	U64 pieceBoardsData[2][7]{};
+	Bitboard pieceBoardsData[2][7]{};
 	I8 pieceValuesData[64]{};
-	U64 occupiedSquaresData[4]{};
-	U64 positionKeyData = 0;
-	U64 pawnKeyData = 0;
+	Bitboard occupiedSquaresData[4]{};
+	std::uint64_t positionKeyData = 0;
+	std::uint64_t pawnKeyData = 0;
 	BoardFlags flagsData;
 	bool hasKsideCastledData[2]{};
 	bool hasQsideCastledData[2]{};

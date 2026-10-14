@@ -38,8 +38,8 @@ void assertBoardConsistency(
 #ifndef NDEBUG
 	assertCondition(board != nullptr, location);
 	int counts[2][7]{};
-	U64 pieces[2][7]{};
-	U64 occupied[4]{};
+	Bitboard pieces[2][7]{};
+	Bitboard occupied[4]{};
 	for (int square = 0; square < 64; ++square) {
 		const int value = board->pieceValue(square);
 		if (value == empty) {
@@ -50,8 +50,8 @@ void assertBoardConsistency(
 		assertCondition(piece >= pawn && piece <= king, location);
 		++counts[color][piece];
 		++counts[color][0];
-		bitsSet(&pieces[color][piece], square);
-		bitsSet(&pieces[color][0], square);
+		pieces[color][piece].set(square);
+		pieces[color][0].set(square);
 		rotatedBitsSet(occupied, square);
 	}
 	for (int color = black; color <= white; ++color) {

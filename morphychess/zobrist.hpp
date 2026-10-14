@@ -25,13 +25,13 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 inline constexpr auto kRemoveRepeatKey = ~(0x0000000000000003LL);
 
-U64 zobristKey(int, int);
-U64 zobristRepeatKey(int);
-U64 zobristKingSideCastleKey(int);
-U64 zobristQueenSideCastleKey(int);
-U64 zobristEpKey(int);
-U64 computePositionKey(const Board *);
-U64 computePawnKey(const Board *);
+std::uint64_t zobristKey(int, int);
+std::uint64_t zobristRepeatKey(int);
+std::uint64_t zobristKingSideCastleKey(int);
+std::uint64_t zobristQueenSideCastleKey(int);
+std::uint64_t zobristEpKey(int);
+std::uint64_t computePositionKey(const Board *);
+std::uint64_t computePawnKey(const Board *);
 void initZobristKeys(void);
 
 } // namespace morphy_chess

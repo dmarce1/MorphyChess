@@ -1,7 +1,4 @@
-#include <bit>
 #include <morphychess/bits.hpp>
-#include <morphychess/board.hpp>
-#include <morphychess/debug.hpp>
 #include <mutex>
 
 namespace morphy_chess {
@@ -24,10 +21,10 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-U64 maskSet[64][4];
-static U64 invMaskSet[64][4];
+static Bitboard maskSet[64][4];
+static Bitboard invMaskSet[64][4];
 
-static const I8 rotatedIndex[4][64] = {
+static constexpr std::int8_t rotatedIndex[4][64] = {
 	{0,	 1,	 2,	 3,	 4,	 5,	 6,	 7,	 8,	 9,	 10, 11, 12, 13, 14, 15,
 	 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
 	 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,
@@ -47,128 +44,69 @@ static const I8 rotatedIndex[4][64] = {
 	 28, 20, 12, 4,	 60, 52, 44, 36, 21, 13, 5,	 61, 53, 45, 37, 29,
 	 14, 6,	 62, 54, 46, 38, 30, 22, 7,	 63, 55, 47, 39, 31, 23, 15}};
 
-int bitsCountOnes(U64 data) { return std::popcount(data); }
-
-int bitsFirstOne(U64 data) { return std::countr_zero(data); }
-
-int bitsLastOne(U64 data) { return 63 - std::countl_zero(data); }
-
-int bitsRemoveFirstOne(U64 *data) {
-	int i;
-
-	assert(data != NULL);
-
-	i = bitsFirstOne(*data);
-	*data &= *data - 1;
-	return i;
-}
-
-int bitsRemoveLastOne(U64 *data) {
-	int i;
-
-	assert(data != NULL);
-
-	i = bitsLastOne(*data);
-	if (i >= 0) {
-		bitsClear(data, i);
-	}
-	return i;
-}
-
-void bitsHorizontalFlip(U64 *data) {
-	U64 bb;
-
-	assert(data != NULL);
-
-	bb = ((*data & 0xF0F0F0F0F0F0F0F0LL) >> 4);
-	*data = bb | ((*data & 0x0F0F0F0F0F0F0F0FLL) << 4);
-	bb = ((*data & 0xCCCCCCCCCCCCCCCCLL) >> 2);
-	*data = bb | ((*data & 0x3333333333333333LL) << 2);
-	bb = ((*data & 0xAAAAAAAAAAAAAAAALL) >> 1);
-	*data = bb | ((*data & 0x5555555555555555LL) << 1);
-}
-
-void bitsVerticalFlip(U64 *data) {
-	assert(data != nullptr);
-	// Each rank occupies one byte; reversing the bytes exchanges the ranks.
-	*data = std::byteswap(*data);
-}
-
 void initBits(void) {
 	static std::once_flag initialized;
 	std::call_once(initialized, [] {
 		int k, j;
 		for (j = 0; j < 64; j++) {
 			for (k = 0; k < 4; k++) {
-				maskSet[j][k] = U64{1} << rotatedIndex[k][j];
+				maskSet[j][k] = Bitboard::mask(rotatedIndex[k][j]);
 				invMaskSet[j][k] = ~maskSet[j][k];
 			}
 		}
 	});
 }
 
-void rotatedBitsClear(U64 *q, int i) {
+void rotatedBitsClear(Bitboard *q, int i) {
 	q[0] &= invMaskSet[i][0];
 	q[1] &= invMaskSet[i][1];
 	q[2] &= invMaskSet[i][2];
 	q[3] &= invMaskSet[i][3];
 }
 
-void rotatedBitsSet(U64 *q, int i) {
+void rotatedBitsSet(Bitboard *q, int i) {
 	q[0] |= maskSet[i][0];
 	q[1] |= maskSet[i][1];
 	q[2] |= maskSet[i][2];
 	q[3] |= maskSet[i][3];
 }
 
-void rotatedBitsCreateSet(U64 *set, U64 q) {
+void rotatedBitsCreateSet(Bitboard *set, Bitboard q) {
 	rotatedBitsZeroOut(set);
-	while (q != 0) {
-		const int square = bitsRemoveFirstOne(&q);
+	while (q) {
+		const int square = q.removeFirstOne();
 		rotatedBitsSet(set, square);
 	}
 }
 
-int rotatedIndexFromRank(const U64 *o, int i) {
+int rotatedIndexFromRank(const Bitboard *o, int i) {
 	int j;
 	j = 8 * (i / 8);
-	return (o[kRankIndex] >> j) & 0xFF;
+	return static_cast<int>((o[kRankIndex] >> j).value() & 0xFF);
 }
 
-int rotatedIndexFromFile(const U64 *o, int i) {
+int rotatedIndexFromFile(const Bitboard *o, int i) {
 	int j;
 	j = 8 * (rotatedIndex[kFileIndex][i] / 8);
-	return (o[kFileIndex] >> j) & 0xFF;
+	return static_cast<int>((o[kFileIndex] >> j).value() & 0xFF);
 }
 
-int rotatedIndexFromDiag1(const U64 *o, int i) {
+int rotatedIndexFromDiag1(const Bitboard *o, int i) {
 	int j;
 	j = 8 * (rotatedIndex[kDiag1Index][i] / 8);
-	return (o[kDiag1Index] >> j) & 0xFF;
+	return static_cast<int>((o[kDiag1Index] >> j).value() & 0xFF);
 }
 
-int rotatedIndexFromDiag2(const U64 *o, int i) {
+int rotatedIndexFromDiag2(const Bitboard *o, int i) {
 	int j;
 	j = 8 * (rotatedIndex[kDiag2Index][i] / 8);
-	return (o[kDiag2Index] >> j) & 0xFF;
+	return static_cast<int>((o[kDiag2Index] >> j).value() & 0xFF);
 }
 
-void bitsClear(U64 *q, int i) { *q &= ~(U64{1} << i); }
-
-void bitsSet(U64 *q, int i) { *q |= (U64{1} << i); }
-
-bool bitsTest(U64 q, int i) {
-	bool rc;
-	rc = ((q & (U64{1} << i)) != 0LL);
-	return rc;
-}
-
-U64 bitsMask(int i) { return (U64{1} << i); }
-
-void rotatedBitsZeroOut(U64 *q) {
+void rotatedBitsZeroOut(Bitboard *q) {
 	int i;
 	for (i = 0; i < 4; i++) {
-		q[i] = 0x0LL;
+		q[i] = Bitboard{};
 	}
 }
 

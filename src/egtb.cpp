@@ -68,9 +68,9 @@ int threeManEgtbIndex(const Board &board, int thirdMan, int pieceColor) {
 		board.pieceCount(colorFlip(pieceColor), 0) != 1) {
 		return -1;
 	}
-	int whiteKing = bitsFirstOne(board.pieceBoard(pieceColor, king));
-	int blackKing = bitsFirstOne(board.pieceBoard(colorFlip(pieceColor), king));
-	int thirdSquare = bitsFirstOne(board.pieceBoard(pieceColor, thirdMan));
+	int whiteKing = board.pieceBoard(pieceColor, king).firstOne();
+	int blackKing = board.pieceBoard(colorFlip(pieceColor), king).firstOne();
+	int thirdSquare = board.pieceBoard(pieceColor, thirdMan).firstOne();
 	if (pieceColor == black) {
 		whiteKing ^= 56;
 		blackKing ^= 56;

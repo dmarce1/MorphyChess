@@ -22,60 +22,60 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-static U64 wpAttacks[64];
-static U64 bpAttacks[64];
-static U64 nAttacks[64];
-static U64 kAttacks[64];
-static U64 rankAttacks[64][256];
-static U64 fileAttacks[64][256];
-static U64 diag1Attacks[64][256];
-static U64 diag2Attacks[64][256];
+static Bitboard wpAttacks[64];
+static Bitboard bpAttacks[64];
+static Bitboard nAttacks[64];
+static Bitboard kAttacks[64];
+static Bitboard rankAttacks[64][256];
+static Bitboard fileAttacks[64][256];
+static Bitboard diag1Attacks[64][256];
+static Bitboard diag2Attacks[64][256];
 
-static U64 genWhitePawnAttacks(int i);
-static U64 genBlackPawnAttacks(int i);
-static U64 genKingAttacks(int i);
-static U64 genKnightAttacks(int i);
+static Bitboard genWhitePawnAttacks(int i);
+static Bitboard genBlackPawnAttacks(int i);
+static Bitboard genKingAttacks(int i);
+static Bitboard genKnightAttacks(int i);
 
-U64 whitePawnAttacks(int i) { return wpAttacks[i]; }
+Bitboard whitePawnAttacks(int i) { return wpAttacks[i]; }
 
-U64 blackPawnAttacks(int i) { return bpAttacks[i]; }
+Bitboard blackPawnAttacks(int i) { return bpAttacks[i]; }
 
-U64 kingAttacks(int i) { return kAttacks[i]; }
+Bitboard kingAttacks(int i) { return kAttacks[i]; }
 
-U64 knightAttacks(int i) { return nAttacks[i]; }
+Bitboard knightAttacks(int i) { return nAttacks[i]; }
 
-U64 rankMoves(const U64 *o, int i) {
+Bitboard rankMoves(const Bitboard *o, int i) {
 	return rankAttacks[i][rotatedIndexFromRank(o, i)];
 }
 
-U64 fileMoves(const U64 *o, int i) {
+Bitboard fileMoves(const Bitboard *o, int i) {
 	return fileAttacks[i][rotatedIndexFromFile(o, i)];
 }
 
-U64 diag1Moves(const U64 *o, int i) {
+Bitboard diag1Moves(const Bitboard *o, int i) {
 	return diag1Attacks[i][rotatedIndexFromDiag1(o, i)];
 }
 
-U64 diag2Moves(const U64 *o, int i) {
+Bitboard diag2Moves(const Bitboard *o, int i) {
 	return diag2Attacks[i][rotatedIndexFromDiag2(o, i)];
 }
 
-U64 bishopAttacks(const U64 *o, int i) {
+Bitboard bishopAttacks(const Bitboard *o, int i) {
 
-	U64 u, q;
+	Bitboard u, q;
 	q = diag1Attacks[i][rotatedIndexFromDiag1(o, i)];
 	u = diag2Attacks[i][rotatedIndexFromDiag2(o, i)];
 	return q | u;
 }
 
-U64 queenAttacks(const U64 *bb, int i) {
+Bitboard queenAttacks(const Bitboard *bb, int i) {
 	assertRange(0, i, 63);
 
 	return bishopAttacks(bb, i) | rookAttacks(bb, i);
 }
 
-U64 rookAttacks(const U64 *o, int i) {
-	U64 u, q;
+Bitboard rookAttacks(const Bitboard *o, int i) {
+	Bitboard u, q;
 	q = rankAttacks[i][rotatedIndexFromRank(o, i)];
 	u = fileAttacks[i][rotatedIndexFromFile(o, i)];
 	return q | u;
@@ -87,9 +87,9 @@ void initMoveData(void) {
 		U8 byte;
 		int from, to, rank, file, i, j;
 		unsigned int index;
-		U64 q;
-		U64 oMasks[256][4];
-		U64 *o;
+		Bitboard q;
+		Bitboard oMasks[256][4];
+		Bitboard *o;
 
 		initBits();
 
@@ -102,7 +102,7 @@ void initMoveData(void) {
 		for (index = 0; index < 256; index++) {
 			o = oMasks[index];
 			for (j = 0; j < 4; j++) {
-				o[j] = 0LL;
+				o[j] = Bitboard{};
 			}
 			for (i = 0; i < 8; i++) {
 				if ((index & (1 << i)) != 0) {
@@ -116,10 +116,10 @@ void initMoveData(void) {
 		for (from = 0; from < 8; from++) {
 			for (index = 0; index < 256; index++) {
 				byte = index;
-				q = 0LL;
+				q = Bitboard{};
 				if (from < 7) {
 					for (to = from + 1; to <= 7; to++) {
-						bitsSet(&q, to);
+						q.set(to);
 						if ((byte & (1 << to)) != 0) {
 							break;
 						}
@@ -127,7 +127,7 @@ void initMoveData(void) {
 				}
 				if (from > 0) {
 					for (to = from - 1; to >= 0; to--) {
-						bitsSet(&q, to);
+						q.set(to);
 						if ((byte & (1 << to)) != 0) {
 							break;
 						}
@@ -141,11 +141,11 @@ void initMoveData(void) {
 		for (from = 0; from < 64; from += 8) {
 			for (index = 0; index < 256; index++) {
 				byte = index;
-				q = 0LL;
+				q = Bitboard{};
 				rank = from / 8;
 				if (rank < 7) {
 					for (to = from + 8; to < 64; to += 8) {
-						bitsSet(&q, to);
+						q.set(to);
 						if ((byte & (1 << (to / 8))) != 0) {
 							break;
 						}
@@ -153,7 +153,7 @@ void initMoveData(void) {
 				}
 				if (rank > 0) {
 					for (to = from - 8; to >= 0; to -= 8) {
-						bitsSet(&q, to);
+						q.set(to);
 						if ((byte & (1 << (to / 8))) != 0) {
 							break;
 						}
@@ -168,11 +168,11 @@ void initMoveData(void) {
 			for (i = 0; i < 256; i++) {
 				o = oMasks[i];
 				index = rotatedIndexFromDiag1(o, from);
-				q = 0LL;
+				q = Bitboard{};
 				if (((from / 8) < 7) && ((from % 8) < 7)) {
 					for (to = from + 9; to < 64; to += 9) {
-						bitsSet(&q, to);
-						if (bitsTest(o[0], to)) {
+						q.set(to);
+						if (o[0].test(to)) {
 							break;
 						} else if (!(((to / 8) < 7) && ((to % 8) < 7))) {
 							break;
@@ -181,8 +181,8 @@ void initMoveData(void) {
 				}
 				if (((from / 8) > 0) && ((from % 8) > 0)) {
 					for (to = from - 9; to >= 0; to -= 9) {
-						bitsSet(&q, to);
-						if (bitsTest(o[0], to)) {
+						q.set(to);
+						if (o[0].test(to)) {
 							break;
 						} else if (!(((to / 8) > 0) && ((to % 8) > 0))) {
 							break;
@@ -196,11 +196,11 @@ void initMoveData(void) {
 			for (i = 0; i < 256; i++) {
 				o = oMasks[i];
 				index = rotatedIndexFromDiag2(o, from);
-				q = 0LL;
+				q = Bitboard{};
 				if (((from / 8) < 7) && ((from % 8) > 0)) {
 					for (to = from + 7; to < 64; to += 7) {
-						bitsSet(&q, to);
-						if (bitsTest(o[0], to)) {
+						q.set(to);
+						if (o[0].test(to)) {
 							break;
 						} else if (!(((to / 8) < 7) && ((to % 8) > 0))) {
 							break;
@@ -209,8 +209,8 @@ void initMoveData(void) {
 				}
 				if (((from / 8) > 0) && ((from % 8) < 7)) {
 					for (to = from - 7; to >= 0; to -= 7) {
-						bitsSet(&q, to);
-						if (bitsTest(o[0], to)) {
+						q.set(to);
+						if (o[0].test(to)) {
 							break;
 						} else if (!(((to / 8) > 0) && ((to % 8) < 7))) {
 							break;
@@ -224,50 +224,47 @@ void initMoveData(void) {
 	});
 }
 
-static U64 genWhitePawnAttacks(int i) {
+static Bitboard genWhitePawnAttacks(int i) {
 	const int side = (i & 0x7) >> 2;
 
 	assertRange(0, i, 63);
 
-	U64 bb = (U64)0x00000000000000001LL << i;
+	Bitboard bb = Bitboard::mask(i);
 	bb = (bb << 7) | (bb << 9);
-	bb &= ~(side * fileA);
-	bb &= ~((1 - side) * fileH);
-	bitsClear(&bb, i);
+	bb &= ~(side ? fileA : fileH);
+	bb.clear(i);
 	return bb;
 }
 
-static U64 genBlackPawnAttacks(int i) {
+static Bitboard genBlackPawnAttacks(int i) {
 	const int side = (i & 0x7) >> 2;
-	U64 bb = (U64)0x00000000000000001LL << i;
+	Bitboard bb = Bitboard::mask(i);
 
 	assertRange(0, i, 63);
 
 	bb = (bb >> 7) | (bb >> 9);
-	bb &= ~(side * fileA);
-	bb &= ~((1 - side) * fileH);
-	bitsClear(&bb, i);
+	bb &= ~(side ? fileA : fileH);
+	bb.clear(i);
 	return bb;
 }
 
-static U64 genKingAttacks(int i) {
+static Bitboard genKingAttacks(int i) {
 	const int side = (i & 0x7) >> 2;
-	U64 bb = (U64)0x00000000000000001LL << i;
+	Bitboard bb = Bitboard::mask(i);
 
 	assertRange(0, i, 63);
 
 	bb |= (bb >> 1) | (bb << 1);
 	bb |= (bb >> 8) | (bb << 8);
-	bb &= ~(side * fileA);
-	bb &= ~((1 - side) * fileH);
-	bitsClear(&bb, i);
+	bb &= ~(side ? fileA : fileH);
+	bb.clear(i);
 	return bb;
 }
 
-static U64 genKnightAttacks(int i) {
+static Bitboard genKnightAttacks(int i) {
 	const int side = (i & 0x7) >> 2;
-	U64 bb = (U64)0x00000000000000001LL << i;
-	U64 bb1;
+	Bitboard bb = Bitboard::mask(i);
+	Bitboard bb1;
 
 	assertRange(0, i, 63);
 
@@ -279,9 +276,8 @@ static U64 genKnightAttacks(int i) {
 	bb1 |= (bb << 10);
 	bb1 |= (bb << 15);
 	bb1 |= (bb << 17);
-	bb1 &= ~(side * (fileA | fileB));
-	bb1 &= ~((1 - side) * (fileH | fileG));
-	bitsClear(&bb1, i);
+	bb1 &= ~(side ? (fileA | fileB) : (fileH | fileG));
+	bb1.clear(i);
 	return bb1;
 }
 

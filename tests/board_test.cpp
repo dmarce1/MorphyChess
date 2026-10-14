@@ -1,4 +1,5 @@
 #include <array>
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <morphychess/board.hpp>
 #include <morphychess/debug.hpp>
@@ -7,13 +8,13 @@
 
 namespace morphy_chess {
 namespace {
-U64 perft(Board &board, int depth) {
+std::uint64_t perft(Board &board, int depth) {
 	if (depth == 0) {
 		return 1;
 	}
 	std::array<Move, maxMoves> moves;
 	const int count = board.genPseudolegalMoves(moves.data());
-	U64 result = 0;
+	std::uint64_t result = 0;
 	for (int index = 0; index < count; ++index) {
 		if (board.makeMove(moves[index])) {
 			result += perft(board, depth - 1);

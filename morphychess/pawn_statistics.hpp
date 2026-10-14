@@ -1,18 +1,18 @@
 #pragma once
-#include <morphychess/integers.hpp>
+#include <morphychess/bitboard.hpp>
 namespace morphy_chess {
 class PawnStatistics {
 public:
-	constexpr PawnStatistics(U64 lanes = 0, U64 moves = 0,
-							 U64 weak = 0) noexcept :
+	constexpr PawnStatistics(Bitboard lanes = {}, Bitboard moves = {},
+							 Bitboard weak = {}) noexcept :
 		lanesValue(lanes), movesValue(moves), weakValue(weak) {}
-	constexpr U64 lanes() const noexcept { return lanesValue; }
-	constexpr U64 moves() const noexcept { return movesValue; }
-	constexpr U64 weak() const noexcept { return weakValue; }
+	constexpr Bitboard lanes() const noexcept { return lanesValue; }
+	constexpr Bitboard moves() const noexcept { return movesValue; }
+	constexpr Bitboard weak() const noexcept { return weakValue; }
 
 private:
-	U64 lanesValue;
-	U64 movesValue;
-	U64 weakValue;
+	Bitboard lanesValue;
+	Bitboard movesValue;
+	Bitboard weakValue;
 };
 } // namespace morphy_chess

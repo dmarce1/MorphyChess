@@ -82,7 +82,7 @@ void MemoryTable::write(Search &search, Move move, bool testResult,
 		throw std::out_of_range(
 			"Search thread index exceeds transposition table partition count");
 	}
-	const U64 key = search.boardPtr->positionKey();
+	const std::uint64_t key = search.boardPtr->positionKey();
 	const auto key32 = static_cast<U32>(key);
 	const int globalIndex = key32 % entryCount;
 	const int localIndex =
@@ -119,7 +119,7 @@ bool MemoryTable::read(Search &search, Move *move, int *lowerBound,
 		throw std::out_of_range(
 			"Search thread index exceeds transposition table partition count");
 	}
-	const U64 key = search.boardPtr->positionKey();
+	const std::uint64_t key = search.boardPtr->positionKey();
 	const auto key32 = static_cast<U32>(key);
 	const int globalIndex = key32 % entryCount;
 	const int localIndex =

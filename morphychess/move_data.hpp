@@ -24,17 +24,17 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-U64 whitePawnAttacks(int);
-U64 blackPawnAttacks(int);
-U64 knightAttacks(int);
-U64 bishopAttacks(const U64 *, int);
-U64 rookAttacks(const U64 *, int);
-U64 queenAttacks(const U64 *, int);
-U64 rankMoves(const U64 *, int);
-U64 fileMoves(const U64 *, int);
-U64 diag1Moves(const U64 *, int);
-U64 diag2Moves(const U64 *, int);
-U64 kingAttacks(int);
+Bitboard whitePawnAttacks(int);
+Bitboard blackPawnAttacks(int);
+Bitboard knightAttacks(int);
+Bitboard bishopAttacks(const Bitboard *, int);
+Bitboard rookAttacks(const Bitboard *, int);
+Bitboard queenAttacks(const Bitboard *, int);
+Bitboard rankMoves(const Bitboard *, int);
+Bitboard fileMoves(const Bitboard *, int);
+Bitboard diag1Moves(const Bitboard *, int);
+Bitboard diag2Moves(const Bitboard *, int);
+Bitboard kingAttacks(int);
 void initMoveData(void);
 
 } // namespace morphy_chess

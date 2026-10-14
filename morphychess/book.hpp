@@ -29,7 +29,7 @@ namespace morphy_chess {
 
 class BookEntry {
 public:
-	U64 key() const noexcept { return keyValue; }
+	std::uint64_t key() const noexcept { return keyValue; }
 	int wins() const noexcept { return winsValue; }
 	int losses() const noexcept { return lossesValue; }
 	int draws() const noexcept { return drawsValue; }
@@ -39,7 +39,7 @@ public:
 
 private:
 	friend class Book;
-	U64 keyValue = 0;
+	std::uint64_t keyValue = 0;
 	int winsValue = 0;
 	int lossesValue = 0;
 	int drawsValue = 0;

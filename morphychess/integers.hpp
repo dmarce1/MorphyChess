@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <cstdint>
 namespace morphy_chess {
-using U64 = unsigned long long;
 using U32 = std::uint32_t;
 using U16 = std::uint16_t;
 using U8 = std::uint8_t;

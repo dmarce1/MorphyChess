@@ -1,6 +1,6 @@
 #pragma once
 
-#include <morphychess/integers.hpp>
+#include <morphychess/bitboard.hpp>
 #include <morphychess/params.hpp>
 
 namespace morphy_chess {
@@ -28,26 +28,14 @@ inline constexpr auto kFileIndex = 1;
 inline constexpr auto kDiag1Index = 2;
 inline constexpr auto kDiag2Index = 3;
 
-void rotatedBitsCreateSet(U64 *, U64);
+void rotatedBitsCreateSet(Bitboard *, Bitboard);
 void initBits(void);
-int bitsCountOnes(U64);
-int bitsFirstOne(U64);
-int bitsLastOne(U64);
-int bitsRemoveFirstOne(U64 *);
-int bitsRemoveLastOne(U64 *);
-void bitsVerticalFlip(U64 *);
-void bitsHorizontalFlip(U64 *);
-void bitsClear(U64 *q, int i);
-void bitsSet(U64 *q, int i);
-bool bitsTest(U64 q, int i);
-
-U64 bitsMask(int i);
-void rotatedBitsClear(U64 *q, int i);
-void rotatedBitsSet(U64 *q, int i);
-void rotatedBitsZeroOut(U64 *q);
-int rotatedIndexFromRank(const U64 *, int);
-int rotatedIndexFromFile(const U64 *, int);
-int rotatedIndexFromDiag1(const U64 *, int);
-int rotatedIndexFromDiag2(const U64 *, int);
+void rotatedBitsClear(Bitboard *q, int i);
+void rotatedBitsSet(Bitboard *q, int i);
+void rotatedBitsZeroOut(Bitboard *q);
+int rotatedIndexFromRank(const Bitboard *, int);
+int rotatedIndexFromFile(const Bitboard *, int);
+int rotatedIndexFromDiag1(const Bitboard *, int);
+int rotatedIndexFromDiag2(const Bitboard *, int);
 
 } // namespace morphy_chess

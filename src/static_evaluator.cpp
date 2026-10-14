@@ -240,33 +240,33 @@ int StaticEvaluator::nonMaterialScore(Board *board, int whiteMat,
 	int score;
 	int square;
 	int file;
-	U64 pieces;
-	U64 mask;
-	U64 test;
+	Bitboard pieces;
+	Bitboard mask;
+	Bitboard test;
 
 	score = evaluatePawnsAndKings(board, whiteMat, blackMat);
 
 	pieces = board->pieceBoard(white, knight);
-	while (pieces != 0x0LL) {
-		square = bitsRemoveFirstOne(&pieces);
+	while (pieces) {
+		square = pieces.removeFirstOne();
 		score +=
 			(knightSquareValueWeight * whiteKnightSquareValue[square]) / 100;
 	}
 	pieces = board->pieceBoard(white, bishop);
-	while (pieces != 0x0LL) {
-		square = bitsRemoveFirstOne(&pieces);
+	while (pieces) {
+		square = pieces.removeFirstOne();
 		score +=
 			(bishopSquareValueWeight * whiteBishopSquareValue[square]) / 100;
 	}
 	pieces = board->pieceBoard(white, rook);
-	while (pieces != 0x0LL) {
-		square = bitsRemoveFirstOne(&pieces);
+	while (pieces) {
+		square = pieces.removeFirstOne();
 		file = square % 8;
-		mask = 0x0101010101010101LL << file;
+		mask = fileA << file;
 		test = board->pieceBoard(white, pawn) & mask;
-		if (test == 0x0LL) {
+		if (!test) {
 			test = board->pieceBoard(black, pawn) & mask;
-			if (test == 0x0LL) {
+			if (!test) {
 				score += rookOpenFileBonus;
 			} else {
 				score += rookSemiOpenFileBonus;
@@ -278,26 +278,26 @@ int StaticEvaluator::nonMaterialScore(Board *board, int whiteMat,
 	}
 
 	pieces = board->pieceBoard(black, knight);
-	while (pieces != 0x0LL) {
-		square = bitsRemoveFirstOne(&pieces);
+	while (pieces) {
+		square = pieces.removeFirstOne();
 		score -=
 			(knightSquareValueWeight * blackKnightSquareValue[square]) / 100;
 	}
 	pieces = board->pieceBoard(black, bishop);
-	while (pieces != 0x0LL) {
-		square = bitsRemoveFirstOne(&pieces);
+	while (pieces) {
+		square = pieces.removeFirstOne();
 		score -=
 			(bishopSquareValueWeight * blackBishopSquareValue[square]) / 100;
 	}
 	pieces = board->pieceBoard(black, rook);
-	while (pieces != 0x0LL) {
-		square = bitsRemoveFirstOne(&pieces);
+	while (pieces) {
+		square = pieces.removeFirstOne();
 		file = square % 8;
-		mask = 0x0101010101010101LL << file;
+		mask = fileA << file;
 		test = board->pieceBoard(black, pawn) & mask;
-		if (test == 0x0LL) {
+		if (!test) {
 			test = board->pieceBoard(white, pawn) & mask;
-			if (test == 0x0LL) {
+			if (!test) {
 				score -= rookOpenFileBonus;
 			} else {
 				score -= rookSemiOpenFileBonus;
@@ -430,7 +430,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 	int rank;
 	int file;
 	U32 key;
-	U64 pawns;
+	Bitboard pawns;
 	for (i = 0; i < 10; i++) {
 		pawnRank[white][i] = 7;
 		pawnRank[black][i] = 0;
@@ -444,8 +444,8 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 	}
 	if (!readPawnTable(key, &score)) {
 		pawns = board->pieceBoard(white, pawn);
-		while (pawns != 0x0LL) {
-			square = bitsRemoveFirstOne(&pawns);
+		while (pawns) {
+			square = pawns.removeFirstOne();
 			rank = square / 8;
 			file = square % 8;
 			if (rank < pawnRank[white][file + 1]) {
@@ -453,8 +453,8 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 			}
 		}
 		pawns = board->pieceBoard(black, pawn);
-		while (pawns != 0x0LL) {
-			square = bitsRemoveFirstOne(&pawns);
+		while (pawns) {
+			square = pawns.removeFirstOne();
 			rank = square / 8;
 			file = square % 8;
 			if (rank > pawnRank[black][file + 1]) {
@@ -463,8 +463,8 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 		}
 		score = 0;
 		pawns = board->pieceBoard(white, pawn);
-		while (pawns != 0x0LL) {
-			square = bitsRemoveFirstOne(&pawns);
+		while (pawns) {
+			square = pawns.removeFirstOne();
 			score +=
 				(pawnSquareValueWeight * whitePawnSquareValue[square]) / 100;
 			rank = square / 8;
@@ -486,8 +486,8 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 			}
 		}
 		pawns = board->pieceBoard(black, pawn);
-		while (pawns != 0x0LL) {
-			square = bitsRemoveFirstOne(&pawns);
+		while (pawns) {
+			square = pawns.removeFirstOne();
 			score -=
 				(pawnSquareValueWeight * blackPawnSquareValue[square]) / 100;
 			rank = square / 8;
@@ -510,7 +510,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 		}
 
 		kingScore = 0;
-		square = bitsFirstOne(board->pieceBoard(white, king));
+		square = board->pieceBoard(white, king).firstOne();
 		if (blackMat < kEndgameDefinition) {
 			kingScore += endgameKingSquareValue[square];
 		} else {
@@ -527,7 +527,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 			}
 		}
 
-		square = bitsFirstOne(board->pieceBoard(black, king));
+		square = board->pieceBoard(black, king).firstOne();
 		if (whiteMat < kEndgameDefinition) {
 			kingScore -= endgameKingSquareValue[square];
 		} else {

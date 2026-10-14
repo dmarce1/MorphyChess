@@ -1,9 +1,11 @@
 #pragma once
 
-#include <array>
-#include <hpx/synchronization/mutex.hpp>
-#include <memory>
 #include <morphychess/board.hpp>
+
+#include <hpx/synchronization/mutex.hpp>
+
+#include <array>
+#include <memory>
 #include <mutex>
 #include <vector>
 
@@ -13,7 +15,7 @@ class MemoryEntry {
 	friend class MemoryTable;
 
 private:
-	U64 key{};
+	std::uint64_t key{};
 	I32 score{};
 	Move move{};
 	int depth{-1};
