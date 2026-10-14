@@ -3,8 +3,8 @@
 #include <morphychess/egtb.hpp>
 #include <string>
 namespace morphy_chess {
-bool egtbIndexToBoard(Board *board, int thirdMan, int index, int sideToMove) {
-	if (!board || thirdMan < pawn || thirdMan > queen || index < 0 ||
+bool Board::loadEgtbIndex(int thirdMan, int index, int sideToMove) {
+	if (thirdMan < pawn || thirdMan > queen || index < 0 ||
 		index >= threeManPositionCount ||
 		(sideToMove != white && sideToMove != black)) {
 		return false;
@@ -57,20 +57,20 @@ bool egtbIndexToBoard(Board *board, int thirdMan, int index, int sideToMove) {
 		candidate.kingInCheck(colorFlip(sideToMove))) {
 		return false;
 	}
-	*board = candidate;
+	*this = candidate;
 	return true;
 }
-int threeManEgtbIndex(const Board &board, int thirdMan, int pieceColor) {
+int Board::threeManEgtbIndex(int thirdMan, int pieceColor) const {
 	if (thirdMan < pawn || thirdMan > queen ||
 		(pieceColor != white && pieceColor != black) ||
-		board.pieceCount(pieceColor, thirdMan) != 1 ||
-		board.pieceCount(pieceColor, 0) != 2 ||
-		board.pieceCount(colorFlip(pieceColor), 0) != 1) {
+		pieceCount(pieceColor, thirdMan) != 1 ||
+		pieceCount(pieceColor, 0) != 2 ||
+		pieceCount(colorFlip(pieceColor), 0) != 1) {
 		return -1;
 	}
-	int whiteKing = board.pieceBoard(pieceColor, king).firstOne();
-	int blackKing = board.pieceBoard(colorFlip(pieceColor), king).firstOne();
-	int thirdSquare = board.pieceBoard(pieceColor, thirdMan).firstOne();
+	int whiteKing = pieceBoard(pieceColor, king).firstOne();
+	int blackKing = pieceBoard(colorFlip(pieceColor), king).firstOne();
+	int thirdSquare = pieceBoard(pieceColor, thirdMan).firstOne();
 	if (pieceColor == black) {
 		whiteKing ^= 56;
 		blackKing ^= 56;

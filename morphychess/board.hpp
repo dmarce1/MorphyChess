@@ -2,9 +2,12 @@
 
 #include <array>
 #include <morphychess/bitboard.hpp>
+#include <morphychess/bits.hpp>
 #include <morphychess/integers.hpp>
 #include <morphychess/params.hpp>
+#include <source_location>
 #include <stdio.h>
+#include <string>
 
 namespace morphy_chess {
 
@@ -89,6 +92,7 @@ class Move {
 public:
 	constexpr Move() noexcept = default;
 	static Move fromString(const char *text);
+	std::string coordinateString() const;
 	constexpr Move(int from, int to, int promo = 0) noexcept :
 		fromValue(from), toValue(to), promoValue(promo) {}
 	constexpr int from() const noexcept { return fromValue; }
@@ -195,6 +199,17 @@ public:
 	bool kingInCheck(int color) const;
 	bool checkForDraw();
 	int pseudolegalMoveCount(Bitboard &control, int color) const;
+	int evaluate() const;
+	int see(Move move, int score);
+	std::uint64_t computePositionKey() const;
+	std::uint64_t computePawnKey() const;
+	bool loadEgtbIndex(int thirdMan, int index, int sideToMove);
+	int threeManEgtbIndex(int thirdMan, int pieceColor) const;
+	void assertBoardConsistency(const std::source_location &location =
+									std::source_location::current()) const;
+	void assertTranspositionKeyConsistency(
+		const std::source_location &location =
+			std::source_location::current()) const;
 	int pieceValue(int square) const noexcept {
 		return pieceValuesData[square];
 	}
@@ -204,7 +219,7 @@ public:
 	Bitboard pieceBoard(int color, int piece) const noexcept {
 		return pieceBoardsData[color][piece];
 	}
-	const std::array<Bitboard, 4> &occupiedSquares() const noexcept {
+	const RotatedBitboard &occupiedSquares() const noexcept {
 		return occupiedSquaresData;
 	}
 	std::uint64_t positionKey() const noexcept { return positionKeyData; }
@@ -236,6 +251,7 @@ private:
 	bool isPseudoLegalMoveDebug(Move m);
 	int genPseudolegalUnderPromotions(Move *mList) const;
 	bool drawByMaterial() const;
+	int evaluateMaterial() const;
 	bool isCastleMove(Move move);
 	bool isEnPassantMove(Move move);
 	void adjustRepeatCount();
@@ -253,7 +269,7 @@ private:
 	std::array<std::array<I8, 7>, 2> pieceCountsData{};
 	std::array<std::array<Bitboard, 7>, 2> pieceBoardsData{};
 	std::array<I8, 64> pieceValuesData{};
-	std::array<Bitboard, 4> occupiedSquaresData{};
+	RotatedBitboard occupiedSquaresData{};
 	std::uint64_t positionKeyData = 0;
 	std::uint64_t pawnKeyData = 0;
 	BoardFlags flagsData;

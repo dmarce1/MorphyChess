@@ -81,10 +81,14 @@ and snake_case filenames. Constants are `constexpr` values.
 `StaticEvaluator`, `Book`, `Pgn`, `SeekBot`, and `Xboard` encapsulate private
 state. `Bitboard` stores a private 64-bit square mask and provides constexpr
 methods for bit scans, counts, updates, and flips, plus bitwise operators.
+`RotatedBitboard` owns the four occupancy orientations and provides updates,
+occupancy indices, and sliding attack queries. `Board` provides hash
+recomputation, material evaluation, static exchange evaluation, consistency
+checks, and three-piece endgame indexing. `Move::coordinateString` formats
+protocol coordinates; capture ordering is a private `Node` method.
 Conversions to and from raw integers are explicit; position hashes and counters
-remain integer types. Helpers that update several rotated bitboards, move
-tables, hashing, ratings, and other independent algorithms remain ordinary
-functions. Searches use private board copies,
+remain integer types. Move-table initialization, key lookups, ratings, and
+other independent algorithms remain ordinary functions. Searches use private board copies,
 shared synchronized caches, cooperative cancellation, and joined futures.
 
 CTest runs the full unit suite with one and four HPX workers, plus executable

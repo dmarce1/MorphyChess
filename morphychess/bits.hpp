@@ -29,14 +29,32 @@ inline constexpr auto kFileIndex = 1;
 inline constexpr auto kDiag1Index = 2;
 inline constexpr auto kDiag2Index = 3;
 
-void rotatedBitsCreateSet(std::array<Bitboard, 4> &, Bitboard);
 void initBits(void);
-void rotatedBitsClear(std::array<Bitboard, 4> &q, int i);
-void rotatedBitsSet(std::array<Bitboard, 4> &q, int i);
-void rotatedBitsZeroOut(std::array<Bitboard, 4> &q);
-int rotatedIndexFromRank(const std::array<Bitboard, 4> &, int);
-int rotatedIndexFromFile(const std::array<Bitboard, 4> &, int);
-int rotatedIndexFromDiag1(const std::array<Bitboard, 4> &, int);
-int rotatedIndexFromDiag2(const std::array<Bitboard, 4> &, int);
+
+class RotatedBitboard {
+public:
+	RotatedBitboard();
+	explicit RotatedBitboard(Bitboard value);
+	void assign(Bitboard value);
+	void set(int square);
+	void clear(int square);
+	void reset();
+	Bitboard operator[](int index) const noexcept { return boards[index]; }
+	const std::array<Bitboard, 4> &rotations() const noexcept { return boards; }
+	int indexFromRank(int square) const;
+	int indexFromFile(int square) const;
+	int indexFromDiag1(int square) const;
+	int indexFromDiag2(int square) const;
+	Bitboard rankMoves(int square) const;
+	Bitboard fileMoves(int square) const;
+	Bitboard diag1Moves(int square) const;
+	Bitboard diag2Moves(int square) const;
+	Bitboard bishopAttacks(int square) const;
+	Bitboard rookAttacks(int square) const;
+	Bitboard queenAttacks(int square) const;
+
+private:
+	std::array<Bitboard, 4> boards{};
+};
 
 } // namespace morphy_chess

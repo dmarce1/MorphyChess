@@ -107,9 +107,9 @@ TEST(Board, MoveUndoCastlingEnPassantPromotionAndHashConsistency) {
 		const Board original = board;
 		ASSERT_TRUE(board.isPseudoLegalMove(move));
 		ASSERT_TRUE(board.makeMove(move));
-		EXPECT_EQ(board.positionKey(), computePositionKey(board));
-		EXPECT_EQ(board.pawnKey(), computePawnKey(board));
-		assertBoardConsistency(board);
+		EXPECT_EQ(board.positionKey(), board.computePositionKey());
+		EXPECT_EQ(board.pawnKey(), board.computePawnKey());
+		board.assertBoardConsistency();
 		ASSERT_TRUE(board.undoMove());
 		expectSamePosition(board, original);
 	}

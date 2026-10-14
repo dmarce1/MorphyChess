@@ -44,40 +44,40 @@ Bitboard kingAttacks(int i) { return kAttacks[i]; }
 
 Bitboard knightAttacks(int i) { return nAttacks[i]; }
 
-Bitboard rankMoves(const std::array<Bitboard, 4> &o, int i) {
-	return rankAttacks[i][rotatedIndexFromRank(o, i)];
+Bitboard RotatedBitboard::rankMoves(int i) const {
+	return rankAttacks[i][indexFromRank(i)];
 }
 
-Bitboard fileMoves(const std::array<Bitboard, 4> &o, int i) {
-	return fileAttacks[i][rotatedIndexFromFile(o, i)];
+Bitboard RotatedBitboard::fileMoves(int i) const {
+	return fileAttacks[i][indexFromFile(i)];
 }
 
-Bitboard diag1Moves(const std::array<Bitboard, 4> &o, int i) {
-	return diag1Attacks[i][rotatedIndexFromDiag1(o, i)];
+Bitboard RotatedBitboard::diag1Moves(int i) const {
+	return diag1Attacks[i][indexFromDiag1(i)];
 }
 
-Bitboard diag2Moves(const std::array<Bitboard, 4> &o, int i) {
-	return diag2Attacks[i][rotatedIndexFromDiag2(o, i)];
+Bitboard RotatedBitboard::diag2Moves(int i) const {
+	return diag2Attacks[i][indexFromDiag2(i)];
 }
 
-Bitboard bishopAttacks(const std::array<Bitboard, 4> &o, int i) {
+Bitboard RotatedBitboard::bishopAttacks(int i) const {
 
 	Bitboard u, q;
-	q = diag1Attacks[i][rotatedIndexFromDiag1(o, i)];
-	u = diag2Attacks[i][rotatedIndexFromDiag2(o, i)];
+	q = diag1Attacks[i][indexFromDiag1(i)];
+	u = diag2Attacks[i][indexFromDiag2(i)];
 	return q | u;
 }
 
-Bitboard queenAttacks(const std::array<Bitboard, 4> &bb, int i) {
+Bitboard RotatedBitboard::queenAttacks(int i) const {
 	assertRange(0, i, 63);
 
-	return bishopAttacks(bb, i) | rookAttacks(bb, i);
+	return bishopAttacks(i) | rookAttacks(i);
 }
 
-Bitboard rookAttacks(const std::array<Bitboard, 4> &o, int i) {
+Bitboard RotatedBitboard::rookAttacks(int i) const {
 	Bitboard u, q;
-	q = rankAttacks[i][rotatedIndexFromRank(o, i)];
-	u = fileAttacks[i][rotatedIndexFromFile(o, i)];
+	q = rankAttacks[i][indexFromRank(i)];
+	u = fileAttacks[i][indexFromFile(i)];
 	return q | u;
 }
 
@@ -88,7 +88,7 @@ void initMoveData(void) {
 		int from, to, rank, file, i, j;
 		unsigned int index;
 		Bitboard q;
-		std::array<std::array<Bitboard, 4>, 256> oMasks;
+		std::array<RotatedBitboard, 256> oMasks;
 
 		initBits();
 
@@ -100,13 +100,11 @@ void initMoveData(void) {
 		}
 		for (index = 0; index < 256; index++) {
 			auto &o = oMasks[index];
-			for (j = 0; j < 4; j++) {
-				o[j] = Bitboard{};
-			}
+			o.reset();
 			for (i = 0; i < 8; i++) {
 				if ((index & (1 << i)) != 0) {
 					for (j = 0; j < 8; j++) {
-						rotatedBitsSet(o, 8 * i + j);
+						o.set(8 * i + j);
 					}
 				}
 			}
@@ -166,7 +164,7 @@ void initMoveData(void) {
 		for (from = 0; from < 64; from++) {
 			for (i = 0; i < 256; i++) {
 				const auto &o = oMasks[i];
-				index = rotatedIndexFromDiag1(o, from);
+				index = o.indexFromDiag1(from);
 				q = Bitboard{};
 				if (((from / 8) < 7) && ((from % 8) < 7)) {
 					for (to = from + 9; to < 64; to += 9) {
@@ -194,7 +192,7 @@ void initMoveData(void) {
 		for (from = 0; from < 64; from++) {
 			for (i = 0; i < 256; i++) {
 				const auto &o = oMasks[i];
-				index = rotatedIndexFromDiag2(o, from);
+				index = o.indexFromDiag2(from);
 				q = Bitboard{};
 				if (((from / 8) < 7) && ((from % 8) > 0)) {
 					for (to = from + 7; to < 64; to += 7) {

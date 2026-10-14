@@ -33,18 +33,17 @@ constexpr int startingMaterial =
 	4 * pieceValues[rook] + 2 * pieceValues[queen];
 constexpr int startingMaterialWoPawns =
 	startingMaterial - 16 * pieceValues[pawn];
-static int evaluateMaterial(const Board &board);
 void initEvaluator() {}
 
-int evaluate(const Board &b) {
+int Board::evaluate() const {
 	int score;
 
-	score = evaluateMaterial(b);
+	score = evaluateMaterial();
 
 	return score;
 }
 
-int evaluateMaterial(const Board &b) {
+int Board::evaluateMaterial() const {
 	std::array<int, 2> material;
 	int materialDifference, totalMaterial;
 	int bonus, score, winningSidePawns;
@@ -55,13 +54,12 @@ int evaluateMaterial(const Board &b) {
 	}
 	for (i = pawn; i < king; i++) {
 		for (j = 0; j < 2; j++) {
-			material[j] += b.pieceCount(j, i) * pieceValues[i];
+			material[j] += pieceCount(j, i) * pieceValues[i];
 		}
 	}
 	materialDifference = material[white] - material[black];
 	totalMaterial = material[white] + material[black];
-	winningSidePawns =
-		b.pieceCount(materialDifference > 0 ? white : black, pawn);
+	winningSidePawns = pieceCount(materialDifference > 0 ? white : black, pawn);
 	bonus = materialDifference * winningSidePawns *
 			(startingMaterial - totalMaterial);
 	bonus /= startingMaterialWoPawns * (winningSidePawns + 1);

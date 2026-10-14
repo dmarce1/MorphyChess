@@ -300,7 +300,7 @@ bool Search::test(int testValue, int depth) {
 		} else {
 			Node node(*this, bestMoveValue);
 			nodeStatus = (node).doNextMove(currentMove);
-			assertBoardConsistency(*boardPtr);
+			boardPtr->assertBoardConsistency();
 			if (nodeStatus != kNodeMovesAvailable) {
 				const int terminalScore =
 					boardPtr->kingInCheck()

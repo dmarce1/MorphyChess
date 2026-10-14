@@ -23,23 +23,21 @@ void assertCondition([[maybe_unused]] bool condition,
 	}
 #endif
 }
-void assertTranspositionKeyConsistency(
-	[[maybe_unused]] const Board &board,
-	[[maybe_unused]] const std::source_location &location) {
+void Board::assertTranspositionKeyConsistency(
+	[[maybe_unused]] const std::source_location &location) const {
 #ifndef NDEBUG
-	assertCondition(computePositionKey(board) == board.positionKey(), location);
-	assertCondition(computePawnKey(board) == board.pawnKey(), location);
+	assertCondition(computePositionKey() == positionKey(), location);
+	assertCondition(computePawnKey() == pawnKey(), location);
 #endif
 }
-void assertBoardConsistency(
-	[[maybe_unused]] const Board &board,
-	[[maybe_unused]] const std::source_location &location) {
+void Board::assertBoardConsistency(
+	[[maybe_unused]] const std::source_location &location) const {
 #ifndef NDEBUG
 	std::array<std::array<int, 7>, 2> counts{};
 	std::array<std::array<Bitboard, 7>, 2> pieces{};
-	std::array<Bitboard, 4> occupied{};
+	RotatedBitboard occupied;
 	for (int square = 0; square < 64; ++square) {
-		const int value = board.pieceValue(square);
+		const int value = pieceValue(square);
 		if (value == empty) {
 			continue;
 		}
@@ -50,24 +48,21 @@ void assertBoardConsistency(
 		++counts[color][0];
 		pieces[color][piece].set(square);
 		pieces[color][0].set(square);
-		rotatedBitsSet(occupied, square);
+		occupied.set(square);
 	}
 	for (int color = black; color <= white; ++color) {
 		for (int piece = empty; piece <= king; ++piece) {
-			assertCondition(counts[color][piece] ==
-								board.pieceCount(color, piece),
+			assertCondition(counts[color][piece] == pieceCount(color, piece),
 							location);
-			assertCondition(pieces[color][piece] ==
-								board.pieceBoard(color, piece),
+			assertCondition(pieces[color][piece] == pieceBoard(color, piece),
 							location);
 		}
 	}
 	for (int index = 0; index < 4; ++index) {
-		assertCondition(occupied[index] == board.occupiedSquares()[index],
-						location);
+		assertCondition(occupied[index] == occupiedSquares()[index], location);
 	}
-	assertCondition(board.fiftyMoveRule() >= 0, location);
-	assertTranspositionKeyConsistency(board, location);
+	assertCondition(fiftyMoveRule() >= 0, location);
+	assertTranspositionKeyConsistency(location);
 #endif
 }
 } // namespace morphy_chess

@@ -10,12 +10,6 @@ inline constexpr bool debugMode = true;
 #endif
 void assertCondition(bool condition, const std::source_location &location =
 										 std::source_location::current());
-void assertBoardConsistency(
-	const Board &board,
-	const std::source_location &location = std::source_location::current());
-void assertTranspositionKeyConsistency(
-	const Board &board,
-	const std::source_location &location = std::source_location::current());
 void debugRegisterBoard(const Board *board);
 template <class L, class V, class H>
 inline void assertRange([[maybe_unused]] L low, [[maybe_unused]] V value,

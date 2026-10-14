@@ -28,13 +28,6 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 Bitboard whitePawnAttacks(int);
 Bitboard blackPawnAttacks(int);
 Bitboard knightAttacks(int);
-Bitboard bishopAttacks(const std::array<Bitboard, 4> &, int);
-Bitboard rookAttacks(const std::array<Bitboard, 4> &, int);
-Bitboard queenAttacks(const std::array<Bitboard, 4> &, int);
-Bitboard rankMoves(const std::array<Bitboard, 4> &, int);
-Bitboard fileMoves(const std::array<Bitboard, 4> &, int);
-Bitboard diag1Moves(const std::array<Bitboard, 4> &, int);
-Bitboard diag2Moves(const std::array<Bitboard, 4> &, int);
 Bitboard kingAttacks(int);
 void initMoveData(void);
 

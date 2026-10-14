@@ -142,13 +142,13 @@ bool Board::isPseudoLegalMove(Move m) {
 			toBoard = knightAttacks(from) & ~ownMen;
 			break;
 		case bishop:
-			toBoard = bishopAttacks(b.occupiedSquaresData, from) & ~ownMen;
+			toBoard = b.occupiedSquaresData.bishopAttacks(from) & ~ownMen;
 			break;
 		case rook:
-			toBoard = rookAttacks(b.occupiedSquaresData, from) & ~ownMen;
+			toBoard = b.occupiedSquaresData.rookAttacks(from) & ~ownMen;
 			break;
 		case queen:
-			toBoard = queenAttacks(b.occupiedSquaresData, from) & ~ownMen;
+			toBoard = b.occupiedSquaresData.queenAttacks(from) & ~ownMen;
 			break;
 		case king:
 			if ((from == 4) && (to == 6) && (movingColor == white) &&
@@ -349,7 +349,7 @@ bool Board::loadFen(const char *text) {
 			++candidate.pieceCountsData[color][0];
 			candidate.pieceBoardsData[color][piece].set(square);
 			candidate.pieceBoardsData[color][0].set(square);
-			rotatedBitsSet(candidate.occupiedSquaresData, square);
+			candidate.occupiedSquaresData.set(square);
 		}
 	}
 	if (row != 0 || column != 8 || (side != "w" && side != "b")) {
@@ -425,13 +425,13 @@ bool Board::loadFen(const char *text) {
 		candidate.flagsData.epCaptureSquareValue = captured;
 	}
 	candidate.fiftyMoveRuleData = halfmove;
-	candidate.positionKeyData = computePositionKey(candidate);
-	candidate.pawnKeyData = computePawnKey(candidate);
+	candidate.positionKeyData = candidate.computePositionKey();
+	candidate.pawnKeyData = candidate.computePawnKey();
 	candidate.flagsData.checkValue =
 		candidate.kingInCheck(candidate.sideToMove());
 	candidate.flagsData.drawValue = candidate.checkForDraw();
 	*this = candidate;
-	assertBoardConsistency(*this);
+	assertBoardConsistency();
 	return true;
 }
 
@@ -494,10 +494,10 @@ bool Board::makeMove(Move move) {
 	if (!move.isEmpty()) {
 		b.pieceBoardsData[movingColor][0].clear(move.from());
 		b.pieceBoardsData[movingColor][movingPiece].clear(move.from());
-		rotatedBitsClear(b.occupiedSquaresData, move.from());
+		b.occupiedSquaresData.clear(move.from());
 		b.pieceBoardsData[movingColor][0].set(move.to());
 		b.pieceBoardsData[movingColor][movingPiece].set(move.to());
-		rotatedBitsSet(b.occupiedSquaresData, move.to());
+		b.occupiedSquaresData.set(move.to());
 		b.positionKeyData ^=
 			zobristKey(b.pieceValuesData[move.from()], move.to());
 		b.positionKeyData ^=
@@ -566,7 +566,7 @@ bool Board::makeMove(Move move) {
 		b.undoMove();
 		rc = false;
 	}
-	assertBoardConsistency(b);
+	b.assertBoardConsistency();
 	return rc;
 }
 
@@ -581,10 +581,10 @@ bool Board::squareUnderAttackBy(int square, int color) const {
 
 		bb1 =
 			b.pieceBoardsData[black][queen] | b.pieceBoardsData[black][bishop];
-		bb2 |= bb1 & bishopAttacks(b.occupiedSquaresData, square);
+		bb2 |= bb1 & b.occupiedSquaresData.bishopAttacks(square);
 
 		bb1 = b.pieceBoardsData[black][queen] | b.pieceBoardsData[black][rook];
-		bb2 |= bb1 & rookAttacks(b.occupiedSquaresData, square);
+		bb2 |= bb1 & b.occupiedSquaresData.rookAttacks(square);
 	} else {
 		bb2 = b.pieceBoardsData[white][pawn] & blackPawnAttacks(square);
 		bb2 |= b.pieceBoardsData[white][knight] & knightAttacks(square);
@@ -592,10 +592,10 @@ bool Board::squareUnderAttackBy(int square, int color) const {
 
 		bb1 =
 			b.pieceBoardsData[white][queen] | b.pieceBoardsData[white][bishop];
-		bb2 |= bb1 & bishopAttacks(b.occupiedSquaresData, square);
+		bb2 |= bb1 & b.occupiedSquaresData.bishopAttacks(square);
 
 		bb1 = b.pieceBoardsData[white][queen] | b.pieceBoardsData[white][rook];
-		bb2 |= bb1 & rookAttacks(b.occupiedSquaresData, square);
+		bb2 |= bb1 & b.occupiedSquaresData.rookAttacks(square);
 	}
 	return static_cast<bool>(bb2);
 }
@@ -622,16 +622,16 @@ bool Board::undoMove() {
 			movingPiece = abs(b.pieceValuesData[move.to()]);
 			b.pieceBoardsData[movingColor][0].set(move.from());
 			b.pieceBoardsData[movingColor][movingPiece].set(move.from());
-			rotatedBitsSet(b.occupiedSquaresData, move.from());
+			b.occupiedSquaresData.set(move.from());
 			b.pieceBoardsData[movingColor][0].clear(move.to());
 			b.pieceBoardsData[movingColor][movingPiece].clear(move.to());
-			rotatedBitsClear(b.occupiedSquaresData, move.to());
+			b.occupiedSquaresData.clear(move.to());
 			b.pieceValuesData[move.from()] = b.pieceValuesData[move.to()];
 			b.pieceValuesData[move.to()] = 0;
 			if (capturedPiece != 0) {
 				b.pieceBoardsData[opposingColor][0].set(move.to());
 				b.pieceBoardsData[opposingColor][capturedPiece].set(move.to());
-				rotatedBitsSet(b.occupiedSquaresData, move.to());
+				b.occupiedSquaresData.set(move.to());
 				b.pieceCountsData[opposingColor][0]++;
 				b.pieceCountsData[opposingColor][capturedPiece]++;
 				b.pieceValuesData[move.to()] =
@@ -648,7 +648,7 @@ bool Board::undoMove() {
 	} else {
 		rc = false;
 	}
-	assertBoardConsistency(b);
+	b.assertBoardConsistency();
 	return rc;
 }
 
@@ -816,7 +816,7 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 	fromBoard = b.pieceBoardsData[attackColor][bishop];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = bishopAttacks(b.occupiedSquaresData, from) &
+		toBoard = b.occupiedSquaresData.bishopAttacks(from) &
 				  b.pieceBoardsData[defendColor][0];
 		while (toBoard) {
 			to = toBoard.removeFirstOne();
@@ -827,7 +827,7 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 	fromBoard = b.pieceBoardsData[attackColor][rook];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = rookAttacks(b.occupiedSquaresData, from) &
+		toBoard = b.occupiedSquaresData.rookAttacks(from) &
 				  b.pieceBoardsData[defendColor][0];
 		while (toBoard) {
 			to = toBoard.removeFirstOne();
@@ -838,7 +838,7 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 	/********* QUEEN  captures ********************/
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = queenAttacks(b.occupiedSquaresData, from) &
+		toBoard = b.occupiedSquaresData.queenAttacks(from) &
 				  b.pieceBoardsData[defendColor][0];
 		while (toBoard) {
 			to = toBoard.removeFirstOne();
@@ -915,7 +915,7 @@ int Board::pseudolegalMoveCount(Bitboard &control, int color) const {
 	fromBoard = b.pieceBoardsData[attackColor][bishop];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = bishopAttacks(b.occupiedSquaresData, from);
+		toBoard = b.occupiedSquaresData.bishopAttacks(from);
 		control |= toBoard;
 		toBoard &= ~b.pieceBoardsData[attackColor][0];
 		count += toBoard.countOnes();
@@ -923,7 +923,7 @@ int Board::pseudolegalMoveCount(Bitboard &control, int color) const {
 	fromBoard = b.pieceBoardsData[attackColor][rook];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = rookAttacks(b.occupiedSquaresData, from);
+		toBoard = b.occupiedSquaresData.rookAttacks(from);
 		control |= toBoard;
 		toBoard &= ~b.pieceBoardsData[attackColor][0];
 		count += toBoard.countOnes();
@@ -931,7 +931,7 @@ int Board::pseudolegalMoveCount(Bitboard &control, int color) const {
 	fromBoard = b.pieceBoardsData[attackColor][queen];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = queenAttacks(b.occupiedSquaresData, from);
+		toBoard = b.occupiedSquaresData.queenAttacks(from);
 		control |= toBoard;
 		toBoard &= ~b.pieceBoardsData[attackColor][0];
 		count += toBoard.countOnes();
@@ -962,21 +962,21 @@ int Board::pseudolegalPieceMoveCount(int color) const {
 	fromBoard = b.pieceBoardsData[attackColor][bishop];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = bishopAttacks(b.occupiedSquaresData, from);
+		toBoard = b.occupiedSquaresData.bishopAttacks(from);
 		toBoard &= ~b.pieceBoardsData[attackColor][0];
 		count += toBoard.countOnes();
 	}
 	fromBoard = b.pieceBoardsData[attackColor][rook];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = rookAttacks(b.occupiedSquaresData, from);
+		toBoard = b.occupiedSquaresData.rookAttacks(from);
 		toBoard &= ~b.pieceBoardsData[attackColor][0];
 		count += toBoard.countOnes();
 	}
 	fromBoard = b.pieceBoardsData[attackColor][queen];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = queenAttacks(b.occupiedSquaresData, from);
+		toBoard = b.occupiedSquaresData.queenAttacks(from);
 		toBoard &= ~b.pieceBoardsData[attackColor][0];
 		count += toBoard.countOnes();
 	}
@@ -1090,7 +1090,7 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 	fromBoard = b.pieceBoardsData[attackColor][bishop];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = bishopAttacks(b.occupiedSquaresData, from) &
+		toBoard = b.occupiedSquaresData.bishopAttacks(from) &
 				  ~b.occupiedSquaresData[0];
 		while (toBoard) {
 			to = toBoard.removeFirstOne();
@@ -1101,8 +1101,8 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 	fromBoard = b.pieceBoardsData[attackColor][rook];
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = rookAttacks(b.occupiedSquaresData, from) &
-				  ~b.occupiedSquaresData[0];
+		toBoard =
+			b.occupiedSquaresData.rookAttacks(from) & ~b.occupiedSquaresData[0];
 		while (toBoard) {
 			to = toBoard.removeFirstOne();
 			storeMove(mList, from, to, 0);
@@ -1112,7 +1112,7 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 	/********* QUEEN MOVES ********************/
 	while (fromBoard) {
 		from = fromBoard.removeFirstOne();
-		toBoard = queenAttacks(b.occupiedSquaresData, from) &
+		toBoard = b.occupiedSquaresData.queenAttacks(from) &
 				  ~b.occupiedSquaresData[0];
 		;
 		while (toBoard) {
@@ -1393,6 +1393,34 @@ Move Board::makeTextMove(const char *text) {
 		m.setEmpty();
 	}
 	return m;
+}
+
+std::string Move::coordinateString() const {
+	if (isEmpty()) {
+		return {};
+	}
+	std::string text;
+	text += static_cast<char>('a' + from() % 8);
+	text += static_cast<char>('1' + from() / 8);
+	text += static_cast<char>('a' + to() % 8);
+	text += static_cast<char>('1' + to() / 8);
+	switch (promo()) {
+	case queen:
+		text += 'q';
+		break;
+	case rook:
+		text += 'r';
+		break;
+	case bishop:
+		text += 'b';
+		break;
+	case knight:
+		text += 'n';
+		break;
+	default:
+		break;
+	}
+	return text;
 }
 
 Move Move::fromString(const char *text) {
@@ -1717,11 +1745,11 @@ void Board::handleCastle(Move move) {
 		b.flagsData.whiteKingSideValue = b.flagsData.whiteQueenSideValue = 0;
 		/* King Side */
 		if (move.from() < move.to()) {
-			rotatedBitsClear(b.occupiedSquaresData, kH1);
+			b.occupiedSquaresData.clear(kH1);
 			b.pieceBoardsData[white][0].clear(kH1);
 			b.pieceBoardsData[white][rook].clear(kH1);
 			b.pieceValuesData[kH1] = 0;
-			rotatedBitsSet(b.occupiedSquaresData, kF1);
+			b.occupiedSquaresData.set(kF1);
 			b.pieceBoardsData[white][0].set(kF1);
 			b.pieceBoardsData[white][rook].set(kF1);
 			b.pieceValuesData[kF1] = rook;
@@ -1731,11 +1759,11 @@ void Board::handleCastle(Move move) {
 		}
 		/* Qside */
 		else {
-			rotatedBitsClear(b.occupiedSquaresData, kA1);
+			b.occupiedSquaresData.clear(kA1);
 			b.pieceBoardsData[white][0].clear(kA1);
 			b.pieceBoardsData[white][rook].clear(kA1);
 			b.pieceValuesData[kA1] = 0;
-			rotatedBitsSet(b.occupiedSquaresData, kD1);
+			b.occupiedSquaresData.set(kD1);
 			b.pieceBoardsData[white][0].set(kD1);
 			b.pieceBoardsData[white][rook].set(kD1);
 			b.pieceValuesData[kD1] = rook;
@@ -1750,11 +1778,11 @@ void Board::handleCastle(Move move) {
 			b.flagsData.blackQueenSideValue * zobristQueenSideCastleKey(black);
 		b.flagsData.blackKingSideValue = b.flagsData.blackQueenSideValue = 0;
 		if (move.from() < move.to()) {
-			rotatedBitsClear(b.occupiedSquaresData, kH8);
+			b.occupiedSquaresData.clear(kH8);
 			b.pieceBoardsData[black][0].clear(kH8);
 			b.pieceBoardsData[black][rook].clear(kH8);
 			b.pieceValuesData[kH8] = 0;
-			rotatedBitsSet(b.occupiedSquaresData, kF8);
+			b.occupiedSquaresData.set(kF8);
 			b.pieceBoardsData[black][0].set(kF8);
 			b.pieceBoardsData[black][rook].set(kF8);
 			b.pieceValuesData[kF8] = -rook;
@@ -1762,11 +1790,11 @@ void Board::handleCastle(Move move) {
 			keyChange ^= zobristKey(-rook, kF8);
 			b.hasKsideCastledData[black] = 1;
 		} else {
-			rotatedBitsClear(b.occupiedSquaresData, kA8);
+			b.occupiedSquaresData.clear(kA8);
 			b.pieceBoardsData[black][0].clear(kA8);
 			b.pieceBoardsData[black][rook].clear(kA8);
 			b.pieceValuesData[kA8] = 0;
-			rotatedBitsSet(b.occupiedSquaresData, kD8);
+			b.occupiedSquaresData.set(kD8);
 			b.pieceBoardsData[black][0].set(kD8);
 			b.pieceBoardsData[black][rook].set(kD8);
 			b.pieceValuesData[kD8] = -rook;
@@ -1853,20 +1881,20 @@ void Board::handleCastleUndo(Move m) {
 	auto &b = *this;
 	if (b.flagsData.sideToMoveValue == white) {
 		if (m.from() < m.to()) {
-			rotatedBitsSet(b.occupiedSquaresData, kH1);
+			b.occupiedSquaresData.set(kH1);
 			b.pieceBoardsData[white][0].set(kH1);
 			b.pieceBoardsData[white][rook].set(kH1);
-			rotatedBitsClear(b.occupiedSquaresData, kF1);
+			b.occupiedSquaresData.clear(kF1);
 			b.pieceBoardsData[white][0].clear(kF1);
 			b.pieceBoardsData[white][rook].clear(kF1);
 			b.pieceValuesData[kF1] = empty;
 			b.pieceValuesData[kH1] = wRook;
 			b.hasKsideCastledData[white] = 0;
 		} else {
-			rotatedBitsSet(b.occupiedSquaresData, kA1);
+			b.occupiedSquaresData.set(kA1);
 			b.pieceBoardsData[white][0].set(kA1);
 			b.pieceBoardsData[white][rook].set(kA1);
-			rotatedBitsClear(b.occupiedSquaresData, kD1);
+			b.occupiedSquaresData.clear(kD1);
 			b.pieceBoardsData[white][0].clear(kD1);
 			b.pieceBoardsData[white][rook].clear(kD1);
 			b.pieceValuesData[kD1] = empty;
@@ -1875,20 +1903,20 @@ void Board::handleCastleUndo(Move m) {
 		}
 	} else {
 		if (m.from() < m.to()) {
-			rotatedBitsSet(b.occupiedSquaresData, kH8);
+			b.occupiedSquaresData.set(kH8);
 			b.pieceBoardsData[black][0].set(kH8);
 			b.pieceBoardsData[black][rook].set(kH8);
-			rotatedBitsClear(b.occupiedSquaresData, kF8);
+			b.occupiedSquaresData.clear(kF8);
 			b.pieceBoardsData[black][0].clear(kF8);
 			b.pieceBoardsData[black][rook].clear(kF8);
 			b.pieceValuesData[kF8] = empty;
 			b.pieceValuesData[kH8] = bRook;
 			b.hasKsideCastledData[black] = 0;
 		} else {
-			rotatedBitsSet(b.occupiedSquaresData, kA8);
+			b.occupiedSquaresData.set(kA8);
 			b.pieceBoardsData[black][0].set(kA8);
 			b.pieceBoardsData[black][rook].set(kA8);
-			rotatedBitsClear(b.occupiedSquaresData, kD8);
+			b.occupiedSquaresData.clear(kD8);
 			b.pieceBoardsData[black][0].clear(kD8);
 			b.pieceBoardsData[black][rook].clear(kD8);
 			b.pieceValuesData[kD8] = empty;
@@ -1901,7 +1929,7 @@ void Board::handleCastleUndo(Move m) {
 void Board::handleEnPassant(Move move) {
 	auto &b = *this;
 	if (b.flagsData.sideToMoveValue == white) {
-		rotatedBitsClear(b.occupiedSquaresData, move.to() - 8);
+		b.occupiedSquaresData.clear(move.to() - 8);
 		b.pieceBoardsData[black][0].clear(move.to() - 8);
 		b.pieceBoardsData[black][pawn].clear(move.to() - 8);
 		b.pieceValuesData[move.to() - 8] = empty;
@@ -1910,7 +1938,7 @@ void Board::handleEnPassant(Move move) {
 		b.positionKeyData ^= zobristKey(bPawn, move.to() - 8);
 		b.pawnKeyData ^= zobristKey(bPawn, move.to() - 8);
 	} else {
-		rotatedBitsClear(b.occupiedSquaresData, move.to() + 8);
+		b.occupiedSquaresData.clear(move.to() + 8);
 		b.pieceBoardsData[white][0].clear(move.to() + 8);
 		b.pieceBoardsData[white][pawn].clear(move.to() + 8);
 		b.pieceValuesData[move.to() + 8] = empty;
@@ -1924,14 +1952,14 @@ void Board::handleEnPassant(Move move) {
 void Board::handleEnPassantUndo(Move move) {
 	auto &b = *this;
 	if (b.flagsData.sideToMoveValue == white) {
-		rotatedBitsSet(b.occupiedSquaresData, move.to() - 8);
+		b.occupiedSquaresData.set(move.to() - 8);
 		b.pieceBoardsData[black][0].set(move.to() - 8);
 		b.pieceBoardsData[black][pawn].set(move.to() - 8);
 		b.pieceValuesData[move.to() - 8] = bPawn;
 		b.pieceCountsData[black][0]++;
 		b.pieceCountsData[black][pawn]++;
 	} else {
-		rotatedBitsSet(b.occupiedSquaresData, move.to() + 8);
+		b.occupiedSquaresData.set(move.to() + 8);
 		b.pieceBoardsData[white][0].set(move.to() + 8);
 		b.pieceBoardsData[white][pawn].set(move.to() + 8);
 		b.pieceValuesData[move.to() + 8] = wPawn;
@@ -2033,7 +2061,7 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 		}
 	}
 	if (rc == false) {
-		attackers = bishopAttacks(board.occupiedSquaresData, square) &
+		attackers = board.occupiedSquaresData.bishopAttacks(square) &
 					board.pieceBoardsData[stm][bishop];
 		if (attackers) {
 			rc = true;
@@ -2041,7 +2069,7 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 		}
 	}
 	if (rc == false) {
-		attackers = rookAttacks(board.occupiedSquaresData, square) &
+		attackers = board.occupiedSquaresData.rookAttacks(square) &
 					board.pieceBoardsData[stm][rook];
 		if (attackers) {
 			rc = true;
@@ -2049,7 +2077,7 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 		}
 	}
 	if (rc == false) {
-		attackers = queenAttacks(board.occupiedSquaresData, square) &
+		attackers = board.occupiedSquaresData.queenAttacks(square) &
 					board.pieceBoardsData[stm][queen];
 		if (attackers) {
 			rc = true;

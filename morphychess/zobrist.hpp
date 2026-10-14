@@ -30,8 +30,6 @@ std::uint64_t zobristRepeatKey(int);
 std::uint64_t zobristKingSideCastleKey(int);
 std::uint64_t zobristQueenSideCastleKey(int);
 std::uint64_t zobristEpKey(int);
-std::uint64_t computePositionKey(const Board &);
-std::uint64_t computePawnKey(const Board &);
 void initZobristKeys(void);
 
 } // namespace morphy_chess

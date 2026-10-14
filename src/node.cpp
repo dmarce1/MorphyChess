@@ -4,7 +4,6 @@
 #include <morphychess/integers.hpp>
 #include <morphychess/node.hpp>
 #include <morphychess/params.hpp>
-#include <morphychess/see.hpp>
 #include <stdexcept>
 #include <stdlib.h>
 #include <string.h>
@@ -28,8 +27,6 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
-
-static int captureMoveValue(const Board &, Move);
 
 int Node::totalMoves() const { return totalMovesGenerated; }
 
@@ -76,7 +73,7 @@ tryAgain:
 		movesInQueue = (search.boardPtr)->genPseudolegalCaptures(list.data());
 		mgStage = GenStage::captures;
 		for (i = 0; i < movesInQueue; i++) {
-			scores[i] = captureMoveValue(*search.boardPtr, list[i]);
+			scores[i] = captureMoveValue(list[i]);
 		}
 		[[fallthrough]];
 	case GenStage::captures:
@@ -210,7 +207,7 @@ tryAgain:
 		movesInQueue = (search.boardPtr)->genPseudolegalCaptures(list.data());
 		mgStage = GenStage::captures;
 		for (i = 0; i < movesInQueue; i++) {
-			scores[i] = captureMoveValue(*search.boardPtr, list[i]);
+			scores[i] = captureMoveValue(list[i]);
 		}
 		[[fallthrough]];
 	case GenStage::captures:
@@ -257,7 +254,8 @@ void Node::restore() {
 	(search.boardPtr)->undoMove();
 }
 
-static int captureMoveValue(const Board &board, Move move) {
+int Node::captureMoveValue(Move move) const {
+	const Board &board = *search.boardPtr;
 	static const std::array<int, 7> pvals = {0,	  100, 300,	  300,
 											 500, 900, kInfty};
 	int targetPiece;

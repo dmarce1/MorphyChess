@@ -83,47 +83,46 @@ std::uint64_t zobristEpKey(int square) {
 	return epKeys[square & 0x7];
 }
 
-std::uint64_t computePositionKey(const Board &board) {
+std::uint64_t Board::computePositionKey() const {
 	std::uint64_t key;
 	int i;
 
 	key = 0LL;
 	for (i = 0; i < 64; i++) {
-		key ^= zobristKey(board.pieceValue(i), i);
+		key ^= zobristKey(pieceValue(i), i);
 	}
-	if (board.flags().whiteKingSide() == 0) {
+	if (flags().whiteKingSide() == 0) {
 		key ^= zobristKingSideCastleKey(white);
 	}
-	if (board.flags().whiteQueenSide() == 0) {
+	if (flags().whiteQueenSide() == 0) {
 		key ^= zobristQueenSideCastleKey(white);
 	}
-	if (board.flags().blackKingSide() == 0) {
+	if (flags().blackKingSide() == 0) {
 		key ^= zobristKingSideCastleKey(black);
 	}
-	if (board.flags().blackQueenSide() == 0) {
+	if (flags().blackQueenSide() == 0) {
 		key ^= zobristQueenSideCastleKey(black);
 	}
-	if (board.flags().epCaptureSquare() != 0) {
-		key ^= zobristEpKey(board.flags().epCaptureSquare());
+	if (flags().epCaptureSquare() != 0) {
+		key ^= zobristEpKey(flags().epCaptureSquare());
 	}
-	//	key ^= zobrist_repeat_key( board.flags().repeat_count() );
+	//	key ^= zobrist_repeat_key( flags().repeat_count() );
 
 	return key;
 }
 
-std::uint64_t computePawnKey(const Board &board) {
+std::uint64_t Board::computePawnKey() const {
 	std::uint64_t key;
 	int i;
 
 	key = 0LL;
 	for (i = 0; i < 64; i++) {
-		if ((abs(board.pieceValue(i)) == pawn) ||
-			(abs(board.pieceValue(i)) == king)) {
-			key ^= zobristKey(board.pieceValue(i), i);
+		if ((abs(pieceValue(i)) == pawn) || (abs(pieceValue(i)) == king)) {
+			key ^= zobristKey(pieceValue(i), i);
 		}
 	}
-	if (board.flags().epCaptureSquare() != 0) {
-		key ^= zobristEpKey(board.flags().epCaptureSquare());
+	if (flags().epCaptureSquare() != 0) {
+		key ^= zobristEpKey(flags().epCaptureSquare());
 	}
 
 	return key;

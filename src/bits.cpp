@@ -57,56 +57,63 @@ void initBits(void) {
 	});
 }
 
-void rotatedBitsClear(std::array<Bitboard, 4> &q, int i) {
-	q[0] &= invMaskSet[i][0];
-	q[1] &= invMaskSet[i][1];
-	q[2] &= invMaskSet[i][2];
-	q[3] &= invMaskSet[i][3];
+RotatedBitboard::RotatedBitboard() { initBits(); }
+
+RotatedBitboard::RotatedBitboard(Bitboard value) :
+	RotatedBitboard() {
+	assign(value);
 }
 
-void rotatedBitsSet(std::array<Bitboard, 4> &q, int i) {
-	q[0] |= maskSet[i][0];
-	q[1] |= maskSet[i][1];
-	q[2] |= maskSet[i][2];
-	q[3] |= maskSet[i][3];
+void RotatedBitboard::clear(int i) {
+	boards[0] &= invMaskSet[i][0];
+	boards[1] &= invMaskSet[i][1];
+	boards[2] &= invMaskSet[i][2];
+	boards[3] &= invMaskSet[i][3];
 }
 
-void rotatedBitsCreateSet(std::array<Bitboard, 4> &set, Bitboard q) {
-	rotatedBitsZeroOut(set);
+void RotatedBitboard::set(int i) {
+	boards[0] |= maskSet[i][0];
+	boards[1] |= maskSet[i][1];
+	boards[2] |= maskSet[i][2];
+	boards[3] |= maskSet[i][3];
+}
+
+void RotatedBitboard::assign(Bitboard q) {
+	reset();
 	while (q) {
 		const int square = q.removeFirstOne();
-		rotatedBitsSet(set, square);
+		set(square);
 	}
 }
 
-int rotatedIndexFromRank(const std::array<Bitboard, 4> &o, int i) {
+int RotatedBitboard::indexFromRank(int i) const {
 	int j;
 	j = 8 * (i / 8);
-	return static_cast<int>((o[kRankIndex] >> j).value() & 0xFF);
+	return static_cast<int>((boards[kRankIndex] >> j).value() & 0xFF);
 }
 
-int rotatedIndexFromFile(const std::array<Bitboard, 4> &o, int i) {
+int RotatedBitboard::indexFromFile(int i) const {
 	int j;
 	j = 8 * (rotatedIndex[kFileIndex][i] / 8);
-	return static_cast<int>((o[kFileIndex] >> j).value() & 0xFF);
+	return static_cast<int>((boards[kFileIndex] >> j).value() & 0xFF);
 }
 
-int rotatedIndexFromDiag1(const std::array<Bitboard, 4> &o, int i) {
+int RotatedBitboard::indexFromDiag1(int i) const {
 	int j;
 	j = 8 * (rotatedIndex[kDiag1Index][i] / 8);
-	return static_cast<int>((o[kDiag1Index] >> j).value() & 0xFF);
+	return static_cast<int>((boards[kDiag1Index] >> j).value() & 0xFF);
 }
 
-int rotatedIndexFromDiag2(const std::array<Bitboard, 4> &o, int i) {
+int RotatedBitboard::indexFromDiag2(int i) const {
 	int j;
 	j = 8 * (rotatedIndex[kDiag2Index][i] / 8);
-	return static_cast<int>((o[kDiag2Index] >> j).value() & 0xFF);
+	return static_cast<int>((boards[kDiag2Index] >> j).value() & 0xFF);
 }
 
-void rotatedBitsZeroOut(std::array<Bitboard, 4> &q) {
+void RotatedBitboard::reset() {
 	int i;
 	for (i = 0; i < 4; i++) {
-		q[i] = Bitboard{};
+		boards[i] = Bitboard{};
 	}
 }
 

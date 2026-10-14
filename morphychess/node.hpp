@@ -32,6 +32,7 @@ public:
 	bool moveIsFutile(int materialBalance, int testValue) const;
 
 private:
+	int captureMoveValue(Move move) const;
 	std::array<Move, maxMoves> list{};
 	std::array<int, maxMoves> scores{};
 	GenStage mgStage{GenStage::start};

@@ -50,34 +50,6 @@ template <class Number> bool parseNumber(std::string_view text, Number &value) {
 	return result.ec == std::errc{} && result.ptr == text.data() + text.size();
 }
 
-std::string coordinateMove(Move move) {
-	if (move.isEmpty()) {
-		return {};
-	}
-	std::string text;
-	text += static_cast<char>('a' + move.from() % 8);
-	text += static_cast<char>('1' + move.from() / 8);
-	text += static_cast<char>('a' + move.to() % 8);
-	text += static_cast<char>('1' + move.to() / 8);
-	switch (move.promo()) {
-	case queen:
-		text += 'q';
-		break;
-	case rook:
-		text += 'r';
-		break;
-	case bishop:
-		text += 'b';
-		break;
-	case knight:
-		text += 'n';
-		break;
-	default:
-		break;
-	}
-	return text;
-}
-
 Result parseGameResult(std::string_view text) {
 	if (text == "1-0") {
 		return whiteWin;
@@ -186,7 +158,7 @@ void Xboard::applySearchResult(const SearchResult &result) {
 	if (!currentBoard.makeMove(move)) {
 		return;
 	}
-	emit("move " + coordinateMove(move) + "\n");
+	emit("move " + move.coordinateString() + "\n");
 	ponderCompleted = false;
 	analysisCompleted = false;
 	const int fullMoves = currentBoard.halfMoveCount() / 2;
@@ -229,7 +201,7 @@ void Xboard::showProgress(const SearchResult &result) {
 						 10;
 	std::ostringstream line;
 	line << result.depth() << ' ' << result.score() << ' ' << elapsed << ' '
-		 << result.nodes() << ' ' << coordinateMove(result.move()) << '\n';
+		 << result.nodes() << ' ' << result.move().coordinateString() << '\n';
 	emit(line.str());
 }
 
@@ -322,8 +294,9 @@ void Xboard::showBookMoves() {
 		const double chance = totalGames > 0.0
 								  ? choices[index].games / totalGames
 								  : 1.0 / choices.size();
-		text << "\t" << index + 1 << ". " << coordinateMove(choices[index].move)
-			 << ' ' << static_cast<int>(100 * chance + 0.5) << "%\n";
+		text << "\t" << index + 1 << ". "
+			 << choices[index].move.coordinateString() << ' '
+			 << static_cast<int>(100 * chance + 0.5) << "%\n";
 	}
 	emit(text.str());
 }
