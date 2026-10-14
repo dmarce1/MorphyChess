@@ -17,7 +17,7 @@ class TemporaryBookFiles {
 public:
 	TemporaryBookFiles() {
 		static std::atomic<unsigned long> counter{0};
-		const auto now =
+		auto const now =
 			std::chrono::steady_clock::now().time_since_epoch().count();
 		directory = std::filesystem::temp_directory_path() /
 					("morphychess_book_" + std::to_string(now) + "_" +
@@ -28,10 +28,10 @@ public:
 		std::error_code error;
 		std::filesystem::remove_all(directory, error);
 	}
-	std::string path(const char *name) const {
+	std::string path(char const *name) const {
 		return (directory / name).string();
 	}
-	void writePgn(const std::string &text) const {
+	void writePgn(std::string const &text) const {
 		std::ofstream output(path("eco.pgn"));
 		output << text;
 	}
@@ -48,7 +48,7 @@ TEST(Book, EmptyBookReturnsNoMoveAndLearningDoesNotAccessMissingEntry) {
 	EXPECT_TRUE(book.findMove(board).isEmpty());
 	ASSERT_TRUE(board.makeMove(Move(12, 28)));
 	ASSERT_TRUE(board.makeMove(Move(52, 36)));
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	book.learning(board, white, whiteWin, 2000);
 	EXPECT_EQ(book.entryCount(), 0);
 	EXPECT_EQ(board.positionKey(), key);
@@ -62,13 +62,13 @@ TEST(Book, FindsSingleEntryAndRestoresBoardAfterChoosingMove) {
 	ASSERT_EQ(book.digest(files.path("eco.pgn")), 1);
 	ASSERT_EQ(book.entryCount(), 1);
 	Board board;
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	EXPECT_EQ(book.findMove(board), Move(12, 28));
 	EXPECT_EQ(book.lastEco(), "B00");
 	EXPECT_EQ(board.positionKey(), key);
 	EXPECT_EQ(board.halfMoveCount(), 0);
 	ASSERT_TRUE(board.makeMove(Move(12, 28)));
-	const auto *entry = book.findEntry(board);
+	auto const *entry = book.findEntry(board);
 	ASSERT_NE(entry, nullptr);
 	EXPECT_EQ(entry->key(), board.positionKey());
 	EXPECT_EQ(entry->color(), black);
@@ -102,7 +102,7 @@ TEST(Book, PreservesLegacyBinaryLayoutAndRoundTrips) {
 	ASSERT_TRUE(book.save(files.path("book.bin")));
 	EXPECT_EQ(std::filesystem::file_size(files.path("book.bin")), 131080);
 	std::ifstream input(files.path("book.bin"), std::ios::binary);
-	const std::vector<unsigned char> bytes(
+	std::vector<unsigned char> const bytes(
 		std::istreambuf_iterator<char>(input), {});
 	EXPECT_EQ(bytes[8], 1);
 	EXPECT_EQ(bytes[20], black);
@@ -130,7 +130,7 @@ TEST(Book, ZeroWeightsStillChooseLegalBookMove) {
 		std::fstream file(files.path("book.bin"),
 						  std::ios::binary | std::ios::in | std::ios::out);
 		file.seekp(8);
-		const std::array<char, 4> zero{};
+		std::array<char, 4> const zero{};
 		file.write(zero.data(), zero.size());
 	}
 	Book book;
@@ -158,7 +158,7 @@ TEST(Book, LearningUpdatesMatchingPositionsAndPersists) {
 	ASSERT_TRUE(book.open(files.path("book.bin")));
 	Board board;
 	ASSERT_TRUE(board.makeMove(Move(12, 28)));
-	const Board opening = board;
+	Board const opening = board;
 	ASSERT_TRUE(board.makeMove(Move(52, 36)));
 	book.learning(board, white, whiteWin, 2000);
 	ASSERT_NE(book.findEntry(opening), nullptr);
@@ -206,7 +206,7 @@ TEST(Book, FailedSavePreservesBookAndExistingTemporaryFile) {
 	}
 	EXPECT_FALSE(book.save(files.path("book.bin")));
 	std::ifstream reserved(files.path("book.bin.tmp"));
-	const std::string contents(std::istreambuf_iterator<char>(reserved), {});
+	std::string const contents(std::istreambuf_iterator<char>(reserved), {});
 	EXPECT_EQ(contents, "another writer's file");
 	Book previous;
 	ASSERT_TRUE(previous.open(files.path("book.bin")));

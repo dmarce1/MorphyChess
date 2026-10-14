@@ -96,7 +96,7 @@ enum Result {
 class Move {
 public:
 	constexpr Move() noexcept = default;
-	static Move fromString(const char *text);
+	static Move fromString(char const *text);
 	std::string coordinateString() const;
 	constexpr Move(int from, int to, int promo = 0) noexcept :
 		fromValue(from), toValue(to), promoValue(promo) {}
@@ -108,7 +108,7 @@ public:
 	constexpr void setPromo(int value) noexcept { promoValue = value; }
 	constexpr bool isEmpty() const noexcept { return promoValue == 1; }
 	constexpr void setEmpty() noexcept { *this = Move(0, 0, 1); }
-	constexpr bool operator==(const Move &) const noexcept = default;
+	constexpr bool operator==(Move const &) const noexcept = default;
 
 private:
 	U16 fromValue : 6 = 0;
@@ -165,7 +165,7 @@ public:
 	std::uint64_t pawnKey() const noexcept { return pawnKeyData; }
 	int fiftyMoveRule() const noexcept { return fiftyMoveRuleData; }
 	Move move() const noexcept { return moveData; }
-	const BoardFlags &flags() const noexcept { return flagsData; }
+	BoardFlags const &flags() const noexcept { return flagsData; }
 
 private:
 	friend class Board;
@@ -191,7 +191,7 @@ public:
 	bool isDraw() const;
 	bool isPseudoLegalMove(Move m);
 	bool isLegalMove(Move m);
-	bool loadFen(const char *fen);
+	bool loadFen(char const *fen);
 	char *moveToStr(char *buffer, Move move);
 	// Lists require maxMoves slots; counts exclude the final empty sentinel.
 	// King safety is deferred to makeMove, including the castle destination.
@@ -200,10 +200,10 @@ public:
 	int genPseudolegalNoncaptures(Move *mList) const;
 	int genPseudolegalPromotions(Move *mList) const;
 	int pseudolegalPieceMoveCount(int color) const;
-	Move makeTextMove(const char *text);
+	Move makeTextMove(char const *text);
 	Result result();
 	void reset();
-	void copy(const Board &s);
+	void copy(Board const &s);
 	void toStream(FILE *fp) const;
 	bool positionIsRepeat();
 	bool lastMoveWasCapture();
@@ -221,10 +221,10 @@ public:
 	std::uint64_t computePawnKey() const;
 	bool loadEgtbIndex(int thirdMan, int index, int sideToMove);
 	int threeManEgtbIndex(int thirdMan, int pieceColor) const;
-	void assertBoardConsistency(const std::source_location &location =
+	void assertBoardConsistency(std::source_location const &location =
 									std::source_location::current()) const;
 	void assertTranspositionKeyConsistency(
-		const std::source_location &location =
+		std::source_location const &location =
 			std::source_location::current()) const;
 	int pieceValue(int square) const noexcept {
 		return pieceValuesData[square];
@@ -235,12 +235,12 @@ public:
 	Bitboard pieceBoard(int color, int piece) const noexcept {
 		return pieceBoardsData[color][piece];
 	}
-	const RotatedBitboard &occupiedSquares() const noexcept {
+	RotatedBitboard const &occupiedSquares() const noexcept {
 		return occupiedSquaresData;
 	}
 	std::uint64_t positionKey() const noexcept { return positionKeyData; }
 	std::uint64_t pawnKey() const noexcept { return pawnKeyData; }
-	const BoardFlags &flags() const noexcept { return flagsData; }
+	BoardFlags const &flags() const noexcept { return flagsData; }
 	int fiftyMoveRule() const noexcept { return fiftyMoveRuleData; }
 	int sideToMove() const noexcept { return flagsData.sideToMove(); }
 	int halfMoveCount() const noexcept { return flagsData.halfMoveCount(); }
@@ -253,7 +253,7 @@ public:
 	bool hasQueensideCastled(int color) const noexcept {
 		return hasQsideCastledData[color];
 	}
-	const UndoInfo &undoInfo(int index) const noexcept {
+	UndoInfo const &undoInfo(int index) const noexcept {
 		return undoInfoData[index];
 	}
 	Move lastMove() const noexcept {
@@ -280,7 +280,7 @@ private:
 	void handleEnPassantUndo(Move move);
 	void handlePawnPromotion(Move move);
 	void handlePromotionUndo(Move move);
-	void storeUndoInfo(const UndoInfo &undo);
+	void storeUndoInfo(UndoInfo const &undo);
 	std::array<UndoInfo, maxHalfMoves> undoInfoData{};
 	// Slot zero is the aggregate count/bitboard for that color, not empties.
 	std::array<std::array<I8, 7>, 2> pieceCountsData{};

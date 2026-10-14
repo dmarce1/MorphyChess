@@ -52,7 +52,7 @@ TEST(Bitboard, ExplicitRawValuesAndBooleanState) {
 		std::numeric_limits<std::uint64_t>::max()};
 	EXPECT_EQ(Bitboard{}.value(), std::uint64_t{0});
 	for (std::uint64_t value : values) {
-		const Bitboard board{value};
+		Bitboard const board{value};
 		EXPECT_EQ(board.value(), value);
 		EXPECT_EQ(static_cast<bool>(board), value != 0);
 		EXPECT_EQ(!board, value == 0);
@@ -112,8 +112,8 @@ TEST(Bitboard, SetAndClearPreserveOtherSquares) {
 }
 
 TEST(Bitboard, BitwiseOperationsAndCompoundAssignments) {
-	const Bitboard lhs{0xF00FF00F0000FFFFULL};
-	const Bitboard rhs{0x0FF00FF00000FFFFULL};
+	Bitboard const lhs{0xF00FF00F0000FFFFULL};
+	Bitboard const rhs{0x0FF00FF00000FFFFULL};
 	EXPECT_EQ((lhs & rhs).value(), 0x000000000000FFFFULL);
 	EXPECT_EQ((lhs | rhs).value(), 0xFFFFFFFF0000FFFFULL);
 	EXPECT_EQ((lhs ^ rhs).value(), 0xFFFFFFFF00000000ULL);
@@ -133,7 +133,7 @@ TEST(Bitboard, BitwiseOperationsAndCompoundAssignments) {
 
 TEST(Bitboard, ShiftsRetainUnsignedBoundaryBehavior) {
 	constexpr std::uint64_t raw = 0x8123456789ABCDEFULL;
-	const Bitboard board{raw};
+	Bitboard const board{raw};
 	for (int shift = 0; shift < 64; ++shift) {
 		EXPECT_EQ((board << shift).value(), raw << shift);
 		EXPECT_EQ((board >> shift).value(), raw >> shift);

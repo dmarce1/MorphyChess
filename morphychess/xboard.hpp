@@ -19,29 +19,29 @@ public:
 					std::ostream &output = std::cout,
 					int memoryEntries = kTableSize);
 	~Xboard();
-	Xboard(const Xboard &) = delete;
-	Xboard &operator=(const Xboard &) = delete;
+	Xboard(Xboard const &) = delete;
+	Xboard &operator=(Xboard const &) = delete;
 
-	bool processCommand(const std::string &command);
+	bool processCommand(std::string const &command);
 	void pollSearch();
 	int run(int inputFd = 0);
-	const Board &board() const noexcept { return currentBoard; }
+	Board const &board() const noexcept { return currentBoard; }
 	bool quitting() const noexcept { return quitRequested; }
 	bool hasDrawOffer() const noexcept { return drawOffered; }
 	bool searching() const noexcept { return searchMode != SearchMode::none; }
 
 private:
 	enum class SearchMode { none, move, ponder, analysis };
-	void emit(const std::string &text);
+	void emit(std::string const &text);
 	SearchResult stopSearch();
-	void applySearchResult(const SearchResult &result);
+	void applySearchResult(SearchResult const &result);
 	void reportResult();
 	void positionChanged(bool keepDrawOffer = false);
 	void showBookMoves();
-	void showProgress(const SearchResult &result);
+	void showProgress(SearchResult const &result);
 	void sendIcsSeeks();
 	double searchSeconds() const;
-	void invalidArgument(const std::string &command);
+	void invalidArgument(std::string const &command);
 
 	Board currentBoard;
 	StaticEvaluator evaluator;

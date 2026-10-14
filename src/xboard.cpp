@@ -37,16 +37,16 @@ namespace morphy_chess {
 namespace {
 
 std::string trim(std::string_view text) {
-	const auto first = text.find_first_not_of(" \t\r\n");
+	auto const first = text.find_first_not_of(" \t\r\n");
 	if (first == std::string_view::npos) {
 		return {};
 	}
-	const auto last = text.find_last_not_of(" \t\r\n");
+	auto const last = text.find_last_not_of(" \t\r\n");
 	return std::string(text.substr(first, last - first + 1));
 }
 
 template <class Number> bool parseNumber(std::string_view text, Number &value) {
-	const auto result =
+	auto const result =
 		std::from_chars(text.data(), text.data() + text.size(), value);
 	return result.ec == std::errc{} && result.ptr == text.data() + text.size();
 }
@@ -80,7 +80,7 @@ Xboard::Xboard(int workers, bool useBook, std::string bookPath,
 		parallelSearch.openingBook().open(bookPath);
 	}
 	parallelSearch.setProgressHandler(
-		[this](const SearchResult &result) { showProgress(result); });
+		[this](SearchResult const &result) { showProgress(result); });
 }
 
 Xboard::~Xboard() {
@@ -90,13 +90,13 @@ Xboard::~Xboard() {
 	}
 }
 
-void Xboard::emit(const std::string &text) {
-	const std::lock_guard<hpx::mutex> guard(outputMutex);
+void Xboard::emit(std::string const &text) {
+	std::lock_guard<hpx::mutex> const guard(outputMutex);
 	output << text << std::flush;
 }
 
 SearchResult Xboard::stopSearch() {
-	const SearchResult result = parallelSearch.stop();
+	SearchResult const result = parallelSearch.stop();
 	searchMode = SearchMode::none;
 	return result;
 }
@@ -110,7 +110,7 @@ void Xboard::positionChanged(bool keepDrawOffer) {
 	gameResult = inProgress;
 }
 
-void Xboard::invalidArgument(const std::string &command) {
+void Xboard::invalidArgument(std::string const &command) {
 	emit("Error (invalid argument): " + command + "\n");
 }
 
@@ -131,8 +131,8 @@ void Xboard::reportResult() {
 	}
 }
 
-void Xboard::applySearchResult(const SearchResult &result) {
-	const Move move = result.move();
+void Xboard::applySearchResult(SearchResult const &result) {
+	Move const move = result.move();
 	if (move.isEmpty()) {
 		reportResult();
 		return;
@@ -145,8 +145,8 @@ void Xboard::applySearchResult(const SearchResult &result) {
 	if (result.score() < -kResignLimit) {
 		Board position = currentBoard;
 		Search confirmation(position, evaluator, memoryTable);
-		const int whiteScore = confirmation.quiescentValue(0);
-		const int rootScore =
+		int const whiteScore = confirmation.quiescentValue(0);
+		int const rootScore =
 			currentBoard.sideToMove() == white ? whiteScore : -whiteScore;
 		if (rootScore < -kResignLimit) {
 			emit("resign\n");
@@ -162,7 +162,7 @@ void Xboard::applySearchResult(const SearchResult &result) {
 	emit("move " + move.coordinateString() + "\n");
 	ponderCompleted = false;
 	analysisCompleted = false;
-	const int fullMoves = currentBoard.halfMoveCount() / 2;
+	int const fullMoves = currentBoard.halfMoveCount() / 2;
 	if (result.score() <= contemptFactor &&
 		currentBoard.halfMoveCount() >= kMinHalfmoves4draw &&
 		!(opponentSeconds < kDrawTimeLimit &&
@@ -185,21 +185,21 @@ double Xboard::searchSeconds() const {
 	if (fixedMoveSeconds > 0.0) {
 		return fixedMoveSeconds;
 	}
-	const int playedMoves = currentBoard.halfMoveCount() / 2;
-	const int remainingMoves =
+	int const playedMoves = currentBoard.halfMoveCount() / 2;
+	int const remainingMoves =
 		movesPerControl > 0 ? movesPerControl - playedMoves % movesPerControl
 							: 30;
-	const double budget =
+	double const budget =
 		remainingSeconds / remainingMoves + incrementSeconds * 0.9;
 	return std::max(0.01,
 					std::min(budget, std::max(0.01, remainingSeconds * 0.8)));
 }
 
-void Xboard::showProgress(const SearchResult &result) {
+void Xboard::showProgress(SearchResult const &result) {
 	if (!posting.load()) {
 		return;
 	}
-	const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+	auto const elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
 							 std::chrono::steady_clock::now() - searchStarted)
 							 .count() /
 						 10;
@@ -220,8 +220,8 @@ void Xboard::pollSearch() {
 		if (!parallelSearch.ready()) {
 			return;
 		}
-		const auto completedMode = searchMode;
-		const SearchResult result = parallelSearch.finish();
+		auto const completedMode = searchMode;
+		SearchResult const result = parallelSearch.finish();
 		searchMode = SearchMode::none;
 		if (completedMode == SearchMode::move) {
 			applySearchResult(result);
@@ -269,12 +269,12 @@ void Xboard::showBookMoves() {
 	};
 	std::array<Move, maxMoves> moves;
 	std::vector<Choice> choices;
-	const int count = currentBoard.genPseudolegalMoves(moves.data());
+	int const count = currentBoard.genPseudolegalMoves(moves.data());
 	for (int index = 0; index < count; ++index) {
 		if (!currentBoard.makeMove(moves[index])) {
 			continue;
 		}
-		const auto *entry =
+		auto const *entry =
 			parallelSearch.openingBook().findEntry(currentBoard);
 		currentBoard.undoMove();
 		if (entry) {
@@ -289,17 +289,17 @@ void Xboard::showBookMoves() {
 		return;
 	}
 	std::sort(choices.begin(), choices.end(),
-			  [](const Choice &left, const Choice &right) {
+			  [](Choice const &left, Choice const &right) {
 				  return left.games > right.games;
 			  });
 	double totalGames = 0.0;
-	for (const auto &choice : choices) {
+	for (auto const &choice : choices) {
 		totalGames += choice.games;
 	}
 	std::ostringstream text;
 	text << "\tBook moves\n";
 	for (size_t index = 0; index < choices.size(); ++index) {
-		const double chance = totalGames > 0.0
+		double const chance = totalGames > 0.0
 								  ? choices[index].games / totalGames
 								  : 1.0 / choices.size();
 		text << "\t" << index + 1 << ". "
@@ -318,19 +318,19 @@ void Xboard::sendIcsSeeks() {
 	}
 }
 
-bool Xboard::processCommand(const std::string &command) {
+bool Xboard::processCommand(std::string const &command) {
 	// Validate commands before changing state where possible. Lifecycle
 	// commands join the current search so callbacks cannot outlive its inputs.
 	if (quitRequested) {
 		return false;
 	}
-	const std::string line = trim(command);
+	std::string const line = trim(command);
 	if (line.empty()) {
 		return true;
 	}
-	const auto split = line.find_first_of(" \t");
-	const std::string name = line.substr(0, split);
-	const std::string arguments =
+	auto const split = line.find_first_of(" \t");
+	std::string const name = line.substr(0, split);
+	std::string const arguments =
 		split == std::string::npos
 			? ""
 			: trim(std::string_view(line).substr(split + 1));
@@ -468,7 +468,7 @@ bool Xboard::processCommand(const std::string &command) {
 		bool valid = bool(values >> moves >> base >> increment) &&
 					 !(values >> extra) && moves >= 0 &&
 					 std::isfinite(increment) && increment >= 0.0;
-		const auto colon = base.find(':');
+		auto const colon = base.find(':');
 		if (valid && colon == std::string::npos) {
 			valid = parseNumber(base, minutes);
 		} else if (valid) {
@@ -500,7 +500,7 @@ bool Xboard::processCommand(const std::string &command) {
 			stopSearch();
 			engineRating = ownRating;
 			opponentRating = otherRating;
-			const long long factor =
+			long long const factor =
 				ownRating == 0 || otherRating == 0
 					? 0
 					: kContemptLevel *
@@ -514,7 +514,7 @@ bool Xboard::processCommand(const std::string &command) {
 		std::istringstream values(arguments);
 		std::string resultText;
 		values >> resultText;
-		const Result result = parseGameResult(resultText);
+		Result const result = parseGameResult(resultText);
 		if (result == invalid) {
 			invalidArgument(line);
 		} else {
@@ -536,8 +536,8 @@ bool Xboard::processCommand(const std::string &command) {
 			}
 		}
 	} else if (name == "?") {
-		const auto oldMode = searchMode;
-		const auto result = stopSearch();
+		auto const oldMode = searchMode;
+		auto const result = stopSearch();
 		if (oldMode == SearchMode::move) {
 			applySearchResult(result);
 		}
@@ -548,8 +548,8 @@ bool Xboard::processCommand(const std::string &command) {
 			emit("Error (unsupported variant): " + arguments + "\n");
 		}
 	} else {
-		const std::string moveText = name == "usermove" ? arguments : line;
-		const Move move = Move::fromString(moveText.c_str());
+		std::string const moveText = name == "usermove" ? arguments : line;
+		Move const move = Move::fromString(moveText.c_str());
 		bool accepted = false;
 		if (!move.isEmpty()) {
 			stopSearch();
@@ -578,7 +578,7 @@ int Xboard::run(int inputFd) {
 	while (!quitRequested) {
 		pollSearch();
 		pollfd descriptor{inputFd, POLLIN, 0};
-		const int ready = ::poll(&descriptor, 1, 0);
+		int const ready = ::poll(&descriptor, 1, 0);
 		if (ready < 0 && errno != EINTR) {
 			stopSearch();
 			emit("Error (cannot poll input)\n");
@@ -586,7 +586,7 @@ int Xboard::run(int inputFd) {
 		}
 		if (ready > 0 && (descriptor.revents & (POLLIN | POLLHUP))) {
 			std::array<char, 4096> buffer;
-			const auto count = ::read(inputFd, buffer.data(), buffer.size());
+			auto const count = ::read(inputFd, buffer.data(), buffer.size());
 			if (count == 0) {
 				if (!pending.empty()) {
 					processCommand(pending);
@@ -605,7 +605,7 @@ int Xboard::run(int inputFd) {
 				pending.append(buffer.data(), static_cast<size_t>(count));
 				size_t newline;
 				while ((newline = pending.find('\n')) != std::string::npos) {
-					const std::string command = pending.substr(0, newline);
+					std::string const command = pending.substr(0, newline);
 					pending.erase(0, newline + 1);
 					if (!processCommand(command)) {
 						break;

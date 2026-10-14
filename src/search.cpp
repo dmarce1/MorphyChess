@@ -178,7 +178,7 @@ bool Search::nullTest(int testValue, int depth) {
 // Spend an extra ply on checks, promotions, and pawns reaching the seventh
 // rank. The absolute ply cap in testChild bounds chains of extensions.
 bool Search::extensionNeeded() {
-	const Board &b = *boardPtr;
+	Board const &b = *boardPtr;
 	bool rc;
 	Move move;
 	int movingMan;
@@ -321,7 +321,7 @@ bool Search::test(int testValue, int depth) {
 			nodeStatus = (node).doNextMove(currentMove);
 			boardPtr->assertBoardConsistency();
 			if (nodeStatus != kNodeMovesAvailable) {
-				const int terminalScore =
+				int const terminalScore =
 					boardPtr->kingInCheck()
 						? -evaluatorRef.checkmateValue(currentPly)
 						: (boardPtr->sideToMove() == computerColor
@@ -356,7 +356,7 @@ bool Search::test(int testValue, int depth) {
 				(boardPtr->pieceValue(bestMoveValue.to()) == 0) ? true : false);
 			tableRef.write(*this, bestMoveValue, testResult, testValue, depth);
 		}
-	} catch (const SearchCancelled &) {
+	} catch (SearchCancelled const &) {
 		// Cancellation may bypass several Node::restore() calls. currentPly
 		// tracks exactly how many speculative moves still need to be undone.
 		bestMoveValue.setEmpty();
@@ -378,7 +378,7 @@ void Search::checkKill() {
 		pollsSinceYield = 0;
 		hpx::this_thread::yield();
 	}
-	const auto deadline = killTime.load(std::memory_order_relaxed);
+	auto const deadline = killTime.load(std::memory_order_relaxed);
 	if (stopRequested.load(std::memory_order_relaxed) ||
 		(deadline != 0 && deadline <= std::time(nullptr))) {
 		stopRequested.store(true, std::memory_order_relaxed);

@@ -38,7 +38,7 @@ public:
 	int draws() const noexcept { return drawsValue; }
 	int color() const noexcept { return colorValue; }
 	int rating() const noexcept { return ratingValue; }
-	const char *eco() const noexcept { return ecoValue.data(); }
+	char const *eco() const noexcept { return ecoValue.data(); }
 
 private:
 	friend class Book;
@@ -58,27 +58,27 @@ class Book {
 public:
 	Book() = default;
 	~Book();
-	Book(const Book &) = delete;
-	Book &operator=(const Book &) = delete;
+	Book(Book const &) = delete;
+	Book &operator=(Book const &) = delete;
 
-	bool open(const std::string &filename = kBookName);
+	bool open(std::string const &filename = kBookName);
 	bool close();
 	// A failed save preserves the destination and the loaded filename/dirty
 	// state. A preexisting sibling .tmp file or symlink destination is refused.
-	bool save(const std::string &filename);
-	int digest(const std::string &filename);
+	bool save(std::string const &filename);
+	int digest(std::string const &filename);
 	Move findMove(Board &board);
-	void learning(const Board &board, int computerColor, Result result,
+	void learning(Board const &board, int computerColor, Result result,
 				  int opponentRating);
 	void showBookMoves(Board &board) const;
-	const BookEntry *findEntry(const Board &board) const;
+	BookEntry const *findEntry(Board const &board) const;
 	size_t entryCount() const noexcept { return entries.size(); }
-	const std::string &lastEco() const noexcept { return lastEcoValue; }
+	std::string const &lastEco() const noexcept { return lastEcoValue; }
 
 private:
-	bool addEntry(const Board &board, const std::string &eco);
-	size_t search(const Board &board) const;
-	static bool entryLess(const BookEntry &left, const BookEntry &right);
+	bool addEntry(Board const &board, std::string const &eco);
+	size_t search(Board const &board) const;
+	static bool entryLess(BookEntry const &left, BookEntry const &right);
 
 	std::vector<BookEntry> entries;
 	std::string filenameValue;

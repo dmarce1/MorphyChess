@@ -27,7 +27,7 @@ public:
 	constexpr double &operator[](size_t index) { return values[index]; }
 	constexpr double operator[](size_t index) const { return values[index]; }
 	constexpr double *data() { return values.data(); }
-	constexpr const double *data() const { return values.data(); }
+	constexpr double const *data() const { return values.data(); }
 	constexpr size_t size() const { return values.size(); }
 
 private:
@@ -55,16 +55,16 @@ private:
 class StaticEvaluator {
 public:
 	explicit StaticEvaluator(
-		const EvaluatorParameters &params = defaultEvaluatorParameters);
-	StaticEvaluator(const StaticEvaluator &) = delete;
-	StaticEvaluator &operator=(const StaticEvaluator &) = delete;
-	void configure(const EvaluatorParameters &params);
-	int materialBalance(const Board &board);
-	int materialScore(const Board &board, int &whiteMat, int &blackMat);
-	int nonMaterialScore(const Board &board, int whiteMat, int blackMat);
+		EvaluatorParameters const &params = defaultEvaluatorParameters);
+	StaticEvaluator(StaticEvaluator const &) = delete;
+	StaticEvaluator &operator=(StaticEvaluator const &) = delete;
+	void configure(EvaluatorParameters const &params);
+	int materialBalance(Board const &board);
+	int materialScore(Board const &board, int &whiteMat, int &blackMat);
+	int nonMaterialScore(Board const &board, int whiteMat, int blackMat);
 	// Return whether the grain-rounded full score exceeds a threshold placed
 	// strictly between score-grain multiples (the search's null-window test).
-	bool test(const Board &board, int testValue);
+	bool test(Board const &board, int testValue);
 	int checkmateValue(int ply) const;
 	int drawValue() const { return 0; }
 	void setGrainSize(int value);
@@ -76,7 +76,7 @@ public:
 private:
 	void writePawnTable(U32 key, int score);
 	bool readPawnTable(U32 key, int &score);
-	int evaluatePawnsAndKings(const Board &board, int whiteMat, int blackMat);
+	int evaluatePawnsAndKings(Board const &board, int whiteMat, int blackMat);
 	std::array<int, 7> materialValues{};
 	int maximumNonMaterialScore{};
 	int scoreGrain{kDefaultGrainSize};

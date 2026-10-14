@@ -20,12 +20,12 @@ protected:
 };
 
 TEST_F(ParallelSearchTest, OneAndTwoWorkersReturnLegalCompletedSearches) {
-	for (const int workers : {1, 2}) {
+	for (int const workers : {1, 2}) {
 		ParallelSearch engine(board, evaluator, table, workers);
 		engine.setUseBook(false);
-		const auto key = board.positionKey();
-		const int ply = board.halfMoveCount();
-		const SearchResult result = engine.run(3);
+		auto const key = board.positionKey();
+		int const ply = board.halfMoveCount();
+		SearchResult const result = engine.run(3);
 		EXPECT_EQ(result.depth(), 3);
 		EXPECT_FALSE(result.move().isEmpty());
 		EXPECT_TRUE(board.isLegalMove(result.move()));
@@ -42,8 +42,8 @@ TEST_F(ParallelSearchTest, DepthOneCompletesAndReportsProgress) {
 	engine.setUseBook(false);
 	std::vector<SearchResult> progress;
 	engine.setProgressHandler(
-		[&](const SearchResult &result) { progress.push_back(result); });
-	const SearchResult result = engine.run(1);
+		[&](SearchResult const &result) { progress.push_back(result); });
+	SearchResult const result = engine.run(1);
 	ASSERT_EQ(progress.size(), 1u);
 	EXPECT_EQ(progress.front().depth(), 1);
 	EXPECT_EQ(result.depth(), 1);
@@ -61,9 +61,9 @@ TEST_F(ParallelSearchTest, StopBeforeAnyStartIsHarmless) {
 TEST_F(ParallelSearchTest, ImmediateStopJoinsEvenBeforeBackgroundTaskStarts) {
 	ParallelSearch engine(board, evaluator, table, 2);
 	engine.setUseBook(false);
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	engine.start(16);
-	const SearchResult result = engine.stop();
+	SearchResult const result = engine.stop();
 	EXPECT_FALSE(engine.running());
 	EXPECT_FALSE(engine.ready());
 	EXPECT_TRUE(board.isLegalMove(result.move()));
@@ -73,12 +73,12 @@ TEST_F(ParallelSearchTest, ImmediateStopJoinsEvenBeforeBackgroundTaskStarts) {
 TEST_F(ParallelSearchTest, StopDuringSearchJoinsAllWorkers) {
 	ParallelSearch engine(board, evaluator, table, 2);
 	engine.setUseBook(false);
-	const auto key = board.positionKey();
-	const int ply = board.halfMoveCount();
+	auto const key = board.positionKey();
+	int const ply = board.halfMoveCount();
 	engine.start(16);
 	hpx::this_thread::sleep_for(std::chrono::milliseconds(5));
 	EXPECT_TRUE(engine.running());
-	const SearchResult result = engine.stop();
+	SearchResult const result = engine.stop();
 	EXPECT_FALSE(engine.running());
 	EXPECT_TRUE(board.isLegalMove(result.move()));
 	EXPECT_EQ(board.positionKey(), key);
@@ -90,11 +90,11 @@ TEST_F(ParallelSearchTest,
 	   RepeatedStartStopsPreviousWorkBeforeReplacingItsFuture) {
 	ParallelSearch engine(board, evaluator, table, 2);
 	engine.setUseBook(false);
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	for (int repetition = 0; repetition < 5; ++repetition) {
 		engine.start(16);
 		engine.start(1);
-		const SearchResult result = engine.finish();
+		SearchResult const result = engine.finish();
 		EXPECT_EQ(result.depth(), 1);
 		EXPECT_TRUE(board.isLegalMove(result.move()));
 		EXPECT_FALSE(engine.running());
@@ -118,9 +118,9 @@ TEST_F(ParallelSearchTest, ReadyBecomesTrueBeforeFinishConsumesTheFuture) {
 TEST_F(ParallelSearchTest, SubsecondLimitInterruptsAnActiveSearch) {
 	ParallelSearch engine(board, evaluator, table, 2);
 	engine.setUseBook(false);
-	const auto start = std::chrono::steady_clock::now();
-	const SearchResult result = engine.run(16, 0.02);
-	const auto elapsed = std::chrono::steady_clock::now() - start;
+	auto const start = std::chrono::steady_clock::now();
+	SearchResult const result = engine.run(16, 0.02);
+	auto const elapsed = std::chrono::steady_clock::now() - start;
 	EXPECT_LT(elapsed, std::chrono::seconds(1));
 	EXPECT_LT(result.depth(), 16);
 	EXPECT_TRUE(board.isLegalMove(result.move()));
@@ -130,14 +130,14 @@ TEST_F(ParallelSearchTest, SubsecondLimitInterruptsAnActiveSearch) {
 TEST_F(ParallelSearchTest, FastSearchDoesNotWaitForItsLongTimer) {
 	ParallelSearch engine(board, evaluator, table, 1);
 	engine.setUseBook(false);
-	const auto start = std::chrono::steady_clock::now();
+	auto const start = std::chrono::steady_clock::now();
 	EXPECT_EQ(engine.run(1, 60.0).depth(), 1);
 	EXPECT_LT(std::chrono::steady_clock::now() - start,
 			  std::chrono::seconds(1));
 }
 
 TEST_F(ParallelSearchTest, DestructorJoinsOutstandingWork) {
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	{
 		ParallelSearch engine(board, evaluator, table, 2);
 		engine.setUseBook(false);
@@ -162,7 +162,7 @@ TEST_F(ParallelSearchTest, TerminalRootReturnsNoMove) {
 TEST_F(ParallelSearchTest, ProgressExceptionCancelsJoinsAndAllowsReuse) {
 	ParallelSearch engine(board, evaluator, table, 2);
 	engine.setUseBook(false);
-	engine.setProgressHandler([](const SearchResult &) {
+	engine.setProgressHandler([](SearchResult const &) {
 		throw std::runtime_error("test progress failure");
 	});
 	EXPECT_THROW(engine.run(16), std::runtime_error);
@@ -214,7 +214,7 @@ TEST_F(ParallelSearchTest, RejectsInvalidSearchArguments) {
 
 TEST_F(ParallelSearchTest,
 	   OpeningBookRouteReturnsItsMoveWithoutLaunchingSearch) {
-	const auto path =
+	auto const path =
 		std::filesystem::temp_directory_path() /
 		("morphychess_parallel_book_" +
 		 std::to_string(
@@ -225,11 +225,11 @@ TEST_F(ParallelSearchTest,
 		output << "[Event \"Single opening\"]\n[Result \"*\"]\n\n1. e4 *\n";
 	}
 	ParallelSearch engine(board, evaluator, table, 2);
-	const int count = engine.openingBook().digest(path.string());
+	int const count = engine.openingBook().digest(path.string());
 	std::filesystem::remove(path);
 	ASSERT_EQ(count, 1);
-	const auto key = board.positionKey();
-	const SearchResult result = engine.run(16);
+	auto const key = board.positionKey();
+	SearchResult const result = engine.run(16);
 	EXPECT_EQ(result.move(), Move(12, 28));
 	EXPECT_EQ(result.depth(), 0);
 	EXPECT_EQ(result.nodes(), 0);

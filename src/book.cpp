@@ -41,7 +41,7 @@ constexpr size_t entryBytes = 32;
 constexpr size_t bookBytes = kBookSize * entryBytes + 8;
 using BookBytes = std::vector<unsigned char>;
 
-std::uint64_t readInteger(const unsigned char *data, size_t count) {
+std::uint64_t readInteger(unsigned char const *data, size_t count) {
 	std::uint64_t value = 0;
 	for (size_t byte = 0; byte < count; ++byte) {
 		value |= std::uint64_t(data[byte]) << (8 * byte);
@@ -49,7 +49,7 @@ std::uint64_t readInteger(const unsigned char *data, size_t count) {
 	return value;
 }
 
-int readSigned(const unsigned char *data) {
+int readSigned(unsigned char const *data) {
 	return std::bit_cast<std::int32_t>(
 		static_cast<std::uint32_t>(readInteger(data, 4)));
 }
@@ -75,7 +75,7 @@ Book::~Book() {
 	}
 }
 
-bool Book::entryLess(const BookEntry &left, const BookEntry &right) {
+bool Book::entryLess(BookEntry const &left, BookEntry const &right) {
 	// Include side to move explicitly: the legacy position hash does not
 	// encode it. Both load and digest restore this ordering before lookup.
 	if (left.colorValue != right.colorValue) {
@@ -84,11 +84,11 @@ bool Book::entryLess(const BookEntry &left, const BookEntry &right) {
 	return left.keyValue < right.keyValue;
 }
 
-size_t Book::search(const Board &board) const {
+size_t Book::search(Board const &board) const {
 	BookEntry target;
 	target.colorValue = board.sideToMove();
 	target.keyValue = board.positionKey();
-	const auto found =
+	auto const found =
 		std::lower_bound(entries.begin(), entries.end(), target, entryLess);
 	if (found == entries.end() || found->keyValue != target.keyValue ||
 		found->colorValue != target.colorValue) {
@@ -97,16 +97,16 @@ size_t Book::search(const Board &board) const {
 	return static_cast<size_t>(found - entries.begin());
 }
 
-const BookEntry *Book::findEntry(const Board &board) const {
-	const size_t index = search(board);
+BookEntry const *Book::findEntry(Board const &board) const {
+	size_t const index = search(board);
 	return index == entries.size() ? nullptr : &entries[index];
 }
 
-bool Book::addEntry(const Board &board, const std::string &eco) {
+bool Book::addEntry(Board const &board, std::string const &eco) {
 	// During PGN ingestion entries are unsorted, so use a linear lookup.
 	// Repeated appearances seed the same counter later used for played wins.
-	const auto found = std::find_if(
-		entries.begin(), entries.end(), [&](const BookEntry &entry) {
+	auto const found = std::find_if(
+		entries.begin(), entries.end(), [&](BookEntry const &entry) {
 			return entry.keyValue == board.positionKey() &&
 				   entry.colorValue == board.sideToMove();
 		});
@@ -129,7 +129,7 @@ bool Book::addEntry(const Board &board, const std::string &eco) {
 	return true;
 }
 
-int Book::digest(const std::string &filename) {
+int Book::digest(std::string const &filename) {
 	// Walk each parsed game backward, recording the position after every
 	// move. Restore the old book if input fails or exceeds fixed disk capacity.
 	// ECO is the PGN opening-classification tag; see bibliography.md [pgn].
@@ -161,13 +161,13 @@ int Book::digest(const std::string &filename) {
 	return openingCount;
 }
 
-bool Book::open(const std::string &filename) {
+bool Book::open(std::string const &filename) {
 	// Parse and validate into separate storage so a malformed file cannot
 	// partially replace the loaded book. Missing books are built from eco.pgn
 	// beside the requested binary file, not from the process's current folder.
 	std::ifstream input(filename, std::ios::binary);
 	if (!input) {
-		const auto pgnPath =
+		auto const pgnPath =
 			std::filesystem::path(filename).parent_path() / "eco.pgn";
 		Book replacement;
 		if (replacement.digest(pgnPath.string()) < 0 ||
@@ -185,14 +185,14 @@ bool Book::open(const std::string &filename) {
 	if (!input || input.peek() != std::char_traits<char>::eof()) {
 		return false;
 	}
-	const auto count = readInteger(bytes.data() + kBookSize * entryBytes, 4);
+	auto const count = readInteger(bytes.data() + kBookSize * entryBytes, 4);
 	if (count > kBookSize) {
 		return false;
 	}
 	std::vector<BookEntry> loaded;
 	loaded.reserve(count);
 	for (size_t index = 0; index < count; ++index) {
-		const auto *data = bytes.data() + entryBytes * index;
+		auto const *data = bytes.data() + entryBytes * index;
 		BookEntry entry;
 		entry.keyValue = readInteger(data, 8);
 		entry.winsValue = readSigned(data + 8);
@@ -211,7 +211,7 @@ bool Book::open(const std::string &filename) {
 	std::sort(loaded.begin(), loaded.end(), entryLess);
 	entries = std::move(loaded);
 	filenameValue = filename;
-	lastEcoValue.assign(reinterpret_cast<const char *>(
+	lastEcoValue.assign(reinterpret_cast<char const *>(
 							bytes.data() + kBookSize * entryBytes + 4),
 						3);
 	lastEcoValue.resize(lastEcoValue.find('\0') == std::string::npos
@@ -221,10 +221,10 @@ bool Book::open(const std::string &filename) {
 	return true;
 }
 
-bool Book::save(const std::string &filename) {
+bool Book::save(std::string const &filename) {
 	BookBytes bytes(bookBytes, 0);
 	for (size_t index = 0; index < entries.size(); ++index) {
-		const auto &entry = entries[index];
+		auto const &entry = entries[index];
 		auto *data = bytes.data() + entryBytes * index;
 		writeInteger(data, entry.keyValue, 8);
 		writeInteger(data + 8, static_cast<std::uint32_t>(entry.winsValue), 4);
@@ -248,12 +248,12 @@ bool Book::save(const std::string &filename) {
 	if (std::filesystem::is_symlink(filename, error)) {
 		return false;
 	}
-	const std::filesystem::path temporary = filename + ".tmp";
+	std::filesystem::path const temporary = filename + ".tmp";
 	std::ofstream output(temporary, std::ios::binary | std::ios::noreplace);
 	if (!output) {
 		return false;
 	}
-	output.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
+	output.write(reinterpret_cast<char const *>(bytes.data()), bytes.size());
 	output.close();
 	if (!output) {
 		std::filesystem::remove(temporary, error);
@@ -283,12 +283,12 @@ Move Book::findMove(Board &board) {
 	std::vector<Move> choices;
 	std::vector<size_t> indices;
 	std::vector<double> weights;
-	const int count = board.genPseudolegalMoves(moves.data());
+	int const count = board.genPseudolegalMoves(moves.data());
 	for (int index = 0; index < count; ++index) {
 		if (!board.makeMove(moves[index])) {
 			continue;
 		}
-		const size_t bookIndex = search(board);
+		size_t const bookIndex = search(board);
 		board.undoMove();
 		if (bookIndex < entries.size()) {
 			choices.push_back(moves[index]);
@@ -306,12 +306,12 @@ Move Book::findMove(Board &board) {
 	}
 	std::discrete_distribution<size_t> distribution(weights.begin(),
 													weights.end());
-	const size_t choice = distribution(randomGenerator);
+	size_t const choice = distribution(randomGenerator);
 	lastEcoValue = entries[indices[choice]].eco();
 	return choices[choice];
 }
 
-void Book::learning(const Board &finalBoard, int computerColor, Result result,
+void Book::learning(Board const &finalBoard, int computerColor, Result result,
 					int opponentRating) {
 	// Update positions reached just after the engine's own moves: their side
 	// to move is the opponent. Outcomes therefore describe the previous mover,
@@ -322,15 +322,15 @@ void Book::learning(const Board &finalBoard, int computerColor, Result result,
 	Board board = finalBoard;
 	while (board.halfMoveCount() > 0) {
 		board.undoMove();
-		const size_t index = search(board);
+		size_t const index = search(board);
 		if (index == entries.size() || board.sideToMove() == computerColor) {
 			continue;
 		}
 		auto &entry = entries[index];
-		const bool won = (computerColor == white && result == whiteWin) ||
+		bool const won = (computerColor == white && result == whiteWin) ||
 						 (computerColor == black && result == blackWin);
-		const int score = result == draw ? 0 : (won ? 1 : -1);
-		const long long gameCount =
+		int const score = result == draw ? 0 : (won ? 1 : -1);
+		long long const gameCount =
 			1LL + entry.winsValue + entry.lossesValue + entry.drawsValue;
 		if (score > 0) {
 			entry.winsValue = incrementCount(entry.winsValue);
@@ -341,7 +341,7 @@ void Book::learning(const Board &finalBoard, int computerColor, Result result,
 		}
 		// Preserve the legacy policy: White's entries always use the
 		// established Elo update; Black's use provisional game counts.
-		const int ratingGames =
+		int const ratingGames =
 			computerColor == white
 				? 100
 				: static_cast<int>(std::min<long long>(
@@ -364,12 +364,12 @@ void Book::showBookMoves(Board &board) const {
 	};
 	std::array<Move, maxMoves> moves;
 	std::vector<Choice> choices;
-	const int count = board.genPseudolegalMoves(moves.data());
+	int const count = board.genPseudolegalMoves(moves.data());
 	for (int index = 0; index < count; ++index) {
 		if (!board.makeMove(moves[index])) {
 			continue;
 		}
-		const auto *entry = findEntry(board);
+		auto const *entry = findEntry(board);
 		board.undoMove();
 		if (entry != nullptr) {
 			choices.push_back(
@@ -383,17 +383,17 @@ void Book::showBookMoves(Board &board) const {
 		return;
 	}
 	std::sort(choices.begin(), choices.end(),
-			  [](const Choice &left, const Choice &right) {
+			  [](Choice const &left, Choice const &right) {
 				  return left.games > right.games;
 			  });
-	const double total = std::accumulate(
+	double const total = std::accumulate(
 		choices.begin(), choices.end(), 0.0,
-		[](double sum, const Choice &choice) { return sum + choice.games; });
+		[](double sum, Choice const &choice) { return sum + choice.games; });
 	std::printf("\tBook moves\n");
 	for (size_t index = 0; index < choices.size(); ++index) {
 		std::array<char, 256> text{};
 		board.moveToStr(text.data(), choices[index].move);
-		const double chance =
+		double const chance =
 			total > 0 ? choices[index].games / total : 1.0 / choices.size();
 		std::printf("\t%2zu. %10s %3i%%\n", index + 1, text.data(),
 					static_cast<int>(100 * chance + 0.5));

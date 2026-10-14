@@ -25,8 +25,8 @@ protected:
 
 TEST(HistoryTest, StartsEmptyAndRecordsQuietCutoffs) {
 	History history;
-	const Move first(12, 28);
-	const Move second(11, 27);
+	Move const first(12, 28);
+	Move const second(11, 27);
 	EXPECT_EQ(history.moveHistory(first), 0);
 	EXPECT_TRUE(history.killer1(0).isEmpty());
 	history.update(first, true, 3, 0, true);
@@ -42,7 +42,7 @@ TEST(HistoryTest, StartsEmptyAndRecordsQuietCutoffs) {
 
 TEST(HistoryTest, IgnoresFailuresAndCaptures) {
 	History history;
-	const Move move(12, 28);
+	Move const move(12, 28);
 	history.update(move, false, 3, 0, true);
 	history.update(move, true, 3, 0, false);
 	history.update(Move{}, true, 3, 0, true);
@@ -52,7 +52,7 @@ TEST(HistoryTest, IgnoresFailuresAndCaptures) {
 
 TEST(HistoryTest, DeepUpdatesDoNotOverflow) {
 	History history;
-	const Move move(12, 28);
+	Move const move(12, 28);
 	for (int depth = 1; depth < kMaxDepth; ++depth) {
 		for (int repetition = 0; repetition < 8; ++repetition) {
 			history.update(move, true, depth, 0, true);
@@ -72,14 +72,14 @@ TEST(HistoryTest, DefaultAndCustomFactorsRetainDepthIncrements) {
 	static_assert(defaultIncrements[15] == 268435456);
 	static_assert(defaultIncrements[16] == maximumIncrement);
 	static_assert(defaultIncrements[kMaxDepth - 1] == maximumIncrement);
-	const Move move(12, 28);
+	Move const move(12, 28);
 	for (double branchFactor :
 		 {0.5, 1.0, 1.25, 3.5, kDefaultHistoryBranchFactor, 4.000001,
 		  1.0e100}) {
 		History history(branchFactor);
 		for (int depth = 1; depth < kMaxDepth; ++depth) {
-			const double value = std::pow(branchFactor, depth - 1);
-			const int expected = value >= maximumIncrement
+			double const value = std::pow(branchFactor, depth - 1);
+			int const expected = value >= maximumIncrement
 									 ? maximumIncrement
 									 : static_cast<int>(value);
 			history.reset();
@@ -104,7 +104,7 @@ TEST_F(SearchTest, DefaultEvaluatorBalancesStartingPosition) {
 
 TEST_F(SearchTest, MaterialAdvantageChangesWithSideToMove) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
-	const int whiteScore = evaluator.materialBalance(board);
+	int const whiteScore = evaluator.materialBalance(board);
 	EXPECT_GT(whiteScore, 0);
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 b - - 0 1"));
 	EXPECT_EQ(evaluator.materialBalance(board), -whiteScore);
@@ -119,7 +119,7 @@ TEST_F(SearchTest, BishopSquareTableIsColorSymmetric) {
 
 TEST_F(SearchTest, ReconfiguringEvaluationClearsPawnCache) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/2P5/8/8/4K3 w - - 0 1"));
-	const int before = evaluator.nonMaterialScore(board, 100, 0);
+	int const before = evaluator.nonMaterialScore(board, 100, 0);
 	auto params = defaultEvaluatorParameters;
 	params[9] = 40;
 	evaluator.configure(params);
@@ -127,8 +127,8 @@ TEST_F(SearchTest, ReconfiguringEvaluationClearsPawnCache) {
 }
 
 TEST_F(SearchTest, NodeEnumeratesEveryStartingMoveAndRestoresBoard) {
-	const auto key = board.positionKey();
-	const auto ply = board.halfMoveCount();
+	auto const key = board.positionKey();
+	auto const ply = board.halfMoveCount();
 	Node node(search, Move{});
 	Move move;
 	std::set<std::pair<int, int>> moves;
@@ -145,7 +145,7 @@ TEST_F(SearchTest, NodeEnumeratesEveryStartingMoveAndRestoresBoard) {
 
 TEST_F(SearchTest, QuiescentNodeGeneratesCapturesOnly) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1"));
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	Node node(search, Move{});
 	Move move;
 	ASSERT_EQ(node.doNextNonquiescentMove(move), kNodeMovesAvailable);
@@ -170,7 +170,7 @@ TEST_F(SearchTest, TranspositionBoundsHonorDepthAndReset) {
 	EXPECT_TRUE(move.isEmpty());
 	EXPECT_EQ(lower, -kInfty);
 	EXPECT_EQ(upper, kInfty);
-	const Move stored(12, 28);
+	Move const stored(12, 28);
 	table.write(search, stored, true, 12, 3);
 	ASSERT_TRUE(table.read(search, move, lower, upper, 3, 12));
 	EXPECT_EQ(move, stored);
@@ -198,8 +198,8 @@ TEST_F(SearchTest, TranspositionEntriesAreSharedAcrossWorkers) {
 
 TEST_F(SearchTest, TranspositionBoundsRequireMatchingFiftyMoveClock) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
-	const auto key = board.positionKey();
-	const Move stored(3, 11);
+	auto const key = board.positionKey();
+	Move const stored(3, 11);
 	table.write(search, stored, true, 12, 3);
 	table.write(search, stored, false, 20, 3);
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 99 1"));
@@ -218,7 +218,7 @@ TEST_F(SearchTest, TranspositionBoundsRequireMatchingFiftyMoveClock) {
 }
 
 TEST_F(SearchTest, TranspositionClockMismatchFallsBackToLocalBounds) {
-	const Move stored(3, 11);
+	Move const stored(3, 11);
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
 	table.write(search, stored, true, 12, 4);
 	table.write(search, stored, false, 20, 4);
@@ -240,7 +240,7 @@ TEST_F(SearchTest, TranspositionClockMismatchFallsBackToLocalBounds) {
 }
 
 TEST_F(SearchTest, TranspositionPrunesOnlyUntouchedEntries) {
-	const Move stored(12, 28);
+	Move const stored(12, 28);
 	Move move;
 	int lower, upper;
 	table.write(search, stored, true, 12, 3);
@@ -256,10 +256,10 @@ TEST_F(SearchTest, TranspositionPrunesOnlyUntouchedEntries) {
 }
 
 TEST_F(SearchTest, SerialSearchReturnsLegalMoveAndRestoresBoard) {
-	const auto key = board.positionKey();
-	const auto ply = board.halfMoveCount();
+	auto const key = board.positionKey();
+	auto const ply = board.halfMoveCount();
 	Move move;
-	const int score = search.serialTestDriver(move, 2, 0);
+	int const score = search.serialTestDriver(move, 2, 0);
 	EXPECT_LT(std::abs(score), kMinCheckmateValue);
 	EXPECT_FALSE(move.isEmpty());
 	EXPECT_TRUE(board.isLegalMove(move));
@@ -271,8 +271,8 @@ TEST_F(SearchTest, SerialSearchReturnsLegalMoveAndRestoresBoard) {
 TEST_F(SearchTest, RebindingBoardSearchesNewPositionAndRestoresBothBoards) {
 	Board replacement;
 	ASSERT_TRUE(replacement.loadFen("7k/6Q1/5K2/8/8/8/8/8 b - - 0 1"));
-	const auto originalKey = board.positionKey();
-	const auto replacementKey = replacement.positionKey();
+	auto const originalKey = board.positionKey();
+	auto const replacementKey = replacement.positionKey();
 	search.setBoard(replacement);
 	EXPECT_FALSE(search.test(0, 2));
 	EXPECT_TRUE(search.bestMove().isEmpty());
@@ -319,15 +319,15 @@ TEST_F(SearchTest, QuiescentCountsEveryLeafExactlyOnce) {
 }
 
 TEST_F(SearchTest, QuiescentStalemateIsDrawDespiteMaterialDisadvantage) {
-	for (const char *fen : {"7k/5K2/6Q1/8/8/8/8/8 b - - 0 1",
+	for (char const *fen : {"7k/5K2/6Q1/8/8/8/8/8 b - - 0 1",
 							"8/8/8/8/8/6q1/5k2/7K w - - 0 1"}) {
 		ASSERT_TRUE(board.loadFen(fen));
 		ASSERT_FALSE(board.isDraw());
 		ASSERT_TRUE(board.kingInStalemate(board.sideToMove()));
 		ASSERT_FALSE(evaluator.test(board, -4));
-		const auto key = board.positionKey();
-		const auto ply = board.halfMoveCount();
-		for (const int threshold : {-2004, -4, 4}) {
+		auto const key = board.positionKey();
+		auto const ply = board.halfMoveCount();
+		for (int const threshold : {-2004, -4, 4}) {
 			search.resetCounters();
 			EXPECT_EQ(search.quiescentTest(threshold), threshold < 0);
 			EXPECT_EQ(search.nodeCount(), 1);
@@ -344,8 +344,8 @@ TEST_F(SearchTest, QuiescentStalemateOverridesPositiveStandPat) {
 		"6n1/6P1/6P1/6P1/1p4P1/pPb3P1/PR4P1/K1k5 w - - 0 1"));
 	ASSERT_TRUE(board.kingInStalemate(white));
 	ASSERT_TRUE(evaluator.test(board, 4));
-	const auto key = board.positionKey();
-	const auto ply = board.halfMoveCount();
+	auto const key = board.positionKey();
+	auto const ply = board.halfMoveCount();
 	EXPECT_FALSE(search.quiescentTest(4));
 	EXPECT_EQ(search.nodeCount(), 1);
 	EXPECT_EQ(board.positionKey(), key);
@@ -354,15 +354,15 @@ TEST_F(SearchTest, QuiescentStalemateOverridesPositiveStandPat) {
 
 TEST_F(SearchTest, QuiescentEvaluationRestoresCaptureSequence) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1"));
-	const auto key = board.positionKey();
-	const auto ply = board.halfMoveCount();
+	auto const key = board.positionKey();
+	auto const ply = board.halfMoveCount();
 	EXPECT_GT(search.quiescentValue(0), 0);
 	EXPECT_EQ(board.positionKey(), key);
 	EXPECT_EQ(board.halfMoveCount(), ply);
 }
 
 TEST_F(SearchTest, StopAndExpiredDeadlineLeaveBoardUnchanged) {
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	search.requestStop();
 	EXPECT_FALSE(search.test(-4, 3));
 	EXPECT_TRUE(search.stopped());
@@ -380,8 +380,8 @@ TEST_F(SearchTest, StopAndExpiredDeadlineLeaveBoardUnchanged) {
 }
 
 TEST_F(SearchTest, RunningHpxSearchCanBeCancelledAndJoined) {
-	const auto key = board.positionKey();
-	const auto ply = board.halfMoveCount();
+	auto const key = board.positionKey();
+	auto const ply = board.halfMoveCount();
 	auto work = hpx::async([&] { return search.test(-4, 16); });
 	hpx::this_thread::sleep_for(std::chrono::milliseconds(10));
 	EXPECT_FALSE(work.is_ready());

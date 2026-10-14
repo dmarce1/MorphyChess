@@ -33,15 +33,15 @@ namespace morphy_chess {
 // with permissive import handling (for example, an omitted final result).
 class Pgn {
 public:
-	bool load(const std::string &filename, Board &board);
+	bool load(std::string const &filename, Board &board);
 	bool loadText(std::string text, Board &board);
 	bool next(Board &board);
 
-	const std::string &event() const noexcept { return eventValue; }
-	const std::string &site() const noexcept { return siteValue; }
-	const std::string &whiteName() const noexcept { return whiteNameValue; }
-	const std::string &blackName() const noexcept { return blackNameValue; }
-	const std::string &eco() const noexcept { return ecoValue; }
+	std::string const &event() const noexcept { return eventValue; }
+	std::string const &site() const noexcept { return siteValue; }
+	std::string const &whiteName() const noexcept { return whiteNameValue; }
+	std::string const &blackName() const noexcept { return blackNameValue; }
+	std::string const &eco() const noexcept { return ecoValue; }
 	int whiteElo() const noexcept { return whiteEloValue; }
 	int blackElo() const noexcept { return blackEloValue; }
 	int year() const noexcept { return yearValue; }
@@ -49,7 +49,7 @@ public:
 	int day() const noexcept { return dayValue; }
 	int round() const noexcept { return roundValue; }
 	Result result() const noexcept { return resultValue; }
-	const std::vector<Move> &moves() const noexcept { return movesValue; }
+	std::vector<Move> const &moves() const noexcept { return movesValue; }
 	size_t moveCount() const noexcept { return movesValue.size(); }
 	bool hasError() const noexcept { return errorValue; }
 
@@ -57,7 +57,7 @@ private:
 	void resetMetadata();
 	bool skipIgnored();
 	bool readTag();
-	void processTag(std::string_view name, const std::string &value);
+	void processTag(std::string_view name, std::string const &value);
 
 	std::string stream;
 	size_t cursor = 0;

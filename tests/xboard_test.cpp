@@ -24,7 +24,7 @@ protected:
 	}
 	bool
 	finishSearch(std::chrono::milliseconds timeout = std::chrono::seconds(5)) {
-		const auto deadline = std::chrono::steady_clock::now() + timeout;
+		auto const deadline = std::chrono::steady_clock::now() + timeout;
 		while (protocol.searching() &&
 			   std::chrono::steady_clock::now() < deadline) {
 			hpx::this_thread::sleep_for(std::chrono::milliseconds(1));
@@ -61,7 +61,7 @@ TEST_F(XboardTest, AppliesAndUndoesMovesInForceMode) {
 	protocol.processCommand("usermove e7e5");
 	protocol.processCommand("remove");
 	EXPECT_EQ(protocol.board().halfMoveCount(), 0);
-	const auto key = protocol.board().positionKey();
+	auto const key = protocol.board().positionKey();
 	protocol.processCommand("e2e5");
 	EXPECT_EQ(protocol.board().positionKey(), key);
 	EXPECT_NE(output.str().find("Illegal move: e2e5"), std::string::npos);
@@ -102,7 +102,7 @@ TEST_F(XboardTest, UnknownCommandsDoNotCancelActiveSearch) {
 TEST_F(XboardTest, LoadsPositionsAndRejectsBadFenWithoutReplacingBoard) {
 	protocol.processCommand("setboard 8/8/8/8/8/8/4K3/7k w - - 0 1");
 	EXPECT_EQ(protocol.board().pieceValue(12), king);
-	const auto key = protocol.board().positionKey();
+	auto const key = protocol.board().positionKey();
 	protocol.processCommand("setboard 8/8");
 	EXPECT_EQ(protocol.board().positionKey(), key);
 	EXPECT_NE(output.str().find("Illegal position"), std::string::npos);
@@ -118,7 +118,7 @@ TEST_F(XboardTest, HandlesTimeControlOptionsAndValidation) {
 	protocol.processCommand("time 500");
 	protocol.processCommand("otim 400");
 	EXPECT_TRUE(output.str().empty());
-	for (const auto *command : {"sd 0", "st 0", "st nan", "time -1",
+	for (auto const *command : {"sd 0", "st 0", "st nan", "time -1",
 								"level -1 5 0", "level 40 5:61 0"}) {
 		protocol.processCommand(command);
 	}
@@ -148,7 +148,7 @@ TEST_F(XboardTest, ProducesMoveWithOneHpxWorkerAndCanStopBeforeMutation) {
 }
 
 TEST_F(XboardTest, ResignationUsesEnginePerspectiveForEitherColor) {
-	for (const auto *fen :
+	for (auto const *fen :
 		 {"7k/8/8/8/8/8/8/3QKR2 b - - 0 1", "3qkr2/8/8/8/8/8/8/7K w - - 0 1"}) {
 		protocol.processCommand(std::string("setboard ") + fen);
 		protocol.processCommand("easy");
@@ -237,7 +237,7 @@ TEST_F(XboardTest, SendsRematchAndThreeSeeksOnlyForIcsSessions) {
 TEST_F(XboardTest, InputLoopHandlesEofAndUnterminatedLastCommand) {
 	std::array<int, 2> descriptors;
 	ASSERT_EQ(::pipe(descriptors.data()), 0);
-	const std::string commands = "xboard\nprotover 2\nping 17";
+	std::string const commands = "xboard\nprotover 2\nping 17";
 	ASSERT_EQ(::write(descriptors[1], commands.data(), commands.size()),
 			  static_cast<ssize_t>(commands.size()));
 	::close(descriptors[1]);
@@ -252,11 +252,11 @@ TEST_F(XboardTest, InputLoopYieldsSoOneWorkerCanDeliverCommands) {
 	ASSERT_EQ(::pipe(descriptors.data()), 0);
 	auto writer = hpx::async([writeFd = descriptors[1]] {
 		hpx::this_thread::sleep_for(std::chrono::milliseconds(5));
-		const std::string commands = "new\neasy\nsd 1\nst 0.01\ngo\n";
-		const auto count = ::write(writeFd, commands.data(), commands.size());
+		std::string const commands = "new\neasy\nsd 1\nst 0.01\ngo\n";
+		auto const count = ::write(writeFd, commands.data(), commands.size());
 		hpx::this_thread::sleep_for(std::chrono::milliseconds(50));
-		const std::string end = "ping 29\nquit\n";
-		const auto endCount = ::write(writeFd, end.data(), end.size());
+		std::string const end = "ping 29\nquit\n";
+		auto const endCount = ::write(writeFd, end.data(), end.size());
 		EXPECT_EQ(endCount, static_cast<ssize_t>(end.size()));
 		::close(writeFd);
 		return count;

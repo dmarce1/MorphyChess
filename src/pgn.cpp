@@ -33,7 +33,7 @@ bool isSpace(char value) {
 
 int parseNumber(std::string_view text) {
 	int value = -1;
-	const auto parsed =
+	auto const parsed =
 		std::from_chars(text.data(), text.data() + text.size(), value);
 	return parsed.ec == std::errc{} && parsed.ptr == text.data() + text.size()
 			   ? value
@@ -58,7 +58,7 @@ Result parseResult(std::string_view token) {
 
 } // namespace
 
-bool Pgn::load(const std::string &filename, Board &board) {
+bool Pgn::load(std::string const &filename, Board &board) {
 	std::ifstream input(filename, std::ios::binary);
 	if (!input) {
 		stream.clear();
@@ -96,18 +96,18 @@ bool Pgn::skipIgnored() {
 	// result markers, and annotations never affect the caller's position.
 	int variationDepth = 0;
 	while (cursor < stream.size()) {
-		const char value = stream[cursor];
+		char const value = stream[cursor];
 		if (isSpace(value)) {
 			++cursor;
 		} else if (value == '{') {
-			const auto end = stream.find('}', cursor + 1);
+			auto const end = stream.find('}', cursor + 1);
 			if (end == std::string::npos) {
 				errorValue = true;
 				return false;
 			}
 			cursor = end + 1;
 		} else if (value == ';' || value == '%') {
-			const auto end = stream.find('\n', cursor + 1);
+			auto const end = stream.find('\n', cursor + 1);
 			cursor = end == std::string::npos ? stream.size() : end + 1;
 		} else if (value == '(') {
 			++variationDepth;
@@ -139,12 +139,12 @@ bool Pgn::readTag() {
 	while (cursor < stream.size() && isSpace(stream[cursor])) {
 		++cursor;
 	}
-	const auto start = cursor;
+	auto const start = cursor;
 	while (cursor < stream.size() && !isSpace(stream[cursor]) &&
 		   stream[cursor] != '"') {
 		++cursor;
 	}
-	const std::string name = stream.substr(start, cursor - start);
+	std::string const name = stream.substr(start, cursor - start);
 	while (cursor < stream.size() && isSpace(stream[cursor])) {
 		++cursor;
 	}
@@ -154,7 +154,7 @@ bool Pgn::readTag() {
 	std::string value;
 	bool closed = false;
 	while (cursor < stream.size()) {
-		const char next = stream[cursor++];
+		char const next = stream[cursor++];
 		if (next == '"') {
 			closed = true;
 			break;
@@ -178,7 +178,7 @@ bool Pgn::readTag() {
 	return true;
 }
 
-void Pgn::processTag(std::string_view name, const std::string &value) {
+void Pgn::processTag(std::string_view name, std::string const &value) {
 	if (name == "Event") {
 		eventValue = value;
 	} else if (name == "Site") {
@@ -237,12 +237,12 @@ bool Pgn::next(Board &board) {
 		// NAGs terminate at the first non-digit, even without whitespace:
 		// e4$1e5 is two moves and one annotation. See bibliography.md [pgn].
 		if (stream[cursor] == '$') {
-			const auto digits = ++cursor;
+			auto const digits = ++cursor;
 			while (cursor < stream.size() && stream[cursor] >= '0' &&
 				   stream[cursor] <= '9') {
 				++cursor;
 			}
-			const int nag = parseNumber(
+			int const nag = parseNumber(
 				std::string_view(stream).substr(digits, cursor - digits));
 			if (nag < 0 || nag > 255) {
 				errorValue = true;
@@ -257,7 +257,7 @@ bool Pgn::next(Board &board) {
 			board = parsedBoard;
 			return true;
 		}
-		const auto start = cursor;
+		auto const start = cursor;
 		while (cursor < stream.size() && !isSpace(stream[cursor]) &&
 			   stream[cursor] != '{' && stream[cursor] != ';' &&
 			   stream[cursor] != '(' && stream[cursor] != ')' &&
@@ -270,7 +270,7 @@ bool Pgn::next(Board &board) {
 			errorValue = true;
 			return false;
 		}
-		if (const Result result = parseResult(token); result != invalid) {
+		if (Result const result = parseResult(token); result != invalid) {
 			resultValue = result;
 			board = parsedBoard;
 			return true;
@@ -278,7 +278,7 @@ bool Pgn::next(Board &board) {
 		if (token == "e.p.") {
 			continue;
 		}
-		const auto period = token.find_last_of('.');
+		auto const period = token.find_last_of('.');
 		if (period != std::string::npos) {
 			token.erase(0, period + 1);
 		}
@@ -292,7 +292,7 @@ bool Pgn::next(Board &board) {
 			errorValue = true;
 			return false;
 		}
-		const Move move = parsedBoard.makeTextMove(token.c_str());
+		Move const move = parsedBoard.makeTextMove(token.c_str());
 		if (move.isEmpty()) {
 			errorValue = true;
 			return false;

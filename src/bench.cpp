@@ -7,8 +7,8 @@
 #include <morphychess/parallel_search.hpp>
 
 namespace morphy_chess {
-int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
-	constexpr std::array<const char *, kNumBenchmarks> positions{
+int runBenchmark(CommandLineOptions const &options, std::ostream &output) {
+	constexpr std::array<char const *, kNumBenchmarks> positions{
 		initialPosition,
 		"8/1b3Rk1/p2rB1pp/8/p2p4/8/1PP3PP/6K1 b - - 0 33",
 		"4r2k/1q4p1/pp4p1/2b1B1Nb/PPQ5/8/2P3PP/5R1K b - b3 0 32",
@@ -26,7 +26,7 @@ int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
 	ParallelSearch search(board, evaluator, table, options.workers());
 	search.setUseBook(false);
 	long long totalNodes = 0;
-	const auto start = std::chrono::steady_clock::now();
+	auto const start = std::chrono::steady_clock::now();
 	for (size_t index = 0; index < positions.size(); ++index) {
 		if (!board.loadFen(positions[index])) {
 			throw std::runtime_error("Invalid benchmark position " +
@@ -34,7 +34,7 @@ int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
 		}
 		// Empty caches and no book keep positions independent of earlier FENs.
 		search.resetMemory();
-		const auto result =
+		auto const result =
 			search.run(options.depth(), options.benchmarkSeconds());
 		if (result.move().isEmpty() || !board.isLegalMove(result.move())) {
 			throw std::runtime_error("Benchmark returned no legal move");
@@ -47,7 +47,7 @@ int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
 			   << " score=" << result.score() << " nodes=" << result.nodes()
 			   << '\n';
 	}
-	const double elapsed =
+	double const elapsed =
 		std::chrono::duration<double>(std::chrono::steady_clock::now() - start)
 			.count();
 	output << "Total nodes: " << totalNodes << " in " << elapsed

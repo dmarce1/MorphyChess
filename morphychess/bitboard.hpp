@@ -33,13 +33,13 @@ public:
 	}
 
 	constexpr int removeFirstOne() noexcept {
-		const int square = firstOne();
+		int const square = firstOne();
 		// Clearing the least significant set bit visits only occupied squares.
 		bits &= bits - 1;
 		return square;
 	}
 	constexpr int removeLastOne() noexcept {
-		const int square = lastOne();
+		int const square = lastOne();
 		if (square >= 0) {
 			clear(square);
 		}
@@ -69,7 +69,7 @@ public:
 	}
 
 	[[nodiscard]] constexpr bool
-	operator==(const Bitboard &) const noexcept = default;
+	operator==(Bitboard const &) const noexcept = default;
 	[[nodiscard]] constexpr Bitboard operator~() const noexcept {
 		return Bitboard{~bits};
 	}

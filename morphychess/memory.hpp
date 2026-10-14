@@ -34,8 +34,8 @@ public:
 	explicit MemoryTable(int entryCount = kTableSize,
 						 int lockCount = kTableLocksPerThread,
 						 int threadCount = 1);
-	MemoryTable(const MemoryTable &) = delete;
-	MemoryTable &operator=(const MemoryTable &) = delete;
+	MemoryTable(MemoryTable const &) = delete;
+	MemoryTable &operator=(MemoryTable const &) = delete;
 	void reset();
 	void resetTouchedFlags();
 	void killUntouchedEntries();

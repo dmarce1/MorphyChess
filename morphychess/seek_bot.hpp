@@ -13,9 +13,9 @@ class SeekBot {
 public:
 	SeekBot() = default;
 	~SeekBot();
-	SeekBot(const SeekBot &) = delete;
-	SeekBot &operator=(const SeekBot &) = delete;
-	void start(std::function<void(const std::string &)> output,
+	SeekBot(SeekBot const &) = delete;
+	SeekBot &operator=(SeekBot const &) = delete;
+	void start(std::function<void(std::string const &)> output,
 			   std::chrono::milliseconds interval = std::chrono::seconds(5));
 	void stop();
 	bool running() const { return active.load(); }

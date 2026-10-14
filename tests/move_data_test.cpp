@@ -63,11 +63,11 @@ bool isOnBoard(int rank, int file) {
 
 template <size_t count>
 Bitboard expectedLeaperAttacks(int square,
-							   const std::array<Direction, count> &directions) {
+							   std::array<Direction, count> const &directions) {
 	Bitboard attacks;
-	for (const Direction direction : directions) {
-		const int rank = square / 8 + direction.rank;
-		const int file = square % 8 + direction.file;
+	for (Direction const direction : directions) {
+		int const rank = square / 8 + direction.rank;
+		int const file = square % 8 + direction.file;
 		if (isOnBoard(rank, file)) {
 			attacks.set(8 * rank + file);
 		}
@@ -80,7 +80,7 @@ Bitboard expectedRay(int square, Bitboard occupancy, Direction direction) {
 	int rank = square / 8 + direction.rank;
 	int file = square % 8 + direction.file;
 	while (isOnBoard(rank, file)) {
-		const int target = 8 * rank + file;
+		int const target = 8 * rank + file;
 		attacks.set(target);
 		if (occupancy.test(target)) {
 			break;
@@ -92,14 +92,14 @@ Bitboard expectedRay(int square, Bitboard occupancy, Direction direction) {
 }
 
 void expectSlidingAttacks(int square, Bitboard occupancy) {
-	const RotatedBitboard rotated(occupancy);
-	const Bitboard rank = expectedRay(square, occupancy, {0, -1}) |
+	RotatedBitboard const rotated(occupancy);
+	Bitboard const rank = expectedRay(square, occupancy, {0, -1}) |
 						  expectedRay(square, occupancy, {0, 1});
-	const Bitboard file = expectedRay(square, occupancy, {-1, 0}) |
+	Bitboard const file = expectedRay(square, occupancy, {-1, 0}) |
 						  expectedRay(square, occupancy, {1, 0});
-	const Bitboard diag1 = expectedRay(square, occupancy, {-1, -1}) |
+	Bitboard const diag1 = expectedRay(square, occupancy, {-1, -1}) |
 						   expectedRay(square, occupancy, {1, 1});
-	const Bitboard diag2 = expectedRay(square, occupancy, {-1, 1}) |
+	Bitboard const diag2 = expectedRay(square, occupancy, {-1, 1}) |
 						   expectedRay(square, occupancy, {1, -1});
 	EXPECT_EQ(rotated.rankMoves(square), rank);
 	EXPECT_EQ(rotated.fileMoves(square), file);

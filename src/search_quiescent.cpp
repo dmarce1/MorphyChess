@@ -15,8 +15,8 @@ int Search::quiescentValue(int guess) {
 		boardPtr->isDraw()) {
 		return 0;
 	}
-	const int startingPly = currentPly;
-	const int originalGuess = guess;
+	int const startingPly = currentPly;
+	int const originalGuess = guess;
 	if (boardPtr->sideToMove() == black) {
 		guess = -guess;
 	}
@@ -35,7 +35,7 @@ int Search::quiescentValue(int guess) {
 				score -= scoreGrain;
 			}
 		}
-	} catch (const SearchCancelled &) {
+	} catch (SearchCancelled const &) {
 		while (currentPly > startingPly) {
 			boardPtr->undoMove();
 			--currentPly;
@@ -55,7 +55,7 @@ bool Search::quiescentTest(int testValue) {
 		++nodesVisited;
 		return 0 > testValue;
 	}
-	const bool inCheck = boardPtr->kingInCheck();
+	bool const inCheck = boardPtr->kingInCheck();
 	if (currentPly >= kMaxDepth) {
 		++nodesVisited;
 		if (!inCheck && boardPtr->kingInStalemate(boardPtr->sideToMove())) {
@@ -79,7 +79,7 @@ bool Search::quiescentTest(int testValue) {
 					: node.doNextNonquiescentMove(currentMove)) ==
 		   kNodeMovesAvailable) {
 		anyMove = true;
-		const bool testResult = !quiescentTest(-testValue);
+		bool const testResult = !quiescentTest(-testValue);
 		node.restore();
 		if (testResult) {
 			return true;

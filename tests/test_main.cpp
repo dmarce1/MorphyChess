@@ -3,7 +3,7 @@
 
 namespace {
 int runTests() {
-	const int result = RUN_ALL_TESTS();
+	int const result = RUN_ALL_TESTS();
 	hpx::local::finalize();
 	return result;
 }

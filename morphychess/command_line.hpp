@@ -11,7 +11,7 @@ namespace morphy_chess {
 class CommandLineOptions {
 public:
 	explicit CommandLineOptions(
-		const hpx::program_options::variables_map &values);
+		hpx::program_options::variables_map const &values);
 	static hpx::program_options::options_description description();
 	int workers() const { return searchWorkers; }
 	int depth() const { return searchDepth; }
@@ -19,7 +19,7 @@ public:
 	bool benchmark() const { return runBenchmark; }
 	bool version() const { return showVersion; }
 	bool useBook() const { return bookEnabled; }
-	const std::string &bookPath() const { return openingBookPath; }
+	std::string const &bookPath() const { return openingBookPath; }
 
 private:
 	int searchWorkers;

@@ -6,9 +6,9 @@
 
 namespace morphy_chess {
 namespace {
-CommandLineOptions parse(const std::vector<std::string> &arguments) {
+CommandLineOptions parse(std::vector<std::string> const &arguments) {
 	hpx::program_options::variables_map values;
-	const auto description = CommandLineOptions::description();
+	auto const description = CommandLineOptions::description();
 	hpx::program_options::store(
 		hpx::program_options::command_line_parser(arguments)
 			.options(description)
@@ -19,14 +19,14 @@ CommandLineOptions parse(const std::vector<std::string> &arguments) {
 }
 } // namespace
 TEST(CommandLineTest, DefaultsMatchEngine) {
-	const auto options = parse({});
+	auto const options = parse({});
 	EXPECT_EQ(options.workers(), defaultThreadCount);
 	EXPECT_EQ(options.depth(), kMaxSearchDepth);
 	EXPECT_FALSE(options.benchmark());
 	EXPECT_TRUE(options.useBook());
 }
 TEST(CommandLineTest, ParsesBenchmarkAndBookOptions) {
-	const auto options = parse({"--bench", "--threads=2", "--depth=3",
+	auto const options = parse({"--bench", "--threads=2", "--depth=3",
 								"--bench-seconds=0.5", "--no-book"});
 	EXPECT_TRUE(options.benchmark());
 	EXPECT_EQ(options.workers(), 2);

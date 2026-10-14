@@ -16,12 +16,12 @@ namespace {
 int runApplication(hpx::program_options::variables_map &values) {
 	int status = 0;
 	try {
-		const auto unknown = hpx::get_config_entry("hpx.unknown_cmd_line", "");
+		auto const unknown = hpx::get_config_entry("hpx.unknown_cmd_line", "");
 		if (!unknown.empty() || values.count("hpx:positional")) {
 			throw std::invalid_argument(
 				"Unrecognized command-line arguments: " + unknown);
 		}
-		const morphy_chess::CommandLineOptions options(values);
+		morphy_chess::CommandLineOptions const options(values);
 		if (options.version()) {
 			std::cout << morphy_chess::kName << " (C++23, HPX local runtime)\n";
 		} else if (options.benchmark()) {
@@ -31,7 +31,7 @@ int runApplication(hpx::program_options::variables_map &values) {
 										   options.bookPath());
 			status = interface.run();
 		}
-	} catch (const std::exception &error) {
+	} catch (std::exception const &error) {
 		std::cerr << "MorphyChess: " << error.what() << '\n';
 		status = 1;
 	}
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 		pointers.push_back(argument.data());
 	}
 	pointers.push_back(nullptr);
-	const auto description = morphy_chess::CommandLineOptions::description();
+	auto const description = morphy_chess::CommandLineOptions::description();
 	hpx::local::init_params parameters;
 	parameters.desc_cmdline = description;
 	// Recursive search needs an HPX task stack independent of worker count.
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 	try {
 		return hpx::local::init(&runApplication, argc, pointers.data(),
 								parameters);
-	} catch (const std::exception &error) {
+	} catch (std::exception const &error) {
 		std::cerr << "MorphyChess: " << error.what() << '\n';
 		return 1;
 	}

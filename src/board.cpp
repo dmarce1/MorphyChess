@@ -250,7 +250,7 @@ bool Board::kingInCheckmate(int color) {
 		return false;
 	}
 	std::array<Move, maxMoves> moves;
-	const int count = genPseudolegalMoves(moves.data());
+	int const count = genPseudolegalMoves(moves.data());
 	for (int index = 0; index < count; ++index) {
 		if (makeMove(moves[index])) {
 			undoMove();
@@ -265,7 +265,7 @@ bool Board::kingInStalemate(int color) {
 		return false;
 	}
 	std::array<Move, maxMoves> moves;
-	const int count = genPseudolegalMoves(moves.data());
+	int const count = genPseudolegalMoves(moves.data());
 	for (int index = 0; index < count; ++index) {
 		if (makeMove(moves[index])) {
 			undoMove();
@@ -302,7 +302,7 @@ bool Board::isDraw() const {
 	return rc;
 }
 
-bool Board::loadFen(const char *text) {
+bool Board::loadFen(char const *text) {
 	// Parse the six FEN fields into a separate board so every rejection leaves
 	// the caller's position/history intact. See bibliography.md [pgn]. The
 	// fullmove number is validated but local undo history starts at zero.
@@ -323,7 +323,7 @@ bool Board::loadFen(const char *text) {
 	Board &candidate = *candidateStorage;
 	int row = 7;
 	int column = 0;
-	const std::string pieces = "PNBRQKpnbrqk";
+	std::string const pieces = "PNBRQKpnbrqk";
 	for (char token : placement) {
 		if (token == '/') {
 			if (column != 8 || row == 0) {
@@ -337,16 +337,16 @@ bool Board::loadFen(const char *text) {
 				return false;
 			}
 		} else {
-			const auto index = pieces.find(token);
+			auto const index = pieces.find(token);
 			if (index == std::string::npos || column >= 8) {
 				return false;
 			}
-			const int color = index < 6 ? white : black;
-			const int piece = static_cast<int>(index % 6) + 1;
+			int const color = index < 6 ? white : black;
+			int const piece = static_cast<int>(index % 6) + 1;
 			if (piece == pawn && (row == 0 || row == 7)) {
 				return false;
 			}
-			const int square = 8 * row + column++;
+			int const square = 8 * row + column++;
 			candidate.pieceValuesData[square] = color == white ? piece : -piece;
 			++candidate.pieceCountsData[color][piece];
 			++candidate.pieceCountsData[color][0];
@@ -419,8 +419,8 @@ bool Board::loadFen(const char *text) {
 			enPassant[1] != (candidate.sideToMove() == white ? '6' : '3')) {
 			return false;
 		}
-		const int target = 8 * (enPassant[1] - '1') + enPassant[0] - 'a';
-		const int captured =
+		int const target = 8 * (enPassant[1] - '1') + enPassant[0] - 'a';
+		int const captured =
 			target + (candidate.sideToMove() == white ? -8 : 8);
 		if (candidate.pieceValue(target) != empty ||
 			candidate.pieceValue(captured) !=
@@ -673,13 +673,13 @@ char *Board::moveToStr(char *buffer, Move move) {
 	// Emit the engine's long algebraic form with explicit source squares,
 	// then temporarily make/undo the move to append check or mate notation.
 	auto &b = *this;
-	const std::array<char, 7> pieceChars = {'\0', '\0', 'N', 'B',
+	std::array<char, 7> const pieceChars = {'\0', '\0', 'N', 'B',
 											'R',  'Q',	'K'};
-	const int fromRank = move.from() / 8;
-	const int fromFile = move.from() % 8;
-	const int toRank = move.to() / 8;
-	const int toFile = move.to() % 8;
-	const int piece = abs(b.pieceValuesData[move.from()]);
+	int const fromRank = move.from() / 8;
+	int const fromFile = move.from() % 8;
+	int const toRank = move.to() / 8;
+	int const toFile = move.to() % 8;
+	int const piece = abs(b.pieceValuesData[move.from()]);
 	bool isEp;
 	char *start = buffer;
 
@@ -754,7 +754,7 @@ int Board::genPseudolegalMoves(Move *mList) const {
 
 int Board::genPseudolegalCaptures(Move *mList) const {
 	auto &b = *this;
-	const Move *startPtr = mList;
+	Move const *startPtr = mList;
 	int attackColor, defendColor, from, to;
 	Bitboard toBoard, fromBoard;
 
@@ -1015,7 +1015,7 @@ int Board::pseudolegalPieceMoveCount(int color) const {
 
 int Board::genPseudolegalNoncaptures(Move *mList) const {
 	auto &b = *this;
-	const Move *startPtr = mList;
+	Move const *startPtr = mList;
 	int attackColor, from, to, cnt;
 	Bitboard toBoard, fromBoard, tempBoard;
 
@@ -1165,7 +1165,7 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 
 int Board::genPseudolegalPromotions(Move *mList) const {
 	auto &b = *this;
-	const Move *startPtr = mList;
+	Move const *startPtr = mList;
 	int attackColor, to;
 	Bitboard toBoard;
 
@@ -1230,7 +1230,7 @@ int Board::genPseudolegalPromotions(Move *mList) const {
 
 int Board::genPseudolegalUnderPromotions(Move *mList) const {
 	auto &b = *this;
-	const Move *startPtr = mList;
+	Move const *startPtr = mList;
 	int attackColor, to;
 	Bitboard toBoard;
 
@@ -1305,7 +1305,7 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 	return (int)(mList - startPtr) - 1;
 }
 
-Move Board::makeTextMove(const char *text) {
+Move Board::makeTextMove(char const *text) {
 	// This legacy parser accepts algebraic and explicit-coordinate forms.
 	// Validate coordinates before packing them into Move's six-bit fields,
 	// then require a unique legal candidate (ignoring pinned alternatives).
@@ -1352,7 +1352,7 @@ Move Board::makeTextMove(const char *text) {
 
 	else {
 		b.genPseudolegalMoves(moves.data());
-		const bool hasPiecePrefix = isupper(static_cast<unsigned char>(*ptr));
+		bool const hasPiecePrefix = isupper(static_cast<unsigned char>(*ptr));
 		if (hasPiecePrefix) {
 			if (strchr("PNBRQK", *ptr) == nullptr) {
 				return {};
@@ -1401,7 +1401,7 @@ Move Board::makeTextMove(const char *text) {
 		m.setTo(8 * tr + tf);
 		matchFound = false;
 		for (i = 0; !moves[i].isEmpty(); i++) {
-			const bool pieceMatches =
+			bool const pieceMatches =
 				abs(b.pieceValuesData[moves[i].from()]) == piece ||
 				(!hasPiecePrefix && fr != -1 && ff != -1);
 			if (moves[i].to() == m.to() && moves[i].promo() == m.promo() &&
@@ -1452,7 +1452,7 @@ std::string Move::coordinateString() const {
 	return text;
 }
 
-Move Move::fromString(const char *text) {
+Move Move::fromString(char const *text) {
 	if (text == nullptr) {
 		return {};
 	}
@@ -1471,7 +1471,7 @@ Move Move::fromString(const char *text) {
 	}
 	int promotion = 0;
 	if (str.size() > 4) {
-		const size_t index = str[4] == '=' ? 5 : 4;
+		size_t const index = str[4] == '=' ? 5 : 4;
 		if (str.size() != index + 1) {
 			return {};
 		}
@@ -1556,7 +1556,7 @@ std::uint64_t Board::computePawnKey() const {
 	return key;
 }
 
-void Board::copy(const Board &source) { *this = source; }
+void Board::copy(Board const &source) { *this = source; }
 
 Board::Board() { reset(); }
 
@@ -1565,7 +1565,7 @@ void Board::reset() { loadFen(initialPosition); }
 void Board::toStream(FILE *fp) const {
 	auto &b = *this;
 	int rank, file, i;
-	const std::array<char, 13> pieceChar = {'k', 'q', 'r', 'b', 'n', 'o', ' ',
+	std::array<char, 13> const pieceChar = {'k', 'q', 'r', 'b', 'n', 'o', ' ',
 											'x', 'N', 'B', 'R', 'Q', 'K'};
 	char c;
 
@@ -1726,7 +1726,7 @@ UndoInfo Board::getUndoInfo() {
 void Board::debugBoardToStream(FILE *fp) const {
 	auto &b = *this;
 	int rank, file, i, j;
-	const std::array<char, 13> pieceChar = {'k', 'q', 'r', 'b', 'n', 'p', ' ',
+	std::array<char, 13> const pieceChar = {'k', 'q', 'r', 'b', 'n', 'p', ' ',
 											'P', 'N', 'B', 'R', 'Q', 'K'};
 	char c;
 
@@ -2052,7 +2052,7 @@ void Board::handleEnPassantUndo(Move move) {
 
 void Board::handlePawnPromotion(Move move) {
 	auto &b = *this;
-	const int color = b.flagsData.sideToMoveValue;
+	int const color = b.flagsData.sideToMoveValue;
 	if (color == white) {
 		b.pieceValuesData[move.to()] = move.promo();
 		b.positionKeyData ^= zobristKey(pawn, move.to());
@@ -2087,13 +2087,13 @@ void Board::handlePromotionUndo(Move move) {
 	}
 }
 
-void Board::storeUndoInfo(const UndoInfo &undo) {
+void Board::storeUndoInfo(UndoInfo const &undo) {
 	auto &b = *this;
 	b.undoInfoData[b.flagsData.halfMoveCountValue] = undo;
 }
 
 bool Board::lastMoveWasCapture() {
-	const Move move = lastMove();
+	Move const move = lastMove();
 	if (move.isEmpty()) {
 		return false;
 	}
@@ -2133,7 +2133,7 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 	move.setPromo(empty);
 	move.setTo(square);
 	stm = board.flagsData.sideToMoveValue;
-	const auto selectLegalAttacker = [&](Bitboard candidates, int promotion) {
+	auto const selectLegalAttacker = [&](Bitboard candidates, int promotion) {
 		move.setPromo(promotion);
 		while (candidates) {
 			move.setFrom(candidates.removeFirstOne());
@@ -2153,7 +2153,7 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 				whitePawnAttacks(square) & board.pieceBoardsData[black][pawn];
 		}
 		if (attackers) {
-			const int promotion =
+			int const promotion =
 				(square / 8 == 0 || square / 8 == 7) ? queen : empty;
 			rc = selectLegalAttacker(attackers, promotion);
 		}

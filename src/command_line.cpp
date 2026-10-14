@@ -25,7 +25,7 @@ hpx::program_options::options_description CommandLineOptions::description() {
 	return options;
 }
 CommandLineOptions::CommandLineOptions(
-	const hpx::program_options::variables_map &values) :
+	hpx::program_options::variables_map const &values) :
 	searchWorkers(values["threads"].as<int>()),
 	searchDepth(values["depth"].as<int>()),
 	secondsPerPosition(values["bench-seconds"].as<double>()),

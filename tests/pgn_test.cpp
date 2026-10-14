@@ -82,9 +82,9 @@ TEST(Pgn, ParsesAdjacentAnnotationAndResultTokens) {
 TEST(Pgn, RejectsMalformedNumericAnnotationsWithoutReplacingBoard) {
 	Board board;
 	ASSERT_TRUE(board.makeMove(Move(11, 27)));
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	Pgn pgn;
-	for (const auto *text : {"1.e4$ *", "1.e4$-1 *", "1.e4$256 *",
+	for (auto const *text : {"1.e4$ *", "1.e4$-1 *", "1.e4$256 *",
 							 "1.e4$999999999999999999999999 *"}) {
 		EXPECT_FALSE(pgn.loadText(text, board)) << text;
 		EXPECT_TRUE(pgn.hasError());
@@ -107,7 +107,7 @@ TEST(Pgn, AcceptsFinalGameWithoutResultOrFinalNewline) {
 TEST(Pgn, RejectsMalformedInputWithoutReplacingBoard) {
 	Board board;
 	ASSERT_TRUE(board.makeMove(Move(11, 27)));
-	const auto key = board.positionKey();
+	auto const key = board.positionKey();
 	Pgn pgn;
 	EXPECT_FALSE(pgn.loadText("1.e4 Qa9 *", board));
 	EXPECT_TRUE(pgn.hasError());
@@ -123,7 +123,7 @@ TEST(Pgn, RejectsMalformedInputWithoutReplacingBoard) {
 TEST(Pgn, AcceptsOwnedLongHeadersAndEscapedQuotes) {
 	Board board;
 	Pgn pgn;
-	const std::string name(600, 'a');
+	std::string const name(600, 'a');
 	ASSERT_TRUE(pgn.loadText("[White \"" + name +
 								 "\"]\n[Event \"A \\\"quote\\\"\"]\n1.e4 *",
 							 board));

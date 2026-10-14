@@ -39,8 +39,8 @@ class BitboardMasks {
 public:
 	constexpr BitboardMasks() noexcept {
 		for (int square = 0; square < 64; ++square) {
-			const int rank = square / 8;
-			const int file = square % 8;
+			int const rank = square / 8;
+			int const file = square % 8;
 			// Diagonal bytes wrap modulo eight; MoveData clips their attacks to
 			// the actual diagonal so unrelated wrapped squares cannot be reached.
 			rotatedIndices[square] = {
@@ -112,11 +112,11 @@ public:
 	constexpr Bitboard operator[](int index) const noexcept {
 		return boards[index];
 	}
-	constexpr const std::array<Bitboard, 4> &rotations() const noexcept {
+	constexpr std::array<Bitboard, 4> const &rotations() const noexcept {
 		return boards;
 	}
 	constexpr int indexFromRank(int square) const noexcept {
-		const int shift = 8 * (square / 8);
+		int const shift = 8 * (square / 8);
 		return static_cast<int>((boards[kRankIndex] >> shift).value() & 0xFF);
 	}
 	constexpr int indexFromFile(int square) const noexcept {
@@ -155,7 +155,7 @@ public:
 
 private:
 	constexpr int indexFromRotation(int square, int rotation) const noexcept {
-		const int shift =
+		int const shift =
 			8 * (bitboardMasks.rotatedIndex(square, rotation) / 8);
 		return static_cast<int>((boards[rotation] >> shift).value() & 0xFF);
 	}

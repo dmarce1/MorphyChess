@@ -60,7 +60,7 @@ TEST(Bits, FlipsAndRotatedBoardsPreserveOccupancy) {
 TEST(Bits, FlipsMapEverySquareAndReverseRankOrder) {
 	for (int rank = 0; rank < 8; ++rank) {
 		for (int file = 0; file < 8; ++file) {
-			const Bitboard original = Bitboard{1} << (8 * rank + file);
+			Bitboard const original = Bitboard{1} << (8 * rank + file);
 			Bitboard vertical = original;
 			vertical.verticalFlip();
 			EXPECT_EQ(vertical, Bitboard{1} << (8 * (7 - rank) + file));
@@ -122,7 +122,7 @@ TEST(MoveData, LeapersAndSlidingBlockers) {
 }
 TEST(Zobrist, KeysMatchIncrementalStateAndInitializationIsStable) {
 	Board board;
-	const std::uint64_t initial = board.positionKey();
+	std::uint64_t const initial = board.positionKey();
 	EXPECT_EQ(initial, board.computePositionKey());
 	initZobristKeys();
 	EXPECT_EQ(initial, board.computePositionKey());
@@ -141,7 +141,7 @@ TEST(Evaluation, MaterialBalanceAndStaticExchangeRestoreBoard) {
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/q7/7K w - - 0 1"));
 	EXPECT_LT(board.evaluate(), 0);
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/q7/R6K w - - 0 1"));
-	const std::uint64_t original = board.positionKey();
+	std::uint64_t const original = board.positionKey();
 	EXPECT_EQ(board.see(Move(0, 8), 0), 900);
 	EXPECT_EQ(board.positionKey(), original);
 	EXPECT_EQ(board.halfMoveCount(), 0);
@@ -171,11 +171,11 @@ TEST(Evaluation, ReversibleMoveClockDampsBothColorsWithoutChangingSign) {
 	StaticEvaluator evaluator(parameters);
 	// A central knight contributes ten points, capped to eight. Disable
 	// other positional terms so this checks damping independently of tuning.
-	const std::array<int, 6> clocks{0, 3, 4, 5, 99, 1000000};
-	const std::array<int, 6> expected{8, 5, 4, 4, 4, 4};
+	std::array<int, 6> const clocks{0, 3, 4, 5, 99, 1000000};
+	std::array<int, 6> const expected{8, 5, 4, 4, 4, 4};
 	for (size_t index = 0; index < clocks.size(); ++index) {
-		for (const std::string &side : {std::string("w"), std::string("b")}) {
-			const std::string suffix =
+		for (std::string const &side : {std::string("w"), std::string("b")}) {
+			std::string const suffix =
 				" " + side + " - - " + std::to_string(clocks[index]) + " 1";
 			Board whiteKnight;
 			Board blackKnight;
@@ -185,12 +185,12 @@ TEST(Evaluation, ReversibleMoveClockDampsBothColorsWithoutChangingSign) {
 				blackKnight.loadFen(("k7/8/8/3n4/8/8/8/7K" + suffix).c_str()));
 			int whiteMaterial, blackMaterial;
 			evaluator.materialScore(whiteKnight, whiteMaterial, blackMaterial);
-			const int whiteScore = evaluator.nonMaterialScore(
+			int const whiteScore = evaluator.nonMaterialScore(
 				whiteKnight, whiteMaterial, blackMaterial);
 			evaluator.materialScore(blackKnight, whiteMaterial, blackMaterial);
-			const int blackScore = evaluator.nonMaterialScore(
+			int const blackScore = evaluator.nonMaterialScore(
 				blackKnight, whiteMaterial, blackMaterial);
-			const int perspective = side == "w" ? 1 : -1;
+			int const perspective = side == "w" ? 1 : -1;
 			EXPECT_EQ(whiteScore, perspective * expected[index]);
 			EXPECT_EQ(blackScore, -whiteScore);
 		}
@@ -205,7 +205,7 @@ TEST(PawnStatistics, EncapsulatedValueFields) {
 TEST(Egtb, ThreePieceIndexRoundTripAndValidation) {
 	Board board;
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/R7/K7 w - - 0 1"));
-	const int index = board.threeManEgtbIndex(rook, white);
+	int const index = board.threeManEgtbIndex(rook, white);
 	ASSERT_GE(index, 0);
 	Board restored;
 	ASSERT_TRUE(restored.loadEgtbIndex(rook, index, white));
@@ -219,7 +219,7 @@ TEST(Debug, ConsistentBoardAndReadableStream) {
 	Board board;
 	board.assertBoardConsistency();
 	board.assertTranspositionKeyConsistency();
-	const auto closeFile = [](FILE *file) { std::fclose(file); };
+	auto const closeFile = [](FILE *file) { std::fclose(file); };
 	std::unique_ptr<FILE, decltype(closeFile)> stream(std::tmpfile(),
 													  closeFile);
 	ASSERT_NE(stream.get(), nullptr);

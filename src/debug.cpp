@@ -8,11 +8,11 @@
 
 namespace morphy_chess {
 namespace {
-thread_local const Board *registeredBoard = nullptr;
+thread_local Board const *registeredBoard = nullptr;
 }
-void debugRegisterBoard(const Board *board) { registeredBoard = board; }
+void debugRegisterBoard(Board const *board) { registeredBoard = board; }
 void assertCondition([[maybe_unused]] bool condition,
-					 [[maybe_unused]] const std::source_location &location) {
+					 [[maybe_unused]] std::source_location const &location) {
 #ifndef NDEBUG
 	if (!condition) {
 		std::fprintf(stderr, "Assertion failed at %s:%u in %s\n",
@@ -26,14 +26,14 @@ void assertCondition([[maybe_unused]] bool condition,
 #endif
 }
 void Board::assertTranspositionKeyConsistency(
-	[[maybe_unused]] const std::source_location &location) const {
+	[[maybe_unused]] std::source_location const &location) const {
 #ifndef NDEBUG
 	assertCondition(computePositionKey() == positionKey(), location);
 	assertCondition(computePawnKey() == pawnKey(), location);
 #endif
 }
 void Board::assertBoardConsistency(
-	[[maybe_unused]] const std::source_location &location) const {
+	[[maybe_unused]] std::source_location const &location) const {
 #ifndef NDEBUG
 	// Reconstruct redundant caches from the square array rather than checking
 	// them against each other, then independently recompute the hash keys.
@@ -41,12 +41,12 @@ void Board::assertBoardConsistency(
 	std::array<std::array<Bitboard, 7>, 2> pieces{};
 	RotatedBitboard occupied;
 	for (int square = 0; square < 64; ++square) {
-		const int value = pieceValue(square);
+		int const value = pieceValue(square);
 		if (value == empty) {
 			continue;
 		}
-		const int color = value > 0 ? white : black;
-		const int piece = std::abs(value);
+		int const color = value > 0 ? white : black;
+		int const piece = std::abs(value);
 		assertCondition(piece >= pawn && piece <= king, location);
 		++counts[color][piece];
 		++counts[color][0];

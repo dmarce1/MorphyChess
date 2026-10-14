@@ -22,7 +22,7 @@ public:
 		}
 	}
 	constexpr int operator[](int depth) const { return increments[depth]; }
-	constexpr const std::array<int, kMaxDepth> &values() const {
+	constexpr std::array<int, kMaxDepth> const &values() const {
 		return increments;
 	}
 

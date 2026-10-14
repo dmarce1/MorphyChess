@@ -29,7 +29,7 @@ int ratingChangeWin(int engineRating, int opponentRating) {
 	// Logistic Elo expectation: E = 1/(1 + 10^((opponent-engine)/400)).
 	// A win changes the rating by K*(1-E), using K=32 and integer rounding.
 	// See bibliography.md [elo]; this engine's fixed K is a local policy.
-	const double ratio = std::pow(
+	double const ratio = std::pow(
 		10.0, (static_cast<double>(engineRating) - opponentRating) / 400.0);
 	return static_cast<int>(32.0 / (1.0 + ratio) + 0.5);
 }

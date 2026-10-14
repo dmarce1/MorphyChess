@@ -110,17 +110,17 @@ private:
 	constexpr Bitboard genWhitePawnAttacks(int square) const noexcept {
 		// Shifts can wrap across files; remove the opposite board edge using
 		// the source's left/right half. Knight masks need two edge files.
-		const int side = (square & 0x7) >> 2;
-		const Bitboard mask = Bitboard::mask(square);
+		int const side = (square & 0x7) >> 2;
+		Bitboard const mask = Bitboard::mask(square);
 		return ((mask << 7) | (mask << 9)) & ~(side ? fileA : fileH);
 	}
 	constexpr Bitboard genBlackPawnAttacks(int square) const noexcept {
-		const int side = (square & 0x7) >> 2;
-		const Bitboard mask = Bitboard::mask(square);
+		int const side = (square & 0x7) >> 2;
+		Bitboard const mask = Bitboard::mask(square);
 		return ((mask >> 7) | (mask >> 9)) & ~(side ? fileA : fileH);
 	}
 	constexpr Bitboard genKingAttacks(int square) const noexcept {
-		const int side = (square & 0x7) >> 2;
+		int const side = (square & 0x7) >> 2;
 		Bitboard mask = Bitboard::mask(square);
 		mask |= (mask >> 1) | (mask << 1);
 		mask |= (mask >> 8) | (mask << 8);
@@ -129,8 +129,8 @@ private:
 		return mask;
 	}
 	constexpr Bitboard genKnightAttacks(int square) const noexcept {
-		const int side = (square & 0x7) >> 2;
-		const Bitboard mask = Bitboard::mask(square);
+		int const side = (square & 0x7) >> 2;
+		Bitboard const mask = Bitboard::mask(square);
 		return ((mask >> 6) | (mask >> 10) | (mask >> 15) | (mask >> 17) |
 				(mask << 6) | (mask << 10) | (mask << 15) | (mask << 17)) &
 			   ~(side ? (fileA | fileB) : (fileH | fileG));
@@ -153,13 +153,13 @@ private:
 constexpr MoveData::MoveData() noexcept {
 	// Spread one line byte onto a file or either principal diagonal, then
 	// shift and clip it for each square's particular line.
-	const auto lineAttacks = makeLineAttacks();
-	const auto fileMasks = makeSpreadMasks(8, 0);
-	const auto diag1Masks = makeSpreadMasks(9, 0);
-	const auto diag2Masks = makeSpreadMasks(7, 7);
-	const auto *files = fileMasks.data();
-	const auto *diagonals1 = diag1Masks.data();
-	const auto *diagonals2 = diag2Masks.data();
+	auto const lineAttacks = makeLineAttacks();
+	auto const fileMasks = makeSpreadMasks(8, 0);
+	auto const diag1Masks = makeSpreadMasks(9, 0);
+	auto const diag2Masks = makeSpreadMasks(7, 7);
+	auto const *files = fileMasks.data();
+	auto const *diagonals1 = diag1Masks.data();
+	auto const *diagonals2 = diag2Masks.data();
 
 	for (int from = 0; from < 64; ++from) {
 		wpAttacks[from] = genWhitePawnAttacks(from);
@@ -167,18 +167,18 @@ constexpr MoveData::MoveData() noexcept {
 		nAttacks[from] = genKnightAttacks(from);
 		kAttacks[from] = genKingAttacks(from);
 
-		const int rank = from / 8;
-		const int file = from % 8;
-		const int diag1Offset = file - rank;
-		const int diag2Offset = file + rank - 7;
-		const unsigned diag1Ranks =
+		int const rank = from / 8;
+		int const file = from % 8;
+		int const diag1Offset = file - rank;
+		int const diag2Offset = file + rank - 7;
+		unsigned const diag1Ranks =
 			rankMask(diag1Offset < 0 ? -diag1Offset : 0,
 					 diag1Offset > 0 ? 7 - diag1Offset : 7);
-		const unsigned diag2Ranks =
+		unsigned const diag2Ranks =
 			rankMask(diag2Offset > 0 ? diag2Offset : 0,
 					 diag2Offset < 0 ? 7 + diag2Offset : 7);
-		const auto *rankLine = lineAttacks[file].data();
-		const auto *verticalLine = lineAttacks[rank].data();
+		auto const *rankLine = lineAttacks[file].data();
+		auto const *verticalLine = lineAttacks[rank].data();
 		auto *ranks = rankAttacks[from].data();
 		auto *fileTable = fileAttacks[from].data();
 		auto *diag1Table = diag1Attacks[from].data();
@@ -187,12 +187,12 @@ constexpr MoveData::MoveData() noexcept {
 		for (int index = 0; index < 256; ++index) {
 			ranks[index] =
 				Bitboard{std::uint64_t{rankLine[index]} << (8 * rank)};
-			const unsigned moves = verticalLine[index];
+			unsigned const moves = verticalLine[index];
 			fileTable[index] = Bitboard{files[moves] << file};
 			// Clip the rank byte before spreading it so wrapped diagonal
 			// bits never cross a board edge.
-			const auto diag1 = diagonals1[moves & diag1Ranks];
-			const auto diag2 = diagonals2[moves & diag2Ranks];
+			auto const diag1 = diagonals1[moves & diag1Ranks];
+			auto const diag2 = diagonals2[moves & diag2Ranks];
 			diag1Table[index] =
 				Bitboard{diag1Offset >= 0 ? diag1 << diag1Offset
 										  : diag1 >> -diag1Offset};

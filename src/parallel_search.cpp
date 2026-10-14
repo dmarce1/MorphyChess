@@ -66,7 +66,7 @@ void ParallelSearch::setComputerColor(int value) {
 	}
 }
 void ParallelSearch::setProgressHandler(
-	std::function<void(const SearchResult &)> handler) {
+	std::function<void(SearchResult const &)> handler) {
 	stop();
 	progressHandler = std::move(handler);
 }
@@ -81,8 +81,8 @@ void ParallelSearch::prepare(int depth, double seconds, int initialGuess) {
 		std::abs(static_cast<long long>(initialGuess)) > kInfty - grainSize) {
 		throw std::invalid_argument("Invalid search depth or time limit");
 	}
-	const auto now = std::chrono::steady_clock::now();
-	const double maximumSeconds =
+	auto const now = std::chrono::steady_clock::now();
+	double const maximumSeconds =
 		std::chrono::duration<double>(
 			std::chrono::steady_clock::time_point::max() - now)
 			.count();
@@ -168,7 +168,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 		Move fallback;
 		// Keep a legal move even if time expires before any iteration finishes.
 		std::array<Move, maxMoves> moves;
-		const int moveCount = rootBoard.genPseudolegalMoves(moves.data());
+		int const moveCount = rootBoard.genPseudolegalMoves(moves.data());
 		for (int index = 0; index < moveCount; ++index) {
 			if (rootBoard.isLegalMove(moves[index])) {
 				fallback = moves[index];
@@ -180,7 +180,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 			return {};
 		}
 		if (useBook) {
-			const Move bookMove = book.findMove(rootBoard);
+			Move const bookMove = book.findMove(rootBoard);
 			if (!bookMove.isEmpty() && rootBoard.isLegalMove(bookMove)) {
 				active.store(false);
 				return SearchResult(bookMove, 0, 0, 0);
@@ -189,7 +189,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 		if (timed) {
 			timer = hpx::async([this, &timerDone] {
 				while (!timerDone.load(std::memory_order_relaxed)) {
-					const auto now = std::chrono::steady_clock::now();
+					auto const now = std::chrono::steady_clock::now();
 					if (now >= deadline) {
 						requestStop();
 						break;
@@ -235,7 +235,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 		if (selected.isEmpty() || !rootBoard.isLegalMove(selected)) {
 			selected = fallback;
 		}
-		const int score = completedDepth > 0
+		int const score = completedDepth > 0
 							  ? lowerBounds[completedDepth] + grainSize / 2
 							  : 0;
 		if (learningOn) {
@@ -360,7 +360,7 @@ void ParallelSearch::worker(int index) {
 	int depth = 0;
 	while (true) {
 		notifications.clear();
-		const bool hasWork = nextSearch(index, testValue, depth, notifications);
+		bool const hasWork = nextSearch(index, testValue, depth, notifications);
 		if (hasWork) {
 			depths[index] = depth;
 			testValues[index] = testValue;
@@ -370,15 +370,15 @@ void ParallelSearch::worker(int index) {
 		if (!notifications.empty()) {
 			// Call client code without the scheduling mutex. Serialize progress
 			// events.
-			const std::lock_guard<hpx::mutex> progressGuard(progressMutex);
-			for (const auto &result : notifications) {
+			std::lock_guard<hpx::mutex> const progressGuard(progressMutex);
+			for (auto const &result : notifications) {
 				progressHandler(result);
 			}
 		}
 		if (!hasWork) {
 			return;
 		}
-		const bool result = search.test(testValue, depth);
+		bool const result = search.test(testValue, depth);
 		guard.lock();
 		nodeCount += search.nodeCount();
 		search.resetCounters();

@@ -21,8 +21,8 @@ class Search {
 
 public:
 	Search(Board &board, StaticEvaluator &evaluator, MemoryTable &table);
-	Search(const Search &) = delete;
-	Search &operator=(const Search &) = delete;
+	Search(Search const &) = delete;
+	Search &operator=(Search const &) = delete;
 	// Test whether the searched value exceeds an inter-grain threshold. A false
 	// result can also mean cancellation; callers must inspect stopped().
 	bool test(int testValue, int depth);

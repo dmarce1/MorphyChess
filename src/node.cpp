@@ -272,8 +272,8 @@ void Node::restore() {
 // Cheap victim/attacker ordering with a defended-square penalty. This does not
 // enumerate recaptures and is not a static exchange evaluation (SEE).
 int Node::captureMoveValue(Move move) const {
-	const Board &board = *search.boardPtr;
-	constexpr const auto &pvals = captureMaterialValues;
+	Board const &board = *search.boardPtr;
+	constexpr auto const &pvals = captureMaterialValues;
 	int targetPiece;
 	int capturingPiece;
 	int value;
@@ -322,8 +322,8 @@ bool Node::moveIsFutile(int materialBalance, int testValue) const {
 	Move move;
 	int moveMaterialGain;
 	int lastCap;
-	const Board &b = *search.boardPtr;
-	constexpr const auto &pvals = futilityMaterialValues;
+	Board const &b = *search.boardPtr;
+	constexpr auto const &pvals = futilityMaterialValues;
 
 	if ((search.boardPtr)->kingInCheck()) {
 		rc = false;

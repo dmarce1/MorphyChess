@@ -45,8 +45,8 @@ public:
 	ParallelSearch(Board &board, StaticEvaluator &evaluator, MemoryTable &table,
 				   int workerCount = defaultThreadCount);
 	~ParallelSearch();
-	ParallelSearch(const ParallelSearch &) = delete;
-	ParallelSearch &operator=(const ParallelSearch &) = delete;
+	ParallelSearch(ParallelSearch const &) = delete;
+	ParallelSearch &operator=(ParallelSearch const &) = delete;
 	SearchResult run(int depth, double seconds = 0.0, int initialGuess = 0);
 	void start(int depth, double seconds = 0.0);
 	bool ready() const;
@@ -59,12 +59,12 @@ public:
 	void setComputerColor(int value);
 	// Handlers run on search tasks; they must not call blocking lifecycle
 	// methods.
-	void setProgressHandler(std::function<void(const SearchResult &)> handler);
+	void setProgressHandler(std::function<void(SearchResult const &)> handler);
 	Book &openingBook() { return book; }
-	const Book &openingBook() const { return book; }
+	Book const &openingBook() const { return book; }
 	void setLearning(bool value);
 	void triggerLearning(int computerSide, Result result);
-	const EvaluatorParameters &parameters() const { return evalParams; }
+	EvaluatorParameters const &parameters() const { return evalParams; }
 
 private:
 	enum class Stage { waiting, searching, finalSearching, complete };
@@ -104,7 +104,7 @@ private:
 	int computerColor{white};
 	bool timed{};
 	std::chrono::steady_clock::time_point deadline;
-	std::function<void(const SearchResult &)> progressHandler;
+	std::function<void(SearchResult const &)> progressHandler;
 	Book book;
 	bool learningOn{};
 	std::vector<Board> learningPositions;

@@ -13,7 +13,7 @@ namespace morphy_chess {
 // The backward recurrence computes all TD(lambda) weights in O(T) time.
 // See bibliography.md [td_learning].
 std::vector<double>
-temporalDifferenceWeights(const std::vector<double> &predictions, double target,
+temporalDifferenceWeights(std::vector<double> const &predictions, double target,
 						  double lambda) {
 	if (!std::isfinite(lambda) || lambda < 0.0 || lambda > 1.0 ||
 		!std::isfinite(target)) {
@@ -23,12 +23,12 @@ temporalDifferenceWeights(const std::vector<double> &predictions, double target,
 	double accumulated = 0.0;
 	for (size_t reverseIndex = predictions.size(); reverseIndex > 0;
 		 --reverseIndex) {
-		const size_t index = reverseIndex - 1;
+		size_t const index = reverseIndex - 1;
 		if (!std::isfinite(predictions[index])) {
 			throw std::invalid_argument(
 				"Non-finite evaluation in learning history");
 		}
-		const double next =
+		double const next =
 			index + 1 < predictions.size() ? predictions[index + 1] : target;
 		accumulated = next - predictions[index] + lambda * accumulated;
 		if (!std::isfinite(accumulated)) {
@@ -57,10 +57,10 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 	if (computerSide != white && computerSide != black) {
 		throw std::invalid_argument("Invalid learning perspective");
 	}
-	const double perspective = computerSide == white ? 1.0 : -1.0;
+	double const perspective = computerSide == white ? 1.0 : -1.0;
 	// Predictions and the terminal result must use the same player's view:
 	// +1 for this engine's win, -1 for its loss, and zero for a draw.
-	const double target = perspective * (result == whiteWin	  ? 1.0
+	double const target = perspective * (result == whiteWin	  ? 1.0
 										 : result == blackWin ? -1.0
 															  : 0.0);
 	std::vector<double> predictions;
@@ -69,8 +69,8 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 	// The stored boards are principal-variation leaves. Re-evaluate each with
 	// quiescence before applying TD(lambda), a TDLeaf-style adaptation rather
 	// than training only on the root positions. See bibliography.md [tdleaf].
-	auto evaluate = [&](const Board &position,
-						const EvaluatorParameters &parameters) {
+	auto evaluate = [&](Board const &position,
+						EvaluatorParameters const &parameters) {
 		Board copy = position;
 		StaticEvaluator value(parameters);
 		value.setGrainSize(delta);
@@ -79,10 +79,10 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 		scratch.reset();
 		// quiescentValue returns a White-relative centipawn score. Convert to
 		// pawns, squash with tanh, then adopt the engine's fixed perspective.
-		const double score = search.quiescentValue(0);
+		double const score = search.quiescentValue(0);
 		return perspective * std::tanh(value.beta() * score / 100.0);
 	};
-	for (const auto &position : learningPositions) {
+	for (auto const &position : learningPositions) {
 		predictions.push_back(evaluate(position, evalParams));
 		EvaluatorParameters jacobian;
 		// Centered finite differences estimate sensitivity through the actual
@@ -91,14 +91,14 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 		for (size_t index = 0; index < evalParams.size(); ++index) {
 			EvaluatorParameters perturbed = evalParams;
 			perturbed[index] += delta;
-			const double above = evaluate(position, perturbed);
+			double const above = evaluate(position, perturbed);
 			perturbed[index] -= 2 * delta;
-			const double below = evaluate(position, perturbed);
+			double const below = evaluate(position, perturbed);
 			jacobian[index] = (above - below) / (2.0 * delta);
 		}
 		jacobians.push_back(jacobian);
 	}
-	const auto weights = temporalDifferenceWeights(predictions, target, lambda);
+	auto const weights = temporalDifferenceWeights(predictions, target, lambda);
 	// Batch update: every prediction and derivative uses the old parameters;
 	// apply alpha * sum_t(weight_t * gradient_t) only after the game is over.
 	EvaluatorParameters updatedParameters = evalParams;
@@ -115,13 +115,13 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 	// Keep the original brain file until the complete native-double payload
 	// and text history have been written. Rename publishes the candidate;
 	// live weights and cached evaluations change only after that succeeds.
-	const std::filesystem::path temporaryBrain = "brain.dat.tmp";
+	std::filesystem::path const temporaryBrain = "brain.dat.tmp";
 	try {
 		std::ofstream brain(temporaryBrain, std::ios::binary | std::ios::trunc);
 		if (!brain) {
 			throw std::runtime_error("Unable to write learning parameters");
 		}
-		brain.write(reinterpret_cast<const char *>(updatedParameters.data()),
+		brain.write(reinterpret_cast<char const *>(updatedParameters.data()),
 					static_cast<std::streamsize>(sizeof(double) *
 												 updatedParameters.size()));
 		brain.close();

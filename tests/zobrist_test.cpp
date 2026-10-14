@@ -12,7 +12,7 @@ namespace {
 // in a fixed order to verify the complete table without duplicating it here.
 constexpr std::uint64_t legacyKeyFingerprint() {
 	std::uint64_t fingerprint = 14695981039346656037ULL;
-	const auto append = [&](std::uint64_t key) {
+	auto const append = [&](std::uint64_t key) {
 		for (int byte = 0; byte < 8; ++byte) {
 			fingerprint ^= (key >> (8 * byte)) & 0xff;
 			fingerprint *= 1099511628211ULL;
@@ -41,7 +41,7 @@ static_assert(zobristRepeatKey(0) == 0);
 static_assert(zobristRepeatKey(2) == 2);
 
 struct HashFixture {
-	const char *fen;
+	char const *fen;
 	std::uint64_t positionKey;
 	std::uint64_t pawnKey;
 };
@@ -70,7 +70,7 @@ TEST(Zobrist, PreservesEveryLegacyKey) {
 
 TEST(Zobrist, PreservesPositionAndPawnHashesFromRuntimeTables) {
 	Board board;
-	for (const auto &fixture : legacyHashes) {
+	for (auto const &fixture : legacyHashes) {
 		SCOPED_TRACE(fixture.fen);
 		ASSERT_TRUE(board.loadFen(fixture.fen));
 		EXPECT_EQ(board.positionKey(), fixture.positionKey);

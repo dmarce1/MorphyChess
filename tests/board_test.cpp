@@ -15,7 +15,7 @@ std::uint64_t perft(Board &board, int depth) {
 		return 1;
 	}
 	std::array<Move, maxMoves> moves;
-	const int count = board.genPseudolegalMoves(moves.data());
+	int const count = board.genPseudolegalMoves(moves.data());
 	std::uint64_t result = 0;
 	for (int index = 0; index < count; ++index) {
 		if (board.makeMove(moves[index])) {
@@ -25,7 +25,7 @@ std::uint64_t perft(Board &board, int depth) {
 	}
 	return result;
 }
-void expectSamePosition(const Board &lhs, const Board &rhs) {
+void expectSamePosition(Board const &lhs, Board const &rhs) {
 	for (int square = 0; square < 64; ++square) {
 		EXPECT_EQ(lhs.pieceValue(square), rhs.pieceValue(square));
 	}
@@ -46,7 +46,7 @@ TEST(Move, EmptyValueCoordinatesAndPromotionParsing) {
 	EXPECT_EQ(Move::fromString("e2e4"), Move(12, 28));
 	EXPECT_EQ(Move::fromString("a7a8q"), Move(48, 56, queen));
 	EXPECT_EQ(Move::fromString("a7a8=N"), Move(48, 56, knight));
-	for (const char *text :
+	for (char const *text :
 		 {"", "a", "a1", "a1b", "i1a1", "a0a1", "a7a8k", "a7a8="}) {
 		EXPECT_TRUE(Move::fromString(text).isEmpty()) << text;
 	}
@@ -77,8 +77,8 @@ TEST(Board, CastlingPositionPerftAndEnPassantEndgame) {
 }
 TEST(Board, RejectsMalformedFenWithoutChangingPosition) {
 	Board board;
-	const Board before = board;
-	for (const char *fen :
+	Board const before = board;
+	for (char const *fen :
 		 {"", "8/8", "8/8/8/8/8/8/8/8 w - - 0 1", "8/8/8/8/8/8/8/K6k x - - 0 1",
 		  "8/8/8/8/8/8/8/K6k w K - 0 1", "8/8/8/8/8/8/8/K6k w - z9 0 1",
 		  "8/8/8/8/8/8/8/K6k w - - -1 1"}) {
@@ -90,7 +90,7 @@ TEST(Board, RejectsMalformedFenWithoutChangingPosition) {
 }
 TEST(Board, MaterialDrawIsIndependentOfHalfmoveClock) {
 	Board board;
-	for (const char *fen :
+	for (char const *fen :
 		 {"7k/8/8/8/8/8/8/K7 w - - 0 1", "7k/8/8/8/8/8/8/K7 w - - 1 1",
 		  "7k/8/8/8/8/8/8/KN6 w - - 99 1"}) {
 		ASSERT_TRUE(board.loadFen(fen));
@@ -100,13 +100,13 @@ TEST(Board, MaterialDrawIsIndependentOfHalfmoveClock) {
 }
 TEST(Board, MoveUndoCastlingEnPassantPromotionAndHashConsistency) {
 	Board board;
-	const std::array<std::pair<const char *, Move>, 3> examples{
+	std::array<std::pair<char const *, Move>, 3> const examples{
 		{{"r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1", Move(kE1, kG1)},
 		 {"7k/8/8/3pP3/8/8/8/K7 w - d6 0 1", Move(36, 43)},
 		 {"7k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, queen)}}};
-	for (const auto &[fen, move] : examples) {
+	for (auto const &[fen, move] : examples) {
 		ASSERT_TRUE(board.loadFen(fen));
-		const Board original = board;
+		Board const original = board;
 		ASSERT_TRUE(board.isPseudoLegalMove(move));
 		ASSERT_TRUE(board.makeMove(move));
 		EXPECT_EQ(board.positionKey(), board.computePositionKey());
@@ -118,14 +118,14 @@ TEST(Board, MoveUndoCastlingEnPassantPromotionAndHashConsistency) {
 	EXPECT_FALSE(board.undoMove());
 }
 TEST(Board, EnPassantIsACaptureAndSeeRestoresBothColors) {
-	const std::array<std::pair<const char *, Move>, 2> examples{
+	std::array<std::pair<char const *, Move>, 2> const examples{
 		{{"4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1", Move(36, 43)},
 		 {"4k3/8/8/8/3Pp3/8/8/4K3 b - d3 0 1", Move(28, 19)}}};
-	for (const auto &[fen, move] : examples) {
+	for (auto const &[fen, move] : examples) {
 		SCOPED_TRACE(fen);
 		Board board;
 		ASSERT_TRUE(board.loadFen(fen));
-		const Board original = board;
+		Board const original = board;
 		EXPECT_TRUE(board.moveIsCapture(move));
 		EXPECT_EQ(board.see(move, 0), 100);
 		expectSamePosition(board, original);
@@ -155,20 +155,20 @@ TEST(Board, NullMoveDoesNotInheritThePreviousCapture) {
 	EXPECT_TRUE(board.lastMoveWasCapture());
 }
 TEST(Board, SeeTriesLegalRecapturesAfterPinnedAttackers) {
-	const std::array<std::pair<const char *, Move>, 2> examples{
+	std::array<std::pair<char const *, Move>, 2> const examples{
 		{{"3rk3/4p3/3n4/2B5/8/8/8/K3R3 w - - 0 1", Move(kD8, 43)},
 		 {"2k5/2p1p3/3n4/2B5/8/8/8/K1R5 w - - 0 1", Move(52, 43)}}};
-	for (const auto &[fen, recapture] : examples) {
+	for (auto const &[fen, recapture] : examples) {
 		SCOPED_TRACE(fen);
 		Board board;
 		ASSERT_TRUE(board.loadFen(fen));
-		const Board original = board;
-		const Move capture(34, 43);
+		Board const original = board;
+		Move const capture(34, 43);
 		// The bishop wins a knight and is recaptured: material is equal.
 		EXPECT_EQ(board.see(capture, 0), 0);
 		expectSamePosition(board, original);
 		ASSERT_TRUE(board.makeMove(capture));
-		const Board afterCapture = board;
+		Board const afterCapture = board;
 		Move selected;
 		ASSERT_TRUE(board.genLvaAttackToSquare(selected, 43));
 		EXPECT_EQ(selected, recapture);
@@ -181,22 +181,22 @@ TEST(Board, SeeTriesLegalRecapturesAfterPinnedAttackers) {
 }
 TEST(Board, SeeIncludesPromotionGainAndSubsequentRecapture) {
 	struct Example {
-		const char *fen;
+		char const *fen;
 		Move move;
 		int score;
 	};
-	const std::array<Example, 6> examples{
+	std::array<Example, 6> const examples{
 		{{"7k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, queen), 800},
 		 {"7k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, knight), 200},
 		 {"1r5k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 57, queen), 1300},
 		 {"1r5k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, queen), -100},
 		 {"7K/8/8/8/8/8/p7/7k b - - 0 1", Move(8, 0, queen), 800},
 		 {"7k/8/8/8/8/R6K/1p6/b7 w - - 0 1", Move(16, 0), -1000}}};
-	for (const auto &[fen, move, score] : examples) {
+	for (auto const &[fen, move, score] : examples) {
 		SCOPED_TRACE(fen);
 		Board board;
 		ASSERT_TRUE(board.loadFen(fen));
-		const Board original = board;
+		Board const original = board;
 		ASSERT_TRUE(board.isLegalMove(move));
 		EXPECT_EQ(board.see(move, 0), score);
 		expectSamePosition(board, original);
@@ -208,14 +208,14 @@ TEST(Board, PromotedArmyUsesMoreThanLegacyMoveBuffer) {
 	Board board;
 	ASSERT_TRUE(board.loadFen("7k/4QQ2/Q5Q1/2Q5/5Q1Q/3Q4/2Q5/K7 w - - 0 1"));
 	std::array<Move, maxMoves> moves;
-	const int count = board.genPseudolegalMoves(moves.data());
+	int const count = board.genPseudolegalMoves(moves.data());
 	EXPECT_GT(count, 128);
 	EXPECT_LT(count, maxMoves);
 	EXPECT_TRUE(moves[count].isEmpty());
 }
 TEST(Board, RepetitionAndValueCopyPreserveHistory) {
 	Board board;
-	const std::array<Move, 4> cycle{Move(6, 21), Move(62, 45), Move(21, 6),
+	std::array<Move, 4> const cycle{Move(6, 21), Move(62, 45), Move(21, 6),
 									Move(45, 62)};
 	for (int repetition = 0; repetition < 2; ++repetition) {
 		for (Move move : cycle) {
@@ -237,7 +237,7 @@ TEST(Board, RepetitionAndValueCopyPreserveHistory) {
 }
 TEST(Board, SanDisambiguationIgnoresPinnedCandidates) {
 	Board board;
-	for (const char *move :
+	for (char const *move :
 		 {"e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "exd5", "Nxd5",
 		  "Nxf7", "Kxf7", "Qf3+", "Ke6", "Nc3"}) {
 		ASSERT_FALSE(board.makeTextMove(move).isEmpty()) << move;
@@ -246,16 +246,16 @@ TEST(Board, SanDisambiguationIgnoresPinnedCandidates) {
 }
 TEST(Board, TextMovesRejectWrappedCoordinatesWithoutChangingPosition) {
 	Board board;
-	const Board initial = board;
-	for (const char *text :
+	Board const initial = board;
+	for (char const *text :
 		 {"e2u2", "e0e4", "e2e9", "e", "", "Xe4", "e2ee4", "\xFF" "e4"}) {
 		SCOPED_TRACE(text);
 		EXPECT_TRUE(board.makeTextMove(text).isEmpty());
 		expectSamePosition(board, initial);
 	}
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/8/R6K w - - 0 1"));
-	const Board rookPosition = board;
-	for (const char *text : {"a9a2", "a1a0"}) {
+	Board const rookPosition = board;
+	for (char const *text : {"a9a2", "a1a0"}) {
 		SCOPED_TRACE(text);
 		EXPECT_TRUE(board.makeTextMove(text).isEmpty());
 		expectSamePosition(board, rookPosition);
@@ -266,8 +266,8 @@ TEST(Board, TextMovesRejectWrappedCoordinatesWithoutChangingPosition) {
 TEST(Board, TextMovesRequireUniqueLegalDisambiguation) {
 	Board board;
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/8/KN3N2 w - - 0 1"));
-	const Board original = board;
-	for (const char *text : {"Nd2", "N1d2"}) {
+	Board const original = board;
+	for (char const *text : {"Nd2", "N1d2"}) {
 		SCOPED_TRACE(text);
 		EXPECT_TRUE(board.makeTextMove(text).isEmpty());
 		expectSamePosition(board, original);

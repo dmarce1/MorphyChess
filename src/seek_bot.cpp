@@ -14,7 +14,7 @@ SeekBot::~SeekBot() {
 	} catch (...) {
 	}
 }
-void SeekBot::start(std::function<void(const std::string &)> output,
+void SeekBot::start(std::function<void(std::string const &)> output,
 					std::chrono::milliseconds interval) {
 	if (!output || interval.count() <= 0) {
 		throw std::invalid_argument(
@@ -32,7 +32,7 @@ void SeekBot::start(std::function<void(const std::string &)> output,
 					output("tellics seek " +
 						   std::to_string(timeControl(random)) + " " +
 						   std::to_string(timeControl(random)) + "\n");
-					const auto next =
+					auto const next =
 						std::chrono::steady_clock::now() + interval;
 					while (!stopRequested.load() &&
 						   std::chrono::steady_clock::now() < next) {

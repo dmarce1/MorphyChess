@@ -19,7 +19,7 @@ History::History(double branchFactor) {
 		updateIncrements = defaultIncrements.values();
 	} else {
 		for (int depth = 0; depth < kMaxDepth; ++depth) {
-			const double increment = std::pow(branchFactor, depth - 1);
+			double const increment = std::pow(branchFactor, depth - 1);
 			constexpr int maximumIncrement =
 				std::numeric_limits<int>::max() / 2;
 			updateIncrements[depth] = increment >= maximumIncrement
@@ -58,7 +58,7 @@ void History::update(Move move, bool test, int depth, int ply, bool isNonCap) {
 		throw std::out_of_range(
 			"History depth and ply must be within the search bounds");
 	}
-	const int increment = updateIncrements[std::min(depth, kMaxDepth - 1)];
+	int const increment = updateIncrements[std::min(depth, kMaxDepth - 1)];
 	int &score = scores.at(move.from()).at(move.to());
 	if (score > std::numeric_limits<int>::max() - increment) {
 		halveScores();

@@ -41,7 +41,7 @@ std::vector<std::unique_lock<hpx::mutex>> MemoryTable::lockAll() {
 }
 
 void MemoryTable::reset() {
-	const auto guards = lockAll();
+	auto const guards = lockAll();
 	for (auto *store : {&upperBoundLocalStore, &lowerBoundLocalStore,
 						&upperBoundGlobalStore, &lowerBoundGlobalStore}) {
 		for (auto &color : *store) {
@@ -51,7 +51,7 @@ void MemoryTable::reset() {
 }
 
 void MemoryTable::resetTouchedFlags() {
-	const auto guards = lockAll();
+	auto const guards = lockAll();
 	for (auto *store : {&upperBoundLocalStore, &lowerBoundLocalStore,
 						&upperBoundGlobalStore, &lowerBoundGlobalStore}) {
 		for (auto &color : *store) {
@@ -63,7 +63,7 @@ void MemoryTable::resetTouchedFlags() {
 }
 
 void MemoryTable::killUntouchedEntries() {
-	const auto guards = lockAll();
+	auto const guards = lockAll();
 	for (auto *store : {&upperBoundLocalStore, &lowerBoundLocalStore,
 						&upperBoundGlobalStore, &lowerBoundGlobalStore}) {
 		for (auto &color : *store) {
@@ -88,13 +88,13 @@ void MemoryTable::write(Search &search, Move move, bool testResult,
 		throw std::out_of_range(
 			"Search thread index exceeds transposition table partition count");
 	}
-	const std::uint64_t key = search.boardPtr->positionKey();
-	const auto key32 = static_cast<U32>(key);
-	const int globalIndex = key32 % entryCount;
-	const int localIndex =
+	std::uint64_t const key = search.boardPtr->positionKey();
+	auto const key32 = static_cast<U32>(key);
+	int const globalIndex = key32 % entryCount;
+	int const localIndex =
 		search.threadNumber * localEntryCount + key32 % localEntryCount;
-	const int colorIndex = search.boardPtr->sideToMove();
-	const std::lock_guard<hpx::mutex> lock(locks[globalIndex % lockCount]);
+	int const colorIndex = search.boardPtr->sideToMove();
+	std::lock_guard<hpx::mutex> const lock(locks[globalIndex % lockCount]);
 	MemoryEntry entry;
 	entry.key = key;
 	// testScore lies between score grains. Shift to the proved side of the
@@ -128,15 +128,15 @@ bool MemoryTable::read(Search &search, Move &move, int &lowerBound,
 		throw std::out_of_range(
 			"Search thread index exceeds transposition table partition count");
 	}
-	const std::uint64_t key = search.boardPtr->positionKey();
-	const auto key32 = static_cast<U32>(key);
-	const int globalIndex = key32 % entryCount;
-	const int localIndex =
+	std::uint64_t const key = search.boardPtr->positionKey();
+	auto const key32 = static_cast<U32>(key);
+	int const globalIndex = key32 % entryCount;
+	int const localIndex =
 		search.threadNumber * localEntryCount + key32 % localEntryCount;
-	const int colorIndex = search.boardPtr->sideToMove();
-	const std::lock_guard<hpx::mutex> lock(locks[globalIndex % lockCount]);
-	const int fiftyMoveRule = search.boardPtr->fiftyMoveRule();
-	const auto matches = [key, fiftyMoveRule](const MemoryEntry &entry) {
+	int const colorIndex = search.boardPtr->sideToMove();
+	std::lock_guard<hpx::mutex> const lock(locks[globalIndex % lockCount]);
+	int const fiftyMoveRule = search.boardPtr->fiftyMoveRule();
+	auto const matches = [key, fiftyMoveRule](MemoryEntry const &entry) {
 		return entry.key == key && entry.depth >= 0 &&
 			   entry.fiftyMoveRule == fiftyMoveRule;
 	};

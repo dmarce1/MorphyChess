@@ -14,11 +14,11 @@ bool Board::loadEgtbIndex(int thirdMan, int index, int sideToMove) {
 		(sideToMove != white && sideToMove != black)) {
 		return false;
 	}
-	const int thirdIndex = index % 62;
+	int const thirdIndex = index % 62;
 	index /= 62;
-	const int blackIndex = index % 63;
-	const int whiteKing = index / 63;
-	const int blackKing = blackIndex + (blackIndex >= whiteKing);
+	int const blackIndex = index % 63;
+	int const whiteKing = index / 63;
+	int const blackKing = blackIndex + (blackIndex >= whiteKing);
 	int thirdSquare = -1;
 	int remaining = thirdIndex;
 	for (int square = 0; square < 64; ++square) {
@@ -38,7 +38,7 @@ bool Board::loadEgtbIndex(int thirdMan, int index, int sideToMove) {
 	for (int rank = 7; rank >= 0; --rank) {
 		int emptyCount = 0;
 		for (int file = 0; file < 8; ++file) {
-			const char piece = squares[8 * rank + file];
+			char const piece = squares[8 * rank + file];
 			if (piece == 0) {
 				++emptyCount;
 				continue;
@@ -83,9 +83,9 @@ int Board::threeManEgtbIndex(int thirdMan, int pieceColor) const {
 		blackKing ^= 56;
 		thirdSquare ^= 56;
 	}
-	const int blackIndex = blackKing - (blackKing > whiteKing);
+	int const blackIndex = blackKing - (blackKing > whiteKing);
 	// Remove the occupied king squares from the third piece's ordinal.
-	const int thirdIndex =
+	int const thirdIndex =
 		thirdSquare - (thirdSquare > whiteKing) - (thirdSquare > blackKing);
 	return (whiteKing * 63 + blackIndex) * 62 + thirdIndex;
 }

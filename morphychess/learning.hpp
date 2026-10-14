@@ -6,6 +6,6 @@ namespace morphy_chess {
 // lambda=0 uses the next prediction; lambda=1 uses target-prediction at
 // every position. Inputs must be finite and lambda must lie in [0, 1].
 std::vector<double>
-temporalDifferenceWeights(const std::vector<double> &predictions, double target,
+temporalDifferenceWeights(std::vector<double> const &predictions, double target,
 						  double lambda);
 } // namespace morphy_chess

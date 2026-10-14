@@ -43,8 +43,8 @@ public:
 		if (piece == empty) {
 			return 0;
 		}
-		const int pieceIndex = (piece < 0 ? -piece : piece) - 1;
-		const int color = piece < 0 ? 1 : 0;
+		int const pieceIndex = (piece < 0 ? -piece : piece) - 1;
+		int const color = piece < 0 ? 1 : 0;
 		return keys[color * 384 + pieceIndex * 64 + square];
 	}
 	[[nodiscard]] constexpr std::uint64_t
