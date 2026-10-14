@@ -9,7 +9,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(HPX 1.11 REQUIRED)
 
 add_library(morphychess
-    src/bits.cpp
     src/board.cpp
     src/book.cpp
     src/debug.cpp
@@ -18,7 +17,6 @@ add_library(morphychess
     src/history.cpp
     src/learning.cpp
     src/memory.cpp
-    src/move_data.cpp
     src/node.cpp
     src/parallel_search.cpp
     src/pawn_statistics.cpp
@@ -29,7 +27,6 @@ add_library(morphychess
     src/see.cpp
     src/seek_bot.cpp
     src/static_evaluator.cpp
-    src/zobrist.cpp
     src/command_line.cpp
     src/bench.cpp
     src/xboard.cpp

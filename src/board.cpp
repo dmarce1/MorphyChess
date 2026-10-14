@@ -1477,13 +1477,54 @@ Result Board::result() {
 	return inProgress;
 }
 
+std::uint64_t Board::computePositionKey() const {
+	std::uint64_t key;
+	int i;
+
+	key = 0LL;
+	for (i = 0; i < 64; i++) {
+		key ^= zobristKey(pieceValue(i), i);
+	}
+	if (flags().whiteKingSide() == 0) {
+		key ^= zobristKingSideCastleKey(white);
+	}
+	if (flags().whiteQueenSide() == 0) {
+		key ^= zobristQueenSideCastleKey(white);
+	}
+	if (flags().blackKingSide() == 0) {
+		key ^= zobristKingSideCastleKey(black);
+	}
+	if (flags().blackQueenSide() == 0) {
+		key ^= zobristQueenSideCastleKey(black);
+	}
+	if (flags().epCaptureSquare() != 0) {
+		key ^= zobristEpKey(flags().epCaptureSquare());
+	}
+	//	key ^= zobrist_repeat_key( flags().repeat_count() );
+
+	return key;
+}
+
+std::uint64_t Board::computePawnKey() const {
+	std::uint64_t key;
+	int i;
+
+	key = 0LL;
+	for (i = 0; i < 64; i++) {
+		if ((abs(pieceValue(i)) == pawn) || (abs(pieceValue(i)) == king)) {
+			key ^= zobristKey(pieceValue(i), i);
+		}
+	}
+	if (flags().epCaptureSquare() != 0) {
+		key ^= zobristEpKey(flags().epCaptureSquare());
+	}
+
+	return key;
+}
+
 void Board::copy(const Board &source) { *this = source; }
 
-Board::Board() {
-	initMoveData();
-	initZobristKeys();
-	reset();
-}
+Board::Board() { reset(); }
 
 void Board::reset() { loadFen(initialPosition); }
 

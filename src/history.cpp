@@ -6,17 +6,26 @@
 #include <stdexcept>
 
 namespace morphy_chess {
+namespace {
+constexpr HistoryIncrements defaultIncrements;
+} // namespace
+
 History::History(double branchFactor) {
 	if (!std::isfinite(branchFactor) || branchFactor <= 0.0) {
 		throw std::invalid_argument(
 			"History branch factor must be positive and finite");
 	}
-	for (int depth = 0; depth < kMaxDepth; ++depth) {
-		const double increment = std::pow(branchFactor, depth - 1);
-		constexpr int maximumIncrement = std::numeric_limits<int>::max() / 2;
-		updateIncrements[depth] = increment >= maximumIncrement
-									  ? maximumIncrement
-									  : static_cast<int>(increment);
+	if (branchFactor == kDefaultHistoryBranchFactor) {
+		updateIncrements = defaultIncrements.values();
+	} else {
+		for (int depth = 0; depth < kMaxDepth; ++depth) {
+			const double increment = std::pow(branchFactor, depth - 1);
+			constexpr int maximumIncrement =
+				std::numeric_limits<int>::max() / 2;
+			updateIncrements[depth] = increment >= maximumIncrement
+										  ? maximumIncrement
+										  : static_cast<int>(increment);
+		}
 	}
 	reset();
 }

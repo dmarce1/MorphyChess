@@ -4,6 +4,7 @@
 #include <morphychess/static_evaluator.hpp>
 
 #include <chrono>
+#include <cmath>
 #include <gtest/gtest.h>
 #include <hpx/modules/async_local.hpp>
 #include <hpx/modules/threading.hpp>
@@ -60,6 +61,35 @@ TEST(HistoryTest, DeepUpdatesDoNotOverflow) {
 	EXPECT_THROW(History(0.0), std::invalid_argument);
 	EXPECT_THROW(History(std::numeric_limits<double>::infinity()),
 				 std::invalid_argument);
+}
+
+TEST(HistoryTest, DefaultAndCustomFactorsRetainDepthIncrements) {
+	constexpr HistoryIncrements defaultIncrements;
+	constexpr int maximumIncrement = std::numeric_limits<int>::max() / 2;
+	static_assert(defaultIncrements[0] == 0);
+	static_assert(defaultIncrements[1] == 1);
+	static_assert(defaultIncrements[15] == 268435456);
+	static_assert(defaultIncrements[16] == maximumIncrement);
+	static_assert(defaultIncrements[kMaxDepth - 1] == maximumIncrement);
+	const Move move(12, 28);
+	for (double branchFactor :
+		 {0.5, 1.0, 1.25, 3.5, kDefaultHistoryBranchFactor, 4.000001,
+		  1.0e100}) {
+		History history(branchFactor);
+		for (int depth = 1; depth < kMaxDepth; ++depth) {
+			const double value = std::pow(branchFactor, depth - 1);
+			const int expected = value >= maximumIncrement
+									 ? maximumIncrement
+									 : static_cast<int>(value);
+			history.reset();
+			history.update(move, true, depth, 0, true);
+			EXPECT_EQ(history.moveHistory(move), expected)
+				<< "branch factor " << branchFactor << ", depth " << depth;
+			if (branchFactor == kDefaultHistoryBranchFactor) {
+				EXPECT_EQ(defaultIncrements[depth], expected);
+			}
+		}
+	}
 }
 
 TEST_F(SearchTest, DefaultEvaluatorBalancesStartingPosition) {

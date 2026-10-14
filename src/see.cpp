@@ -1,5 +1,5 @@
-#include <array>
 #include <morphychess/board.hpp>
+#include <morphychess/material_values.hpp>
 #include <stdlib.h>
 
 namespace morphy_chess {
@@ -22,7 +22,9 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-std::array<int, 7> materialScore = {0, 100, 300, 300, 500, 900, 1000};
+namespace {
+constexpr MaterialValues materialScore({0, 100, 300, 300, 500, 900, 1000});
+} // namespace
 
 int Board::see(Move move, int score) {
 	Move reply;

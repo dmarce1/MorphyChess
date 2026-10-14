@@ -1,7 +1,7 @@
-#include <array>
 #include <morphychess/debug.hpp>
 #include <morphychess/history.hpp>
 #include <morphychess/integers.hpp>
+#include <morphychess/material_values.hpp>
 #include <morphychess/node.hpp>
 #include <morphychess/params.hpp>
 #include <stdexcept>
@@ -27,6 +27,13 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	You should have received a copy of the GNU General Public License
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
+
+namespace {
+constexpr MaterialValues captureMaterialValues({0, 100, 300, 300, 500, 900,
+												kInfty});
+constexpr MaterialValues futilityMaterialValues({0, 100, 325, 325, 500, 900,
+												 kInfty});
+} // namespace
 
 int Node::totalMoves() const { return totalMovesGenerated; }
 
@@ -256,8 +263,7 @@ void Node::restore() {
 
 int Node::captureMoveValue(Move move) const {
 	const Board &board = *search.boardPtr;
-	static const std::array<int, 7> pvals = {0,	  100, 300,	  300,
-											 500, 900, kInfty};
+	constexpr const auto &pvals = captureMaterialValues;
 	int targetPiece;
 	int capturingPiece;
 	int value;
@@ -301,8 +307,7 @@ bool Node::moveIsFutile(int materialBalance, int testValue) const {
 	int moveMaterialGain;
 	int lastCap;
 	const Board &b = *search.boardPtr;
-	static const std::array<int, 7> pvals = {0,	  100, 325,	  325,
-											 500, 900, kInfty};
+	constexpr const auto &pvals = futilityMaterialValues;
 
 	if ((search.boardPtr)->kingInCheck()) {
 		rc = false;

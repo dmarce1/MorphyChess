@@ -87,9 +87,17 @@ recomputation, material evaluation, static exchange evaluation, consistency
 checks, and three-piece endgame indexing. `Move::coordinateString` formats
 protocol coordinates; capture ordering is a private `Node` method.
 Conversions to and from raw integers are explicit; position hashes and counters
-remain integer types. Move-table initialization, key lookups, ratings, and
-other independent algorithms remain ordinary functions. Searches use private board copies,
-shared synchronized caches, cooperative cancellation, and joined futures.
+remain integer types. `MoveData`, `BitboardMasks`, and `ZobristData` provide
+constexpr instance lookups backed by shared inline constexpr objects. Their
+headers contain the implementations; `RotatedBitboard` methods live in
+`bits.hpp`. The former initialization functions remain compatibility no-ops.
+Zobrist data preserves all 780 legacy keys for opening-book compatibility.
+`HistoryIncrements` generates the default increment table at compile time;
+custom branch factors retain runtime generation. `MaterialValues` holds the
+fixed values used by exchange and move-ordering algorithms. Ratings and other
+independent algorithms remain ordinary functions.
+Searches use private board copies, shared synchronized caches, cooperative
+cancellation, and joined futures.
 
 CTest runs the full unit suite with one and four HPX workers, plus executable
 help, option validation, version, and benchmark smoke tests. Coverage includes move generation and
