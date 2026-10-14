@@ -7,7 +7,7 @@ int runTests() {
 	return result;
 }
 } // namespace
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
 	::testing::InitGoogleTest(&argc, argv);
 	hpx::local::init_params parameters;
 	parameters.cfg = {"hpx.os_threads=1", "hpx.stacks.small_size=0x400000",

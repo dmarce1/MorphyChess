@@ -15,28 +15,29 @@ class Search {
 	friend class MemoryTable;
 
 public:
-	Search(Board *board, StaticEvaluator *evaluator, MemoryTable *table);
+	Search(Board &board, StaticEvaluator &evaluator, MemoryTable &table);
 	Search(const Search &) = delete;
 	Search &operator=(const Search &) = delete;
 	bool test(int testValue, int depth);
 	bool quiescentTest(int testValue);
 	int quiescentValue(int guess);
-	int serialTestDriver(Move *move, int depth, int initialGuess);
-	void reconstructPrincipalVariation(Board *leafNode, Move *pv, int depth,
-									   bool print = false);
+	int serialTestDriver(Move &move, int depth, int initialGuess);
+	void reconstructPrincipalVariation(Board *leafNode,
+									   std::array<Move, kMaxDepth + 1> &pv,
+									   int depth, bool print = false);
 	void resetCounters();
 	void requestStop();
 	void clearStop();
-	void setBoard(Board *board);
+	void setBoard(Board &board);
 	void setKillTime(std::time_t killTime);
 	void setGrainSize(int value);
 	void setThreadNumber(int threadNumber);
 	void setContemptFactor(int value);
 	void setComputerColor(int color);
 	void setBestMove(Move move) { bestMoveValue = move; }
-	Board *board() const { return boardPtr; }
-	StaticEvaluator *evaluator() const { return evaluatorPtr; }
-	MemoryTable *table() const { return tablePtr; }
+	Board &board() const { return *boardPtr; }
+	StaticEvaluator &evaluator() const { return evaluatorRef; }
+	MemoryTable &table() const { return tableRef; }
 	Move bestMove() const { return bestMoveValue; }
 	int nodeCount() const { return nodesVisited; }
 	int tableHits() const { return tableHitCount; }
@@ -54,10 +55,11 @@ private:
 	bool nullTest(int testValue, int depth);
 	bool extensionNeeded();
 	void checkKill();
+	// Borrowed, non-null board; setBoard() can rebind it.
 	Board *boardPtr;
-	StaticEvaluator *evaluatorPtr;
+	StaticEvaluator &evaluatorRef;
 	History history;
-	MemoryTable *tablePtr;
+	MemoryTable &tableRef;
 	bool verifyNullMove{true};
 	std::atomic<bool> stopRequested{false};
 	Move bestMoveValue{};

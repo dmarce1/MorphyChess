@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <ctime>
 #include <hpx/modules/async_local.hpp>
@@ -22,7 +23,7 @@ ParallelSearch::ParallelSearch(Board &board, StaticEvaluator &evaluator,
 	for (int index = 0; index < workerCount; ++index) {
 		boards.push_back(std::make_unique<Board>(board));
 		searches.push_back(
-			std::make_unique<Search>(boards.back().get(), &evaluator, &table));
+			std::make_unique<Search>(*boards.back(), evaluator, table));
 		searches.back()->setThreadNumber(index);
 	}
 }
@@ -163,8 +164,8 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 		// future.
 		workers.reserve(workerCount);
 		Move fallback;
-		Move moves[maxMoves];
-		const int moveCount = rootBoard.genPseudolegalMoves(moves);
+		std::array<Move, maxMoves> moves;
+		const int moveCount = rootBoard.genPseudolegalMoves(moves.data());
 		for (int index = 0; index < moveCount; ++index) {
 			if (rootBoard.isLegalMove(moves[index])) {
 				fallback = moves[index];
@@ -235,7 +236,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 							  : 0;
 		if (learningOn) {
 			Board leaf = rootBoard;
-			Move variation[kMaxDepth + 1];
+			std::array<Move, kMaxDepth + 1> variation;
 			searches.front()->setBestMove(selected);
 			searches.front()->reconstructPrincipalVariation(
 				&leaf, variation, completedDepth, false);

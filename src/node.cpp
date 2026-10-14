@@ -1,3 +1,4 @@
+#include <array>
 #include <morphychess/debug.hpp>
 #include <morphychess/history.hpp>
 #include <morphychess/integers.hpp>
@@ -28,22 +29,22 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-static int captureMoveValue(Board *, Move);
+static int captureMoveValue(const Board &, Move);
 
 int Node::totalMoves() const { return totalMovesGenerated; }
 
-Node::Node(Search *searchValue, Move move) {
+Node::Node(Search &searchValue, Move move) :
+	search(searchValue) {
 	firstNoncap = false;
 	mgStage = GenStage::start;
-	search = searchValue;
 	totalMovesGenerated = 0;
-	search->nodesVisited++;
+	search.nodesVisited++;
 	tableMove = move;
 	movesInQueue = 0;
 	(killer).setEmpty();
 }
 
-int Node::doNextMove(Move *branch) {
+int Node::doNextMove(Move &branch) {
 	Move move;
 	int i, rc, bestScore, score, bestI;
 
@@ -64,7 +65,7 @@ tryAgain:
 		[[fallthrough]];
 	case GenStage::table:
 		mgStage = GenStage::promotions;
-		movesInQueue = (search->boardPtr)->genPseudolegalPromotions(list.data());
+		movesInQueue = (search.boardPtr)->genPseudolegalPromotions(list.data());
 		[[fallthrough]];
 	case GenStage::promotions:
 		if (movesInQueue > 0) {
@@ -72,10 +73,10 @@ tryAgain:
 			move = list[movesInQueue];
 			break;
 		}
-		movesInQueue = (search->boardPtr)->genPseudolegalCaptures(list.data());
+		movesInQueue = (search.boardPtr)->genPseudolegalCaptures(list.data());
 		mgStage = GenStage::captures;
 		for (i = 0; i < movesInQueue; i++) {
-			scores[i] = captureMoveValue(search->boardPtr, list[i]);
+			scores[i] = captureMoveValue(*search.boardPtr, list[i]);
 		}
 		[[fallthrough]];
 	case GenStage::captures:
@@ -98,22 +99,22 @@ tryAgain:
 			}
 		}
 		mgStage = GenStage::losingCaptures;
-		move = search->history.killer1(search->currentPly);
+		move = search.history.killer1(search.currentPly);
 		if ((move.promo() == 0)) {
 			if (!(move == tableMove)) {
-				if (!(search->boardPtr)->moveIsCapture(move)) {
-					if ((search->boardPtr)->isPseudoLegalMove(move)) {
+				if (!(search.boardPtr)->moveIsCapture(move)) {
+					if ((search.boardPtr)->isPseudoLegalMove(move)) {
 						killer = move;
 						break;
 					}
 				}
 			}
 		}
-		move = search->history.killer2(search->currentPly);
+		move = search.history.killer2(search.currentPly);
 		if ((move.promo() == 0)) {
 			if (!(move == tableMove)) {
-				if (!(search->boardPtr)->moveIsCapture(move)) {
-					if ((search->boardPtr)->isPseudoLegalMove(move)) {
+				if (!(search.boardPtr)->moveIsCapture(move)) {
+					if ((search.boardPtr)->isPseudoLegalMove(move)) {
 						killer = move;
 						break;
 					}
@@ -138,7 +139,8 @@ tryAgain:
 			scores[bestI] = scores[movesInQueue];
 			break;
 		}
-		movesInQueue = (search->boardPtr)->genPseudolegalNoncaptures(list.data());
+		movesInQueue =
+			(search.boardPtr)->genPseudolegalNoncaptures(list.data());
 		mgStage = GenStage::noncaptures;
 		firstNoncap = true;
 		[[fallthrough]];
@@ -146,8 +148,7 @@ tryAgain:
 		if (movesInQueue > 0) {
 			bestScore = -kInfty;
 			for (i = 0; i < movesInQueue; i++) {
-				score =
-					search->history.moveHistory(list[i], search->currentPly);
+				score = search.history.moveHistory(list[i], search.currentPly);
 				assert(score > -kInfty);
 				if (score > bestScore) {
 					if (!(killer == list[i])) {
@@ -171,14 +172,14 @@ tryAgain:
 		rc = kNodeNoMoreMoves;
 		break;
 	}
-	*branch = move;
+	branch = move;
 	if (rc == kNodeMovesAvailable) {
 		if (((move == tableMove)) && (mgStage != GenStage::table)) {
 			goto tryAgain;
-		} else if (!(search->boardPtr)->makeMove(move)) {
+		} else if (!(search.boardPtr)->makeMove(move)) {
 			goto tryAgain;
 		} else {
-			search->currentPly++;
+			search.currentPly++;
 			totalMovesGenerated++;
 		}
 	} else if (totalMovesGenerated == 0) {
@@ -187,7 +188,7 @@ tryAgain:
 	return rc;
 }
 
-int Node::doNextNonquiescentMove(Move *branch) {
+int Node::doNextNonquiescentMove(Move &branch) {
 	Move move;
 	int i, rc, bestScore, score, bestI;
 
@@ -197,7 +198,7 @@ int Node::doNextNonquiescentMove(Move *branch) {
 tryAgain:
 	switch (mgStage) {
 	case GenStage::start:
-		movesInQueue = (search->boardPtr)->genPseudolegalPromotions(list.data());
+		movesInQueue = (search.boardPtr)->genPseudolegalPromotions(list.data());
 		mgStage = GenStage::promotions;
 		[[fallthrough]];
 	case GenStage::promotions:
@@ -206,10 +207,10 @@ tryAgain:
 			move = list[movesInQueue];
 			break;
 		}
-		movesInQueue = (search->boardPtr)->genPseudolegalCaptures(list.data());
+		movesInQueue = (search.boardPtr)->genPseudolegalCaptures(list.data());
 		mgStage = GenStage::captures;
 		for (i = 0; i < movesInQueue; i++) {
-			scores[i] = captureMoveValue(search->boardPtr, list[i]);
+			scores[i] = captureMoveValue(*search.boardPtr, list[i]);
 		}
 		[[fallthrough]];
 	case GenStage::captures:
@@ -239,10 +240,10 @@ tryAgain:
 		throw std::logic_error(
 			"Cannot mix normal and quiescent move generation on one node");
 	}
-	*branch = move;
+	branch = move;
 	if (rc == kNodeMovesAvailable) {
-		if ((search->boardPtr)->makeMove(move)) {
-			search->currentPly++;
+		if ((search.boardPtr)->makeMove(move)) {
+			search.currentPly++;
 			totalMovesGenerated++;
 		} else {
 			goto tryAgain;
@@ -252,20 +253,20 @@ tryAgain:
 }
 
 void Node::restore() {
-	search->currentPly--;
-	(search->boardPtr)->undoMove();
+	search.currentPly--;
+	(search.boardPtr)->undoMove();
 }
 
-static int captureMoveValue(Board *board, Move move) {
-	static const int pvals[7] = {0, 100, 300, 300, 500, 900, kInfty};
+static int captureMoveValue(const Board &board, Move move) {
+	static const std::array<int, 7> pvals = {0,	  100, 300,	  300,
+											 500, 900, kInfty};
 	int targetPiece;
 	int capturingPiece;
 	int value;
-	targetPiece = abs(board->pieceValue(move.to()));
-	capturingPiece = abs(board->pieceValue(move.from()));
+	targetPiece = abs(board.pieceValue(move.to()));
+	capturingPiece = abs(board.pieceValue(move.from()));
 	value = pvals[targetPiece];
-	if ((board)->squareUnderAttackBy(move.to(),
-									 colorFlip(board->sideToMove()))) {
+	if (board.squareUnderAttackBy(move.to(), colorFlip(board.sideToMove()))) {
 		value -= pvals[capturingPiece];
 	} else {
 		value -= pvals[capturingPiece] / 10;
@@ -288,7 +289,7 @@ bool Node::okToReduce(int depth) const {
 		rc = false;
 	} else if (totalMovesGenerated <= kFullDepthMoves) {
 		rc = false;
-	} else if ((search->boardPtr)->kingInCheck()) {
+	} else if ((search.boardPtr)->kingInCheck()) {
 		rc = false;
 	} else {
 		rc = true;
@@ -301,14 +302,15 @@ bool Node::moveIsFutile(int materialBalance, int testValue) const {
 	Move move;
 	int moveMaterialGain;
 	int lastCap;
-	Board *b = search->boardPtr;
-	static const int pvals[7] = {0, 100, 325, 325, 500, 900, kInfty};
+	const Board &b = *search.boardPtr;
+	static const std::array<int, 7> pvals = {0,	  100, 325,	  325,
+											 500, 900, kInfty};
 
-	if ((search->boardPtr)->kingInCheck()) {
+	if ((search.boardPtr)->kingInCheck()) {
 		rc = false;
 	} else {
-		move = b->lastMove();
-		lastCap = b->mostRecentCapture();
+		move = b.lastMove();
+		lastCap = b.mostRecentCapture();
 		moveMaterialGain = pvals[lastCap];
 		if (move.promo() > pawn) {
 			moveMaterialGain += pvals[move.promo()] - pvals[pawn];

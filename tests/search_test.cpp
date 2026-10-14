@@ -18,7 +18,7 @@ protected:
 	Board board;
 	StaticEvaluator evaluator;
 	MemoryTable table{4096, 16, 2};
-	Search search{&board, &evaluator, &table};
+	Search search{board, evaluator, table};
 };
 
 TEST(HistoryTest, StartsEmptyAndRecordsQuietCutoffs) {
@@ -63,9 +63,9 @@ TEST(HistoryTest, DeepUpdatesDoNotOverflow) {
 }
 
 TEST_F(SearchTest, DefaultEvaluatorBalancesStartingPosition) {
-	EXPECT_EQ(evaluator.materialBalance(&board), 0);
-	EXPECT_TRUE(evaluator.test(&board, -4));
-	EXPECT_FALSE(evaluator.test(&board, 4));
+	EXPECT_EQ(evaluator.materialBalance(board), 0);
+	EXPECT_TRUE(evaluator.test(board, -4));
+	EXPECT_FALSE(evaluator.test(board, 4));
 	EXPECT_EQ(evaluator.grainSize(), kDefaultGrainSize);
 	EXPECT_GT(evaluator.checkmateValue(0), evaluator.checkmateValue(5));
 	EXPECT_EQ(evaluator.drawValue(), 0);
@@ -73,35 +73,35 @@ TEST_F(SearchTest, DefaultEvaluatorBalancesStartingPosition) {
 
 TEST_F(SearchTest, MaterialAdvantageChangesWithSideToMove) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
-	const int whiteScore = evaluator.materialBalance(&board);
+	const int whiteScore = evaluator.materialBalance(board);
 	EXPECT_GT(whiteScore, 0);
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 b - - 0 1"));
-	EXPECT_EQ(evaluator.materialBalance(&board), -whiteScore);
+	EXPECT_EQ(evaluator.materialBalance(board), -whiteScore);
 }
 
 TEST_F(SearchTest, BishopSquareTableIsColorSymmetric) {
 	ASSERT_TRUE(board.loadFen("4k2b/8/8/8/8/8/8/4K2B w - - 0 1"));
-	EXPECT_EQ(evaluator.nonMaterialScore(&board, 325, 325), 0);
+	EXPECT_EQ(evaluator.nonMaterialScore(board, 325, 325), 0);
 	evaluator.resetPawnTable();
-	EXPECT_EQ(evaluator.nonMaterialScore(&board, 325, 325), 0);
+	EXPECT_EQ(evaluator.nonMaterialScore(board, 325, 325), 0);
 }
 
 TEST_F(SearchTest, ReconfiguringEvaluationClearsPawnCache) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/8/2P5/8/8/4K3 w - - 0 1"));
-	const int before = evaluator.nonMaterialScore(&board, 100, 0);
+	const int before = evaluator.nonMaterialScore(board, 100, 0);
 	auto params = defaultEvaluatorParameters;
 	params[9] = 40;
 	evaluator.configure(params);
-	EXPECT_GT(evaluator.nonMaterialScore(&board, 100, 0), before);
+	EXPECT_GT(evaluator.nonMaterialScore(board, 100, 0), before);
 }
 
 TEST_F(SearchTest, NodeEnumeratesEveryStartingMoveAndRestoresBoard) {
 	const auto key = board.positionKey();
 	const auto ply = board.halfMoveCount();
-	Node node(&search, Move{});
+	Node node(search, Move{});
 	Move move;
 	std::set<std::pair<int, int>> moves;
-	while (node.doNextMove(&move) == kNodeMovesAvailable) {
+	while (node.doNextMove(move) == kNodeMovesAvailable) {
 		moves.emplace(move.from(), move.to());
 		node.restore();
 		EXPECT_EQ(board.positionKey(), key);
@@ -115,12 +115,12 @@ TEST_F(SearchTest, NodeEnumeratesEveryStartingMoveAndRestoresBoard) {
 TEST_F(SearchTest, QuiescentNodeGeneratesCapturesOnly) {
 	ASSERT_TRUE(board.loadFen("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1"));
 	const auto key = board.positionKey();
-	Node node(&search, Move{});
+	Node node(search, Move{});
 	Move move;
-	ASSERT_EQ(node.doNextNonquiescentMove(&move), kNodeMovesAvailable);
+	ASSERT_EQ(node.doNextNonquiescentMove(move), kNodeMovesAvailable);
 	EXPECT_EQ(move, Move(28, 35));
 	node.restore();
-	EXPECT_EQ(node.doNextNonquiescentMove(&move), kNodeNoMoreMoves);
+	EXPECT_EQ(node.doNextNonquiescentMove(move), kNodeNoMoreMoves);
 	EXPECT_EQ(board.positionKey(), key);
 }
 
@@ -135,32 +135,32 @@ TEST_F(SearchTest, TranspositionBoundsHonorDepthAndReset) {
 	Move move;
 	int lower = 0;
 	int upper = 0;
-	EXPECT_FALSE(table.read(search, &move, &lower, &upper, 1, 0));
+	EXPECT_FALSE(table.read(search, move, lower, upper, 1, 0));
 	EXPECT_TRUE(move.isEmpty());
 	EXPECT_EQ(lower, -kInfty);
 	EXPECT_EQ(upper, kInfty);
 	const Move stored(12, 28);
 	table.write(search, stored, true, 12, 3);
-	ASSERT_TRUE(table.read(search, &move, &lower, &upper, 3, 12));
+	ASSERT_TRUE(table.read(search, move, lower, upper, 3, 12));
 	EXPECT_EQ(move, stored);
 	EXPECT_EQ(lower, 16);
 	EXPECT_EQ(upper, kInfty);
-	EXPECT_FALSE(table.read(search, &move, &lower, &upper, 4, 12));
+	EXPECT_FALSE(table.read(search, move, lower, upper, 4, 12));
 	table.write(search, stored, false, 20, 3);
-	ASSERT_TRUE(table.read(search, &move, &lower, &upper, 3, 16));
+	ASSERT_TRUE(table.read(search, move, lower, upper, 3, 16));
 	EXPECT_EQ(lower, 16);
 	EXPECT_EQ(upper, 16);
 	table.reset();
-	EXPECT_FALSE(table.read(search, &move, &lower, &upper, 1, 0));
+	EXPECT_FALSE(table.read(search, move, lower, upper, 1, 0));
 }
 
 TEST_F(SearchTest, TranspositionEntriesAreSharedAcrossWorkers) {
-	Search second(&board, &evaluator, &table);
+	Search second(board, evaluator, table);
 	second.setThreadNumber(1);
 	table.write(search, Move(12, 28), true, 12, 3);
 	Move move;
 	int lower, upper;
-	ASSERT_TRUE(table.read(second, &move, &lower, &upper, 3, 12));
+	ASSERT_TRUE(table.read(second, move, lower, upper, 3, 12));
 	EXPECT_EQ(move, Move(12, 28));
 	EXPECT_EQ(lower, 16);
 }
@@ -171,27 +171,50 @@ TEST_F(SearchTest, TranspositionPrunesOnlyUntouchedEntries) {
 	int lower, upper;
 	table.write(search, stored, true, 12, 3);
 	table.resetTouchedFlags();
-	ASSERT_TRUE(table.read(search, &move, &lower, &upper, 3, 0));
+	ASSERT_TRUE(table.read(search, move, lower, upper, 3, 0));
 	table.killUntouchedEntries();
-	EXPECT_TRUE(table.read(search, &move, &lower, &upper, 3, 0));
+	EXPECT_TRUE(table.read(search, move, lower, upper, 3, 0));
 	table.resetTouchedFlags();
 	table.killUntouchedEntries();
-	EXPECT_FALSE(table.read(search, &move, &lower, &upper, 3, 0));
+	EXPECT_FALSE(table.read(search, move, lower, upper, 3, 0));
 	table.write(search, stored, true, kMinCheckmateValue, 3);
-	EXPECT_FALSE(table.read(search, &move, &lower, &upper, 3, 0));
+	EXPECT_FALSE(table.read(search, move, lower, upper, 3, 0));
 }
 
 TEST_F(SearchTest, SerialSearchReturnsLegalMoveAndRestoresBoard) {
 	const auto key = board.positionKey();
 	const auto ply = board.halfMoveCount();
 	Move move;
-	const int score = search.serialTestDriver(&move, 2, 0);
+	const int score = search.serialTestDriver(move, 2, 0);
 	EXPECT_LT(std::abs(score), kMinCheckmateValue);
 	EXPECT_FALSE(move.isEmpty());
 	EXPECT_TRUE(board.isLegalMove(move));
 	EXPECT_EQ(board.positionKey(), key);
 	EXPECT_EQ(board.halfMoveCount(), ply);
 	EXPECT_GT(search.nodeCount(), 0);
+}
+
+TEST_F(SearchTest, RebindingBoardSearchesNewPositionAndRestoresBothBoards) {
+	Board replacement;
+	ASSERT_TRUE(replacement.loadFen("7k/6Q1/5K2/8/8/8/8/8 b - - 0 1"));
+	const auto originalKey = board.positionKey();
+	const auto replacementKey = replacement.positionKey();
+	search.setBoard(replacement);
+	EXPECT_FALSE(search.test(0, 2));
+	EXPECT_TRUE(search.bestMove().isEmpty());
+	EXPECT_EQ(replacement.positionKey(), replacementKey);
+	EXPECT_EQ(replacement.halfMoveCount(), 0);
+	EXPECT_EQ(board.positionKey(), originalKey);
+	EXPECT_EQ(board.halfMoveCount(), 0);
+	search.setBoard(board);
+	Move move;
+	search.serialTestDriver(move, 1, 0);
+	EXPECT_FALSE(move.isEmpty());
+	EXPECT_TRUE(board.isLegalMove(move));
+	EXPECT_EQ(board.positionKey(), originalKey);
+	EXPECT_EQ(board.halfMoveCount(), 0);
+	EXPECT_EQ(replacement.positionKey(), replacementKey);
+	EXPECT_EQ(replacement.halfMoveCount(), 0);
 }
 
 TEST_F(SearchTest, TerminalSearchRootHasNoMove) {

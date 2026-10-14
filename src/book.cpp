@@ -356,11 +356,11 @@ void Book::showBookMoves(Board &board) const {
 		[](double sum, const Choice &choice) { return sum + choice.games; });
 	std::printf("\tBook moves\n");
 	for (size_t index = 0; index < choices.size(); ++index) {
-		char text[256]{};
-		board.moveToStr(text, choices[index].move);
+		std::array<char, 256> text{};
+		board.moveToStr(text.data(), choices[index].move);
 		const double chance =
 			total > 0 ? choices[index].games / total : 1.0 / choices.size();
-		std::printf("\t%2zu. %10s %3i%%\n", index + 1, text,
+		std::printf("\t%2zu. %10s %3i%%\n", index + 1, text.data(),
 					static_cast<int>(100 * chance + 0.5));
 	}
 	std::printf("\n");

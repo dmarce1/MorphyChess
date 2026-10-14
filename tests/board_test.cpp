@@ -107,9 +107,9 @@ TEST(Board, MoveUndoCastlingEnPassantPromotionAndHashConsistency) {
 		const Board original = board;
 		ASSERT_TRUE(board.isPseudoLegalMove(move));
 		ASSERT_TRUE(board.makeMove(move));
-		EXPECT_EQ(board.positionKey(), computePositionKey(&board));
-		EXPECT_EQ(board.pawnKey(), computePawnKey(&board));
-		assertBoardConsistency(&board);
+		EXPECT_EQ(board.positionKey(), computePositionKey(board));
+		EXPECT_EQ(board.pawnKey(), computePawnKey(board));
+		assertBoardConsistency(board);
 		ASSERT_TRUE(board.undoMove());
 		expectSamePosition(board, original);
 	}
@@ -142,7 +142,7 @@ TEST(Board, RepetitionAndValueCopyPreserveHistory) {
 	Board castled;
 	ASSERT_TRUE(castled.loadFen("r3k2r/8/8/8/8/8/8/R3K2R w KQkq - 0 1"));
 	ASSERT_TRUE(castled.makeMove(Move(kE1, kG1)));
-	copied.copy(&castled);
+	copied.copy(castled);
 	EXPECT_TRUE(copied.hasKingsideCastled(white));
 	expectSamePosition(copied, castled);
 }

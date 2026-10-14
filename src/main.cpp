@@ -37,7 +37,7 @@ int runApplication(hpx::program_options::variables_map &values) {
 	return status;
 }
 } // namespace
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
 	// Retain the historical spelling while all option parsing belongs to HPX.
 	std::vector<std::string> arguments;
 	std::vector<char *> pointers;

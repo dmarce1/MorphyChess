@@ -23,6 +23,6 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-int see(Board *board, Move move, int score);
+int see(Board &board, Move move, int score);
 
 } // namespace morphy_chess

@@ -22,14 +22,14 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-static Bitboard wpAttacks[64];
-static Bitboard bpAttacks[64];
-static Bitboard nAttacks[64];
-static Bitboard kAttacks[64];
-static Bitboard rankAttacks[64][256];
-static Bitboard fileAttacks[64][256];
-static Bitboard diag1Attacks[64][256];
-static Bitboard diag2Attacks[64][256];
+static std::array<Bitboard, 64> wpAttacks;
+static std::array<Bitboard, 64> bpAttacks;
+static std::array<Bitboard, 64> nAttacks;
+static std::array<Bitboard, 64> kAttacks;
+static std::array<std::array<Bitboard, 256>, 64> rankAttacks;
+static std::array<std::array<Bitboard, 256>, 64> fileAttacks;
+static std::array<std::array<Bitboard, 256>, 64> diag1Attacks;
+static std::array<std::array<Bitboard, 256>, 64> diag2Attacks;
 
 static Bitboard genWhitePawnAttacks(int i);
 static Bitboard genBlackPawnAttacks(int i);
@@ -44,23 +44,23 @@ Bitboard kingAttacks(int i) { return kAttacks[i]; }
 
 Bitboard knightAttacks(int i) { return nAttacks[i]; }
 
-Bitboard rankMoves(const Bitboard *o, int i) {
+Bitboard rankMoves(const std::array<Bitboard, 4> &o, int i) {
 	return rankAttacks[i][rotatedIndexFromRank(o, i)];
 }
 
-Bitboard fileMoves(const Bitboard *o, int i) {
+Bitboard fileMoves(const std::array<Bitboard, 4> &o, int i) {
 	return fileAttacks[i][rotatedIndexFromFile(o, i)];
 }
 
-Bitboard diag1Moves(const Bitboard *o, int i) {
+Bitboard diag1Moves(const std::array<Bitboard, 4> &o, int i) {
 	return diag1Attacks[i][rotatedIndexFromDiag1(o, i)];
 }
 
-Bitboard diag2Moves(const Bitboard *o, int i) {
+Bitboard diag2Moves(const std::array<Bitboard, 4> &o, int i) {
 	return diag2Attacks[i][rotatedIndexFromDiag2(o, i)];
 }
 
-Bitboard bishopAttacks(const Bitboard *o, int i) {
+Bitboard bishopAttacks(const std::array<Bitboard, 4> &o, int i) {
 
 	Bitboard u, q;
 	q = diag1Attacks[i][rotatedIndexFromDiag1(o, i)];
@@ -68,13 +68,13 @@ Bitboard bishopAttacks(const Bitboard *o, int i) {
 	return q | u;
 }
 
-Bitboard queenAttacks(const Bitboard *bb, int i) {
+Bitboard queenAttacks(const std::array<Bitboard, 4> &bb, int i) {
 	assertRange(0, i, 63);
 
 	return bishopAttacks(bb, i) | rookAttacks(bb, i);
 }
 
-Bitboard rookAttacks(const Bitboard *o, int i) {
+Bitboard rookAttacks(const std::array<Bitboard, 4> &o, int i) {
 	Bitboard u, q;
 	q = rankAttacks[i][rotatedIndexFromRank(o, i)];
 	u = fileAttacks[i][rotatedIndexFromFile(o, i)];
@@ -88,8 +88,7 @@ void initMoveData(void) {
 		int from, to, rank, file, i, j;
 		unsigned int index;
 		Bitboard q;
-		Bitboard oMasks[256][4];
-		Bitboard *o;
+		std::array<std::array<Bitboard, 4>, 256> oMasks;
 
 		initBits();
 
@@ -100,7 +99,7 @@ void initMoveData(void) {
 			nAttacks[from] = genKnightAttacks(from);
 		}
 		for (index = 0; index < 256; index++) {
-			o = oMasks[index];
+			auto &o = oMasks[index];
 			for (j = 0; j < 4; j++) {
 				o[j] = Bitboard{};
 			}
@@ -166,7 +165,7 @@ void initMoveData(void) {
 		}
 		for (from = 0; from < 64; from++) {
 			for (i = 0; i < 256; i++) {
-				o = oMasks[i];
+				const auto &o = oMasks[i];
 				index = rotatedIndexFromDiag1(o, from);
 				q = Bitboard{};
 				if (((from / 8) < 7) && ((from % 8) < 7)) {
@@ -194,7 +193,7 @@ void initMoveData(void) {
 		}
 		for (from = 0; from < 64; from++) {
 			for (i = 0; i < 256; i++) {
-				o = oMasks[i];
+				const auto &o = oMasks[i];
 				index = rotatedIndexFromDiag2(o, from);
 				q = Bitboard{};
 				if (((from / 8) < 7) && ((from % 8) > 0)) {

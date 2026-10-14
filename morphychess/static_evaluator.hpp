@@ -47,10 +47,10 @@ public:
 	StaticEvaluator(const StaticEvaluator &) = delete;
 	StaticEvaluator &operator=(const StaticEvaluator &) = delete;
 	void configure(const EvaluatorParameters &params);
-	int materialBalance(Board *board);
-	int materialScore(Board *board, int *whiteMat, int *blackMat);
-	int nonMaterialScore(Board *board, int whiteMat, int blackMat);
-	bool test(Board *board, int testValue);
+	int materialBalance(const Board &board);
+	int materialScore(const Board &board, int &whiteMat, int &blackMat);
+	int nonMaterialScore(const Board &board, int whiteMat, int blackMat);
+	bool test(const Board &board, int testValue);
 	int checkmateValue(int ply) const;
 	int drawValue() const { return 0; }
 	void setGrainSize(int value);
@@ -60,9 +60,9 @@ public:
 
 private:
 	void writePawnTable(U32 key, int score);
-	bool readPawnTable(U32 key, int *score);
-	int evaluatePawnsAndKings(Board *board, int whiteMat, int blackMat);
-	int materialValues[7]{};
+	bool readPawnTable(U32 key, int &score);
+	int evaluatePawnsAndKings(const Board &board, int whiteMat, int blackMat);
+	std::array<int, 7> materialValues{};
 	int maximumNonMaterialScore{};
 	int scoreGrain{kDefaultGrainSize};
 	int pawnSquareValueWeight{};

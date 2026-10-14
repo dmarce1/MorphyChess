@@ -37,10 +37,10 @@ int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
 			throw std::runtime_error("Benchmark returned no legal move");
 		}
 		totalNodes += result.nodes();
-		char move[64]{};
-		board.moveToStr(move, result.move());
+		std::array<char, 64> move{};
+		board.moveToStr(move.data(), result.move());
 		output << "Position " << index + 1 << '/' << positions.size() << ": "
-			   << move << " depth=" << result.depth()
+			   << move.data() << " depth=" << result.depth()
 			   << " score=" << result.score() << " nodes=" << result.nodes()
 			   << '\n';
 	}

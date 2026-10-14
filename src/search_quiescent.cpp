@@ -4,10 +4,10 @@
 namespace morphy_chess {
 int Search::quiescentValue(int guess) {
 	if (boardPtr->kingInCheckmate(white)) {
-		return -evaluatorPtr->checkmateValue(currentPly);
+		return -evaluatorRef.checkmateValue(currentPly);
 	}
 	if (boardPtr->kingInCheckmate(black)) {
-		return evaluatorPtr->checkmateValue(currentPly);
+		return evaluatorRef.checkmateValue(currentPly);
 	}
 	if (boardPtr->kingInStalemate(boardPtr->sideToMove()) ||
 		boardPtr->isDraw()) {
@@ -53,17 +53,17 @@ bool Search::quiescentTest(int testValue) {
 	const bool inCheck = boardPtr->kingInCheck();
 	if (currentPly >= kMaxDepth) {
 		++nodesVisited;
-		return evaluatorPtr->test(boardPtr, testValue);
+		return evaluatorRef.test(*boardPtr, testValue);
 	}
-	if (!inCheck && evaluatorPtr->test(boardPtr, testValue)) {
+	if (!inCheck && evaluatorRef.test(*boardPtr, testValue)) {
 		++nodesVisited;
 		return true;
 	}
-	Node node(this, Move{});
+	Node node(*this, Move{});
 	Move currentMove;
 	bool anyMove = false;
-	while ((inCheck ? node.doNextMove(&currentMove)
-					: node.doNextNonquiescentMove(&currentMove)) ==
+	while ((inCheck ? node.doNextMove(currentMove)
+					: node.doNextNonquiescentMove(currentMove)) ==
 		   kNodeMovesAvailable) {
 		anyMove = true;
 		const bool testResult = !quiescentTest(-testValue);
@@ -73,7 +73,7 @@ bool Search::quiescentTest(int testValue) {
 		}
 	}
 	if (inCheck && !anyMove) {
-		return -evaluatorPtr->checkmateValue(currentPly) > testValue;
+		return -evaluatorRef.checkmateValue(currentPly) > testValue;
 	}
 	return false;
 }

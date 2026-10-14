@@ -64,7 +64,7 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 		Board copy = position;
 		StaticEvaluator value(parameters);
 		value.setGrainSize(delta);
-		Search search(&copy, &value, &scratch);
+		Search search(copy, value, scratch);
 		search.setGrainSize(delta);
 		scratch.reset();
 		const double score = search.quiescentValue(0);

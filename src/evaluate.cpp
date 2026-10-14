@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <array>
 #include <morphychess/evaluate.hpp>
 #include <morphychess/params.hpp>
 
@@ -24,7 +25,7 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 using std::min;
 
-constexpr int pieceValues[7] = {0, 100, 325, 350, 500, 900, kInfty};
+constexpr std::array<int, 7> pieceValues = {0, 100, 325, 350, 500, 900, kInfty};
 constexpr int maxMaterial = 3100;
 constexpr int maxMaterialWoBonus = 2400;
 constexpr int startingMaterial =
@@ -32,10 +33,10 @@ constexpr int startingMaterial =
 	4 * pieceValues[rook] + 2 * pieceValues[queen];
 constexpr int startingMaterialWoPawns =
 	startingMaterial - 16 * pieceValues[pawn];
-static int evaluateMaterial(Board *board);
+static int evaluateMaterial(const Board &board);
 void initEvaluator() {}
 
-int evaluate(Board *b) {
+int evaluate(const Board &b) {
 	int score;
 
 	score = evaluateMaterial(b);
@@ -43,8 +44,9 @@ int evaluate(Board *b) {
 	return score;
 }
 
-int evaluateMaterial(Board *b) {
-	int material[2], materialDifference, totalMaterial;
+int evaluateMaterial(const Board &b) {
+	std::array<int, 2> material;
+	int materialDifference, totalMaterial;
 	int bonus, score, winningSidePawns;
 	int i, j;
 
@@ -53,13 +55,13 @@ int evaluateMaterial(Board *b) {
 	}
 	for (i = pawn; i < king; i++) {
 		for (j = 0; j < 2; j++) {
-			material[j] += b->pieceCount(j, i) * pieceValues[i];
+			material[j] += b.pieceCount(j, i) * pieceValues[i];
 		}
 	}
 	materialDifference = material[white] - material[black];
 	totalMaterial = material[white] + material[black];
 	winningSidePawns =
-		b->pieceCount(materialDifference > 0 ? white : black, pawn);
+		b.pieceCount(materialDifference > 0 ? white : black, pawn);
 	bonus = materialDifference * winningSidePawns *
 			(startingMaterial - totalMaterial);
 	bonus /= startingMaterialWoPawns * (winningSidePawns + 1);

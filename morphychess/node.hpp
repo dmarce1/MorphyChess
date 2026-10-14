@@ -22,10 +22,10 @@ inline constexpr int kNodeNoMoreMoves = 3;
 
 class Node {
 public:
-	Node(Search *search, Move move);
+	Node(Search &search, Move move);
 	int totalMoves() const;
-	int doNextMove(Move *branch);
-	int doNextNonquiescentMove(Move *branch);
+	int doNextMove(Move &branch);
+	int doNextNonquiescentMove(Move &branch);
 	void restore();
 	bool noMovesGenerated() const;
 	bool okToReduce(int depth) const;
@@ -35,7 +35,7 @@ private:
 	std::array<Move, maxMoves> list{};
 	std::array<int, maxMoves> scores{};
 	GenStage mgStage{GenStage::start};
-	Search *search;
+	Search &search;
 	int totalMovesGenerated{};
 	int movesInQueue{};
 	Move killer{};

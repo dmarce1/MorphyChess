@@ -1,6 +1,7 @@
 #include <atomic>
 #include <chrono>
 #include <cmath>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <gtest/gtest.h>
@@ -73,14 +74,14 @@ TEST(Learning, InvalidEvaluatorParametersLeaveConfigurationIntact) {
 	Board board;
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/Q7/K7 w - - 0 1"));
 	StaticEvaluator evaluator;
-	const int before = evaluator.materialBalance(&board);
+	const int before = evaluator.materialBalance(board);
 	for (double invalid :
 		 {0.0, -1.0, 10001.0, std::numeric_limits<double>::infinity(),
 		  std::numeric_limits<double>::quiet_NaN()}) {
 		auto parameters = defaultEvaluatorParameters;
 		parameters[0] = invalid;
 		EXPECT_THROW(evaluator.configure(parameters), std::invalid_argument);
-		EXPECT_EQ(evaluator.materialBalance(&board), before);
+		EXPECT_EQ(evaluator.materialBalance(board), before);
 	}
 }
 TEST(Learning, CommitsFiniteParametersAndKeepsStateWhenSavingFails) {

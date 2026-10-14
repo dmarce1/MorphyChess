@@ -1,3 +1,4 @@
+#include <array>
 #include <hpx/modules/threading.hpp>
 #include <morphychess/debug.hpp>
 #include <morphychess/node.hpp>
@@ -25,25 +26,25 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-Search::Search(Board *board, StaticEvaluator *evaluator, MemoryTable *table) :
-	boardPtr(board),
-	evaluatorPtr(evaluator),
-	tablePtr(table),
-	scoreGrain(evaluator->grainSize()) {}
+Search::Search(Board &board, StaticEvaluator &evaluator, MemoryTable &table) :
+	boardPtr(&board),
+	evaluatorRef(evaluator),
+	tableRef(table),
+	scoreGrain(evaluator.grainSize()) {}
 
 void Search::setKillTime(std::time_t value) {
 	killTime.store(value, std::memory_order_relaxed);
 }
 
-void Search::reconstructPrincipalVariation(Board *leafNode, Move *pv, int depth,
-										   bool print) {
+void Search::reconstructPrincipalVariation(Board *leafNode,
+										   std::array<Move, kMaxDepth + 1> &pv,
+										   int depth, bool print) {
 	int ply, upper, lower, guess;
-	char moveStr[64];
+	std::array<char, 64> moveStr;
 	bool inTable;
 
 	for (ply = 0; depth > 0 && ply < kMaxDepth; depth--) {
-		inTable =
-			tablePtr->read(*this, pv + ply, &lower, &upper, depth, -kInfty);
+		inTable = tableRef.read(*this, pv[ply], lower, upper, depth, -kInfty);
 		if (!inTable) {
 			break;
 		}
@@ -55,14 +56,14 @@ void Search::reconstructPrincipalVariation(Board *leafNode, Move *pv, int depth,
 			guess /= 2;
 			guess /= scoreGrain;
 			guess *= scoreGrain;
-			serialTestDriver(pv + ply, depth, guess);
+			serialTestDriver(pv[ply], depth, guess);
 		}
 		if ((pv[ply]).isEmpty()) {
 			break;
 		}
-		(boardPtr)->moveToStr(moveStr, pv[ply]);
+		(boardPtr)->moveToStr(moveStr.data(), pv[ply]);
 		if (print) {
-			printf("%8s ", moveStr);
+			printf("%8s ", moveStr.data());
 			fflush(stdout);
 		}
 		(boardPtr)->makeMove(pv[ply]);
@@ -74,8 +75,8 @@ void Search::reconstructPrincipalVariation(Board *leafNode, Move *pv, int depth,
 			break;
 		}
 	}
-	(pv + ply)->setEmpty();
-	if (leafNode != NULL) {
+	pv[ply].setEmpty();
+	if (leafNode != nullptr) {
 		*(leafNode) = *(boardPtr);
 	}
 	while (ply > 0) {
@@ -91,7 +92,7 @@ void Search::resetCounters() {
 	lateMoveReductionCount = 0;
 }
 
-int Search::serialTestDriver(Move *move, int depth, int initialGuess) {
+int Search::serialTestDriver(Move &move, int depth, int initialGuess) {
 	bool testResult;
 	int upperBound;
 	int lowerBound;
@@ -110,10 +111,10 @@ int Search::serialTestDriver(Move *move, int depth, int initialGuess) {
 	while ((upperBound > lowerBound) && !timesup) {
 		testResult = test(testValue - epsilon, depth);
 		if (stopped() || ((killTime != 0) && (killTime <= time(NULL)))) {
-			(move)->setEmpty();
+			move.setEmpty();
 			timesup = true;
 		} else if (testResult == true) {
-			*move = bestMoveValue;
+			move = bestMoveValue;
 			lowerBound = testValue;
 			testValue += scoreGrain;
 		} else {
@@ -161,14 +162,13 @@ bool Search::nullTest(int testValue, int depth) {
 }
 
 bool Search::extensionNeeded() {
-	Board *b;
+	const Board &b = *boardPtr;
 	bool rc;
 	Move move;
 	int movingMan;
-	b = boardPtr;
-	move = b->lastMove();
-	movingMan = b->pieceValue(move.to());
-	if ((b)->kingInCheck()) {
+	move = b.lastMove();
+	movingMan = b.pieceValue(move.to());
+	if (b.kingInCheck()) {
 		rc = true;
 	} else if (move.promo() > pawn) {
 		rc = true;
@@ -206,8 +206,8 @@ bool Search::testChild(int testValue, int depth) {
 		if ((depth <= 0) || (currentPly >= kMaxDepth - 1)) {
 			testResult = quiescentTest(testValue);
 		} else {
-			tablePtr->read(*this, &bestMove, &lowerBound, &upperBound, depth,
-						   testValue);
+			tableRef.read(*this, bestMove, lowerBound, upperBound, depth,
+						  testValue);
 			if (upperBound < testValue) {
 				testResult = false;
 				tableHitCount++;
@@ -222,8 +222,8 @@ bool Search::testChild(int testValue, int depth) {
 					nodesVisited++;
 					nullHitCount++;
 				} else {
-					Node node(this, bestMove);
-					nodeStatus = (node).doNextMove(&currentMove);
+					Node node(*this, bestMove);
+					nodeStatus = (node).doNextMove(currentMove);
 					if (nodeStatus == kNodeMovesAvailable) {
 						branchCount = 0;
 						do {
@@ -243,13 +243,13 @@ bool Search::testChild(int testValue, int depth) {
 								break;
 							}
 							branchCount++;
-							nodeStatus = (node).doNextMove(&currentMove);
+							nodeStatus = (node).doNextMove(currentMove);
 						} while (nodeStatus == kNodeMovesAvailable);
 					} else {
 						assert(nodeStatus == kNodeTerminal);
 						if ((boardPtr)->kingInCheck()) {
 							if (testValue <
-								-(evaluatorPtr)->checkmateValue(currentPly)) {
+								-evaluatorRef.checkmateValue(currentPly)) {
 								testResult = true;
 							} else {
 								testResult = false;
@@ -264,8 +264,8 @@ bool Search::testChild(int testValue, int depth) {
 								   (boardPtr->pieceValue(bestMove.to()) == 0)
 									   ? true
 									   : false);
-					tablePtr->write(*this, bestMove, testResult, testValue,
-									depth);
+					tableRef.write(*this, bestMove, testResult, testValue,
+								   depth);
 				}
 			}
 		}
@@ -288,8 +288,8 @@ bool Search::test(int testValue, int depth) {
 	testResult = false;
 	try {
 		checkKill();
-		tablePtr->read(*this, &bestMoveValue, &lowerBound, &upperBound, depth,
-					   testValue);
+		tableRef.read(*this, bestMoveValue, lowerBound, upperBound, depth,
+					  testValue);
 		if ((upperBound < testValue) && !(bestMoveValue).isEmpty()) {
 			nodesVisited++;
 			tableHitCount++;
@@ -298,13 +298,13 @@ bool Search::test(int testValue, int depth) {
 			nodesVisited++;
 			tableHitCount++;
 		} else {
-			Node node(this, bestMoveValue);
-			nodeStatus = (node).doNextMove(&currentMove);
-			assertBoardConsistency(boardPtr);
+			Node node(*this, bestMoveValue);
+			nodeStatus = (node).doNextMove(currentMove);
+			assertBoardConsistency(*boardPtr);
 			if (nodeStatus != kNodeMovesAvailable) {
 				const int terminalScore =
 					boardPtr->kingInCheck()
-						? -evaluatorPtr->checkmateValue(currentPly)
+						? -evaluatorRef.checkmateValue(currentPly)
 						: (boardPtr->sideToMove() == computerColor
 							   ? contemptFactor
 							   : -contemptFactor);
@@ -328,12 +328,12 @@ bool Search::test(int testValue, int depth) {
 					break;
 				}
 				branchCount++;
-				nodeStatus = (node).doNextMove(&currentMove);
+				nodeStatus = (node).doNextMove(currentMove);
 			} while (nodeStatus == kNodeMovesAvailable);
 			history.update(
 				bestMoveValue, testResult, depth, currentPly,
 				(boardPtr->pieceValue(bestMoveValue.to()) == 0) ? true : false);
-			tablePtr->write(*this, bestMoveValue, testResult, testValue, depth);
+			tableRef.write(*this, bestMoveValue, testResult, testValue, depth);
 		}
 	} catch (const SearchCancelled &) {
 		bestMoveValue.setEmpty();
@@ -377,7 +377,7 @@ void Search::setGrainSize(int value) {
 }
 void Search::setThreadNumber(int value) { threadNumber = value; }
 
-void Search::setBoard(Board *value) { boardPtr = value; }
+void Search::setBoard(Board &value) { boardPtr = &value; }
 
 void Search::setContemptFactor(int value) {
 	contemptFactor = (value / scoreGrain) * scoreGrain;

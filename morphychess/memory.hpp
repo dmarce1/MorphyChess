@@ -35,7 +35,7 @@ public:
 	void killUntouchedEntries();
 	void write(Search &search, Move move, bool testResult, int testScore,
 			   int depth);
-	bool read(Search &search, Move *move, int *lowerBound, int *upperBound,
+	bool read(Search &search, Move &move, int &lowerBound, int &upperBound,
 			  int minDepth, int testScore);
 
 private:

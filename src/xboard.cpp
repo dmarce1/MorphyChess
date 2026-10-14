@@ -171,7 +171,7 @@ void Xboard::applySearchResult(const SearchResult &result) {
 	}
 	if (result.score() < -kResignLimit) {
 		Board position = currentBoard;
-		Search confirmation(&position, &evaluator, &memoryTable);
+		Search confirmation(position, evaluator, memoryTable);
 		const int whiteScore = confirmation.quiescentValue(0);
 		const int rootScore =
 			currentBoard.sideToMove() == white ? whiteScore : -whiteScore;

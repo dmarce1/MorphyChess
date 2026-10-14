@@ -107,11 +107,11 @@ void MemoryTable::write(Search &search, Move move, bool testResult,
 	}
 }
 
-bool MemoryTable::read(Search &search, Move *move, int *lowerBound,
-					   int *upperBound, int minDepth, int) {
-	*upperBound = kInfty;
-	*lowerBound = -kInfty;
-	move->setEmpty();
+bool MemoryTable::read(Search &search, Move &move, int &lowerBound,
+					   int &upperBound, int minDepth, int) {
+	upperBound = kInfty;
+	lowerBound = -kInfty;
+	move.setEmpty();
 	if (search.boardPtr->positionIsRepeat()) {
 		return false;
 	}
@@ -135,11 +135,11 @@ bool MemoryTable::read(Search &search, Move *move, int *lowerBound,
 	if (upper->key == key && upper->depth >= 0 &&
 		!(search.verifyNullMove && !upper->nullMovesVerified)) {
 		upper->touched = true;
-		*move = upper->move;
+		move = upper->move;
 		upperDepth = upper->depth;
 		if (minDepth <= upper->depth) {
 			found = true;
-			*upperBound = upper->score;
+			upperBound = upper->score;
 		}
 	}
 	auto *lower = &lowerBoundGlobalStore[colorIndex][globalIndex];
@@ -149,14 +149,14 @@ bool MemoryTable::read(Search &search, Move *move, int *lowerBound,
 	if (lower->key == key && lower->depth >= 0 &&
 		!(search.verifyNullMove && !lower->nullMovesVerified)) {
 		lower->touched = true;
-		if (upperDepth <= lower->depth || move->isEmpty()) {
-			*move = lower->move;
+		if (upperDepth <= lower->depth || move.isEmpty()) {
+			move = lower->move;
 		}
 		if (minDepth <= lower->depth) {
 			found = true;
-			*lowerBound = lower->score;
+			lowerBound = lower->score;
 		}
 	}
-	return found && !move->isEmpty();
+	return found && !move.isEmpty();
 }
 } // namespace morphy_chess

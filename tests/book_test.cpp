@@ -1,3 +1,4 @@
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <filesystem>
@@ -127,8 +128,8 @@ TEST(Book, ZeroWeightsStillChooseLegalBookMove) {
 		std::fstream file(files.path("book.bin"),
 						  std::ios::binary | std::ios::in | std::ios::out);
 		file.seekp(8);
-		const char zero[4]{};
-		file.write(zero, sizeof(zero));
+		const std::array<char, 4> zero{};
+		file.write(zero.data(), zero.size());
 	}
 	Book book;
 	ASSERT_TRUE(book.open(files.path("book.bin")));

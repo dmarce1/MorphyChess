@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <morphychess/bitboard.hpp>
 #include <morphychess/params.hpp>
 
@@ -28,14 +29,14 @@ inline constexpr auto kFileIndex = 1;
 inline constexpr auto kDiag1Index = 2;
 inline constexpr auto kDiag2Index = 3;
 
-void rotatedBitsCreateSet(Bitboard *, Bitboard);
+void rotatedBitsCreateSet(std::array<Bitboard, 4> &, Bitboard);
 void initBits(void);
-void rotatedBitsClear(Bitboard *q, int i);
-void rotatedBitsSet(Bitboard *q, int i);
-void rotatedBitsZeroOut(Bitboard *q);
-int rotatedIndexFromRank(const Bitboard *, int);
-int rotatedIndexFromFile(const Bitboard *, int);
-int rotatedIndexFromDiag1(const Bitboard *, int);
-int rotatedIndexFromDiag2(const Bitboard *, int);
+void rotatedBitsClear(std::array<Bitboard, 4> &q, int i);
+void rotatedBitsSet(std::array<Bitboard, 4> &q, int i);
+void rotatedBitsZeroOut(std::array<Bitboard, 4> &q);
+int rotatedIndexFromRank(const std::array<Bitboard, 4> &, int);
+int rotatedIndexFromFile(const std::array<Bitboard, 4> &, int);
+int rotatedIndexFromDiag1(const std::array<Bitboard, 4> &, int);
+int rotatedIndexFromDiag2(const std::array<Bitboard, 4> &, int);
 
 } // namespace morphy_chess

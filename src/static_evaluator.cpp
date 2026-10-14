@@ -1,3 +1,4 @@
+#include <array>
 #include <cmath>
 #include <morphychess/bits.hpp>
 #include <morphychess/debug.hpp>
@@ -32,42 +33,46 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-static int evaluateWhiteKingPawn(int pawnRank[2][10], int file);
-static int evaluateBlackKingPawn(int pawnRank[2][10], int file);
+static int
+evaluateWhiteKingPawn(const std::array<std::array<int, 10>, 2> &pawnRank,
+					  int file);
+static int
+evaluateBlackKingPawn(const std::array<std::array<int, 10>, 2> &pawnRank,
+					  int file);
 
-constexpr int whitePawnSquareValue[64] = {
+constexpr std::array<int, 64> whitePawnSquareValue = {
 	0, 0,  0,  0,	0,	 0,	 0,	 0, 0, 0, 0,  -40, -40, 0,	0, 0,
 	1, 2,  3,  -10, -10, 3,	 2,	 1, 2, 4, 6,  8,   8,	6,	4, 2,
 	3, 6,  9,  12,	12,	 9,	 6,	 3, 4, 8, 12, 16,  16,	12, 8, 4,
 	5, 10, 15, 20,	20,	 15, 10, 5, 0, 0, 0,  0,   0,	0,	0, 0};
 
-constexpr int blackPawnSquareValue[64] = {
+constexpr std::array<int, 64> blackPawnSquareValue = {
 	0, 0, 0,  0,   0,	0,	0, 0, 5, 10, 15, 20,  20,  15, 10, 5,
 	4, 8, 12, 16,  16,	12, 8, 4, 3, 6,	 9,	 12,  12,  9,  6,  3,
 	2, 4, 6,  8,   8,	6,	4, 2, 1, 2,	 3,	 -10, -10, 3,  2,  1,
 	0, 0, 0,  -40, -40, 0,	0, 0, 0, 0,	 0,	 0,	  0,   0,  0,  0};
 
-constexpr int blackKingSquareValue[64] = {
+constexpr std::array<int, 64> blackKingSquareValue = {
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -20, -20, -20, -20,
 	-20, -20, -20, -20, 0,	 20,  40,  -20, 0,	 -20, 40,  20};
 
-constexpr int whiteKingSquareValue[64] = {
+constexpr std::array<int, 64> whiteKingSquareValue = {
 	0,	 20,  40,  -20, 0,	 -20, 40,  20,	-40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40, -40,
 	-40, -40, -40, -40, -20, -20, -20, -20, -20, -20, -20, -20};
 
-constexpr int endgameKingSquareValue[64] = {
+constexpr std::array<int, 64> endgameKingSquareValue = {
 	0,	10, 20, 30, 30, 20, 10, 0,	10, 20, 30, 40, 40, 30, 20, 10,
 	20, 30, 40, 50, 50, 40, 30, 20, 30, 40, 50, 60, 60, 50, 40, 30,
 	30, 40, 50, 60, 60, 50, 40, 30, 20, 30, 40, 50, 50, 40, 30, 20,
 	10, 20, 30, 40, 40, 30, 20, 10, 0,	10, 20, 30, 30, 20, 10, 0};
 
-constexpr int whiteKnightSquareValue[64] = {
+constexpr std::array<int, 64> whiteKnightSquareValue = {
 	-10, -30, -10, -10, -10, -10, -30, -10, -10, 0,	  0,   0,	0,
 	0,	 0,	  -10, -10, 0,	 5,	  5,   5,	5,	 0,	  -10, -10, 0,
 	5,	 10,  10,  5,	0,	 -10, -10, 0,	5,	 10,  10,  5,	0,
@@ -75,14 +80,14 @@ constexpr int whiteKnightSquareValue[64] = {
 	0,	 0,	  0,   -10, -10, -10, -10, -10, -10, -10, -10, -10,
 };
 
-constexpr int blackKnightSquareValue[64] = {
+constexpr std::array<int, 64> blackKnightSquareValue = {
 	-10, -10, -10, -10, -10, -10, -10, -10, -10, 0,	  0,   0,	0,
 	0,	 0,	  -10, -10, 0,	 5,	  5,   5,	5,	 0,	  -10, -10, 0,
 	5,	 10,  10,  5,	0,	 -10, -10, 0,	5,	 10,  10,  5,	0,
 	-10, -10, 0,   5,	5,	 5,	  5,   0,	-10, -10, 0,   0,	0,
 	0,	 0,	  0,   -10, -10, -30, -10, -10, -10, -10, -30, -10};
 
-constexpr int whiteBishopSquareValue[64] = {
+constexpr std::array<int, 64> whiteBishopSquareValue = {
 	-10, -10, -20, -10, -10, -20, -10, -10, -10, 0,	  0,   0,	0,
 	0,	 0,	  -10, -10, 0,	 5,	  5,   5,	5,	 0,	  -10, -10, 0,
 	5,	 10,  10,  5,	0,	 -10, -10, 0,	5,	 10,  10,  5,	0,
@@ -90,7 +95,7 @@ constexpr int whiteBishopSquareValue[64] = {
 	0,	 0,	  0,   -10, -10, -10, -10, -10, -10, -10, -10, -10,
 };
 
-constexpr int blackBishopSquareValue[64] = {
+constexpr std::array<int, 64> blackBishopSquareValue = {
 	-10, -10, -10, -10, -10, -10, -10, -10, -10, 0,	  0,   0,	0,
 	0,	 0,	  -10, -10, 0,	 5,	  5,   5,	5,	 0,	  -10, -10, 0,
 	5,	 10,  10,  5,	0,	 -10, -10, 0,	5,	 10,  10,  5,	0,
@@ -156,58 +161,58 @@ void StaticEvaluator::configure(const EvaluatorParameters &params) {
 	maxMaterialWoBonus = startingMaterial / 2 - 1600;
 }
 
-int StaticEvaluator::materialScore(Board *board, int *whiteMat, int *blackMat) {
+int StaticEvaluator::materialScore(const Board &board, int &whiteMat,
+								   int &blackMat) {
 	int i, totalMat, winnersPawns, difMat, score, nBonus, rBonus, qBonus;
 	I64 bonus;
 	int totalPawns;
-	*whiteMat = 0;
-	*blackMat = 0;
+	whiteMat = 0;
+	blackMat = 0;
 	for (i = pawn; i <= queen; i++) {
-		*whiteMat += board->pieceCount(white, i) * materialValues[i];
-		*blackMat += board->pieceCount(black, i) * materialValues[i];
+		whiteMat += board.pieceCount(white, i) * materialValues[i];
+		blackMat += board.pieceCount(black, i) * materialValues[i];
 	}
-	difMat = *whiteMat - *blackMat;
-	totalMat = *whiteMat + *blackMat;
-	winnersPawns = board->pieceCount((difMat > 0) ? white : black, pawn);
+	difMat = whiteMat - blackMat;
+	totalMat = whiteMat + blackMat;
+	winnersPawns = board.pieceCount((difMat > 0) ? white : black, pawn);
 	bonus =
 		static_cast<I64>(difMat) * (startingMaterial - totalMat) * winnersPawns;
 	bonus /= (startingMaterial - 1600) * (winnersPawns + 1);
 
-	totalPawns =
-		board->pieceCount(white, pawn) + board->pieceCount(black, pawn);
+	totalPawns = board.pieceCount(white, pawn) + board.pieceCount(black, pawn);
 	nBonus = 2 * totalPawns - 16;
 	qBonus = totalPawns;
-	qBonus += board->pieceCount(white, bishop);
-	qBonus += board->pieceCount(white, knight);
-	qBonus += board->pieceCount(black, bishop);
-	qBonus += board->pieceCount(black, knight);
+	qBonus += board.pieceCount(white, bishop);
+	qBonus += board.pieceCount(white, knight);
+	qBonus += board.pieceCount(black, bishop);
+	qBonus += board.pieceCount(black, knight);
 	rBonus = 32 - 2 * totalPawns;
-	if (board->pieceCount(white, knight) >= 1) {
+	if (board.pieceCount(white, knight) >= 1) {
 		bonus += nBonus;
-		if (board->pieceCount(white, knight) > 1) {
+		if (board.pieceCount(white, knight) > 1) {
 			bonus -= 11;
 		}
 	}
-	if (board->pieceCount(black, knight) >= 1) {
+	if (board.pieceCount(black, knight) >= 1) {
 		bonus -= nBonus;
-		if (board->pieceCount(black, knight) > 1) {
+		if (board.pieceCount(black, knight) > 1) {
 			bonus += 11;
 		}
 	}
-	if (board->pieceCount(white, bishop) > 1) {
+	if (board.pieceCount(white, bishop) > 1) {
 		bonus += 13;
 	}
-	if (board->pieceCount(black, bishop) > 1) {
+	if (board.pieceCount(black, bishop) > 1) {
 		bonus -= 13;
 	}
-	if (board->pieceCount(white, queen) > 0) {
+	if (board.pieceCount(white, queen) > 0) {
 		bonus += qBonus;
 	}
-	if (board->pieceCount(black, queen) > 0) {
+	if (board.pieceCount(black, queen) > 0) {
 		bonus -= qBonus;
 	}
-	bonus += board->pieceCount(white, rook) * rBonus;
-	bonus -= board->pieceCount(black, rook) * rBonus;
+	bonus += board.pieceCount(white, rook) * rBonus;
+	bonus -= board.pieceCount(black, rook) * rBonus;
 
 	score = difMat;
 	if (score > maxMaterialWoBonus) {
@@ -224,18 +229,18 @@ int StaticEvaluator::materialScore(Board *board, int *whiteMat, int *blackMat) {
 	if (score < -maxMaterial) {
 		score = -maxMaterial;
 	}
-	if (board->sideToMove() == black) {
+	if (board.sideToMove() == black) {
 		score = -score;
 	}
 	return score;
 }
 
-int StaticEvaluator::materialBalance(Board *board) {
+int StaticEvaluator::materialBalance(const Board &board) {
 	int whiteMat, blackMat;
-	return materialScore(board, &whiteMat, &blackMat);
+	return materialScore(board, whiteMat, blackMat);
 }
 
-int StaticEvaluator::nonMaterialScore(Board *board, int whiteMat,
+int StaticEvaluator::nonMaterialScore(const Board &board, int whiteMat,
 									  int blackMat) {
 	int score;
 	int square;
@@ -246,26 +251,26 @@ int StaticEvaluator::nonMaterialScore(Board *board, int whiteMat,
 
 	score = evaluatePawnsAndKings(board, whiteMat, blackMat);
 
-	pieces = board->pieceBoard(white, knight);
+	pieces = board.pieceBoard(white, knight);
 	while (pieces) {
 		square = pieces.removeFirstOne();
 		score +=
 			(knightSquareValueWeight * whiteKnightSquareValue[square]) / 100;
 	}
-	pieces = board->pieceBoard(white, bishop);
+	pieces = board.pieceBoard(white, bishop);
 	while (pieces) {
 		square = pieces.removeFirstOne();
 		score +=
 			(bishopSquareValueWeight * whiteBishopSquareValue[square]) / 100;
 	}
-	pieces = board->pieceBoard(white, rook);
+	pieces = board.pieceBoard(white, rook);
 	while (pieces) {
 		square = pieces.removeFirstOne();
 		file = square % 8;
 		mask = fileA << file;
-		test = board->pieceBoard(white, pawn) & mask;
+		test = board.pieceBoard(white, pawn) & mask;
 		if (!test) {
-			test = board->pieceBoard(black, pawn) & mask;
+			test = board.pieceBoard(black, pawn) & mask;
 			if (!test) {
 				score += rookOpenFileBonus;
 			} else {
@@ -277,26 +282,26 @@ int StaticEvaluator::nonMaterialScore(Board *board, int whiteMat,
 		}
 	}
 
-	pieces = board->pieceBoard(black, knight);
+	pieces = board.pieceBoard(black, knight);
 	while (pieces) {
 		square = pieces.removeFirstOne();
 		score -=
 			(knightSquareValueWeight * blackKnightSquareValue[square]) / 100;
 	}
-	pieces = board->pieceBoard(black, bishop);
+	pieces = board.pieceBoard(black, bishop);
 	while (pieces) {
 		square = pieces.removeFirstOne();
 		score -=
 			(bishopSquareValueWeight * blackBishopSquareValue[square]) / 100;
 	}
-	pieces = board->pieceBoard(black, rook);
+	pieces = board.pieceBoard(black, rook);
 	while (pieces) {
 		square = pieces.removeFirstOne();
 		file = square % 8;
 		mask = fileA << file;
-		test = board->pieceBoard(black, pawn) & mask;
+		test = board.pieceBoard(black, pawn) & mask;
 		if (!test) {
-			test = board->pieceBoard(white, pawn) & mask;
+			test = board.pieceBoard(white, pawn) & mask;
 			if (!test) {
 				score -= rookOpenFileBonus;
 			} else {
@@ -314,19 +319,19 @@ int StaticEvaluator::nonMaterialScore(Board *board, int whiteMat,
 		score = -maximumNonMaterialScore;
 	}
 	if (score > 0) {
-		if (2 * board->fiftyMoveRule() > score) {
+		if (2 * board.fiftyMoveRule() > score) {
 			score /= 2;
 		} else {
-			score -= board->fiftyMoveRule();
+			score -= board.fiftyMoveRule();
 		}
 	} else if (score < 0) {
-		if (2 * board->fiftyMoveRule() < score) {
+		if (2 * board.fiftyMoveRule() < score) {
 			score /= 2;
 		} else {
-			score += board->fiftyMoveRule();
+			score += board.fiftyMoveRule();
 		}
 	}
-	if (board->sideToMove() == black) {
+	if (board.sideToMove() == black) {
 		score = -score;
 	}
 	return score;
@@ -340,11 +345,11 @@ int StaticEvaluator::checkmateValue(int ply) const {
 	return score;
 }
 
-bool StaticEvaluator::test(Board *board, int testValue) {
+bool StaticEvaluator::test(const Board &board, int testValue) {
 	int score, materialScore;
 	int whiteMat, blackMat;
 	bool testResult;
-	materialScore = this->materialScore(board, &whiteMat, &blackMat);
+	materialScore = this->materialScore(board, whiteMat, blackMat);
 	score = materialScore / scoreGrain;
 	score *= scoreGrain;
 	if ((score - maximumNonMaterialScore > testValue)) {
@@ -384,7 +389,7 @@ void StaticEvaluator::writePawnTable(U32 key, int score) {
 	/****************************************************/
 }
 
-bool StaticEvaluator::readPawnTable(U32 key, int *score) {
+bool StaticEvaluator::readPawnTable(U32 key, int &score) {
 	int tableIndex;
 	int lockIndex;
 	bool rc;
@@ -398,7 +403,7 @@ bool StaticEvaluator::readPawnTable(U32 key, int *score) {
 	const std::lock_guard<hpx::mutex> lock(locks[lockIndex]);
 	/****************************************************/
 	if ((pawnTable[tableIndex].key == key) && (key != 0)) {
-		*score = pawnTable[tableIndex].score;
+		score = pawnTable[tableIndex].score;
 		rc = true;
 	} else {
 		rc = false;
@@ -420,13 +425,13 @@ void StaticEvaluator::resetPawnTable() {
 	}
 }
 
-int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
+int StaticEvaluator::evaluatePawnsAndKings(const Board &board, int whiteMat,
 										   int blackMat) {
 	int i;
 	int score;
 	int kingScore;
 	int square;
-	int pawnRank[2][10];
+	std::array<std::array<int, 10>, 2> pawnRank;
 	int rank;
 	int file;
 	U32 key;
@@ -435,15 +440,15 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 		pawnRank[white][i] = 7;
 		pawnRank[black][i] = 0;
 	}
-	key = board->pawnKey() & 0xFFFFFFFF;
+	key = board.pawnKey() & 0xFFFFFFFF;
 	if (whiteMat < kEndgameDefinition) {
 		key ^= 0xFFFF0000;
 	}
 	if (blackMat < kEndgameDefinition) {
 		key ^= 0x0000FFFF;
 	}
-	if (!readPawnTable(key, &score)) {
-		pawns = board->pieceBoard(white, pawn);
+	if (!readPawnTable(key, score)) {
+		pawns = board.pieceBoard(white, pawn);
 		while (pawns) {
 			square = pawns.removeFirstOne();
 			rank = square / 8;
@@ -452,7 +457,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 				pawnRank[white][file + 1] = rank;
 			}
 		}
-		pawns = board->pieceBoard(black, pawn);
+		pawns = board.pieceBoard(black, pawn);
 		while (pawns) {
 			square = pawns.removeFirstOne();
 			rank = square / 8;
@@ -462,7 +467,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 			}
 		}
 		score = 0;
-		pawns = board->pieceBoard(white, pawn);
+		pawns = board.pieceBoard(white, pawn);
 		while (pawns) {
 			square = pawns.removeFirstOne();
 			score +=
@@ -485,7 +490,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 				score -= backwardsPawnPenalty;
 			}
 		}
-		pawns = board->pieceBoard(black, pawn);
+		pawns = board.pieceBoard(black, pawn);
 		while (pawns) {
 			square = pawns.removeFirstOne();
 			score -=
@@ -510,7 +515,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 		}
 
 		kingScore = 0;
-		square = board->pieceBoard(white, king).firstOne();
+		square = board.pieceBoard(white, king).firstOne();
 		if (blackMat < kEndgameDefinition) {
 			kingScore += endgameKingSquareValue[square];
 		} else {
@@ -527,7 +532,7 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 			}
 		}
 
-		square = board->pieceBoard(black, king).firstOne();
+		square = board.pieceBoard(black, king).firstOne();
 		if (whiteMat < kEndgameDefinition) {
 			kingScore -= endgameKingSquareValue[square];
 		} else {
@@ -550,7 +555,9 @@ int StaticEvaluator::evaluatePawnsAndKings(Board *board, int whiteMat,
 	return score;
 }
 
-static int evaluateWhiteKingPawn(int pawnRank[2][10], int file) {
+static int
+evaluateWhiteKingPawn(const std::array<std::array<int, 10>, 2> &pawnRank,
+					  int file) {
 	int kingScore;
 	kingScore = 0;
 	if (pawnRank[white][file + 1] == 1) {
@@ -572,7 +579,9 @@ static int evaluateWhiteKingPawn(int pawnRank[2][10], int file) {
 	return kingScore;
 }
 
-static int evaluateBlackKingPawn(int pawnRank[2][10], int file) {
+static int
+evaluateBlackKingPawn(const std::array<std::array<int, 10>, 2> &pawnRank,
+					  int file) {
 	int kingScore;
 	kingScore = 0;
 	if (pawnRank[black][file + 1] == 6) {

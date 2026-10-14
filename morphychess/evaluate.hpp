@@ -2,5 +2,5 @@
 #include <morphychess/board.hpp>
 namespace morphy_chess {
 void initEvaluator();
-int evaluate(Board *board);
+int evaluate(const Board &board);
 } // namespace morphy_chess

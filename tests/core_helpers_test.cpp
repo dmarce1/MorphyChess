@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <gtest/gtest.h>
+#include <memory>
 #include <morphychess/bitboard.hpp>
 #include <morphychess/bits.hpp>
 #include <morphychess/board.hpp>
@@ -40,15 +41,15 @@ TEST(Bits, FlipsAndRotatedBoardsPreserveOccupancy) {
 	value.verticalFlip();
 	EXPECT_EQ(value, Bitboard{1} << 63);
 	std::array<Bitboard, 4> rotated{};
-	rotatedBitsCreateSet(rotated.data(), (Bitboard{1} << 63) | Bitboard{1});
+	rotatedBitsCreateSet(rotated, (Bitboard{1} << 63) | Bitboard{1});
 	for (Bitboard bits : rotated) {
 		EXPECT_EQ(bits.countOnes(), 2);
 	}
-	rotatedBitsClear(rotated.data(), 63);
+	rotatedBitsClear(rotated, 63);
 	for (Bitboard bits : rotated) {
 		EXPECT_EQ(bits.countOnes(), 1);
 	}
-	rotatedBitsZeroOut(rotated.data());
+	rotatedBitsZeroOut(rotated);
 	for (Bitboard bits : rotated) {
 		EXPECT_EQ(bits, Bitboard{});
 	}
@@ -83,8 +84,7 @@ TEST(Bits, RotatedBoardsMapEverySquareAndOverwritePreviousOccupancy) {
 	for (int rank = 0; rank < 8; ++rank) {
 		for (int file = 0; file < 8; ++file) {
 			rotated.fill(~Bitboard{0});
-			rotatedBitsCreateSet(rotated.data(),
-								 Bitboard{1} << (8 * rank + file));
+			rotatedBitsCreateSet(rotated, Bitboard{1} << (8 * rank + file));
 			EXPECT_EQ(rotated[kRankIndex], Bitboard{1} << (8 * rank + file));
 			EXPECT_EQ(rotated[kFileIndex], Bitboard{1} << (8 * file + rank));
 			EXPECT_EQ(rotated[kDiag1Index],
@@ -93,11 +93,11 @@ TEST(Bits, RotatedBoardsMapEverySquareAndOverwritePreviousOccupancy) {
 					  Bitboard{1} << (8 * ((7 - file - rank + 8) % 8) + rank));
 		}
 	}
-	rotatedBitsCreateSet(rotated.data(), ~Bitboard{0});
+	rotatedBitsCreateSet(rotated, ~Bitboard{0});
 	for (Bitboard bits : rotated) {
 		EXPECT_EQ(bits, ~Bitboard{0});
 	}
-	rotatedBitsCreateSet(rotated.data(), Bitboard{});
+	rotatedBitsCreateSet(rotated, Bitboard{});
 	for (Bitboard bits : rotated) {
 		EXPECT_EQ(bits, Bitboard{});
 	}
@@ -109,38 +109,37 @@ TEST(MoveData, LeapersAndSlidingBlockers) {
 	EXPECT_EQ(whitePawnAttacks(8), Bitboard{1} << 17);
 	EXPECT_EQ(blackPawnAttacks(55), Bitboard{1} << 46);
 	std::array<Bitboard, 4> occupancy{};
-	EXPECT_EQ(rookAttacks(occupancy.data(), 27).countOnes(), 14);
-	EXPECT_EQ(bishopAttacks(occupancy.data(), 27).countOnes(), 13);
-	rotatedBitsSet(occupancy.data(), 43);
-	EXPECT_TRUE(rookAttacks(occupancy.data(), 27).test(43));
-	EXPECT_FALSE(rookAttacks(occupancy.data(), 27).test(51));
-	EXPECT_EQ(queenAttacks(occupancy.data(), 27),
-			  bishopAttacks(occupancy.data(), 27) |
-				  rookAttacks(occupancy.data(), 27));
+	EXPECT_EQ(rookAttacks(occupancy, 27).countOnes(), 14);
+	EXPECT_EQ(bishopAttacks(occupancy, 27).countOnes(), 13);
+	rotatedBitsSet(occupancy, 43);
+	EXPECT_TRUE(rookAttacks(occupancy, 27).test(43));
+	EXPECT_FALSE(rookAttacks(occupancy, 27).test(51));
+	EXPECT_EQ(queenAttacks(occupancy, 27),
+			  bishopAttacks(occupancy, 27) | rookAttacks(occupancy, 27));
 }
 TEST(Zobrist, KeysMatchIncrementalStateAndInitializationIsStable) {
 	Board board;
 	const std::uint64_t initial = board.positionKey();
-	EXPECT_EQ(initial, computePositionKey(&board));
+	EXPECT_EQ(initial, computePositionKey(board));
 	initZobristKeys();
-	EXPECT_EQ(initial, computePositionKey(&board));
+	EXPECT_EQ(initial, computePositionKey(board));
 	ASSERT_TRUE(board.makeMove(Move(12, 28)));
 	EXPECT_NE(initial, board.positionKey());
-	EXPECT_EQ(board.positionKey(), computePositionKey(&board));
-	EXPECT_EQ(board.pawnKey(), computePawnKey(&board));
+	EXPECT_EQ(board.positionKey(), computePositionKey(board));
+	EXPECT_EQ(board.pawnKey(), computePawnKey(board));
 	EXPECT_TRUE(board.undoMove());
 	EXPECT_EQ(initial, board.positionKey());
 }
 TEST(Evaluation, MaterialBalanceAndStaticExchangeRestoreBoard) {
 	Board board;
-	EXPECT_EQ(evaluate(&board), 0);
+	EXPECT_EQ(evaluate(board), 0);
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/Q7/K7 w - - 0 1"));
-	EXPECT_GT(evaluate(&board), 0);
+	EXPECT_GT(evaluate(board), 0);
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/q7/7K w - - 0 1"));
-	EXPECT_LT(evaluate(&board), 0);
+	EXPECT_LT(evaluate(board), 0);
 	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/q7/R6K w - - 0 1"));
 	const std::uint64_t original = board.positionKey();
-	EXPECT_EQ(see(&board, Move(0, 8), 0), 900);
+	EXPECT_EQ(see(board, Move(0, 8), 0), 900);
 	EXPECT_EQ(board.positionKey(), original);
 	EXPECT_EQ(board.halfMoveCount(), 0);
 }
@@ -165,12 +164,12 @@ TEST(Egtb, ThreePieceIndexRoundTripAndValidation) {
 }
 TEST(Debug, ConsistentBoardAndReadableStream) {
 	Board board;
-	assertBoardConsistency(&board);
-	assertTranspositionKeyConsistency(&board);
-	FILE *stream = std::tmpfile();
-	ASSERT_NE(stream, nullptr);
-	board.toStream(stream);
-	EXPECT_GT(std::ftell(stream), 0);
-	std::fclose(stream);
+	assertBoardConsistency(board);
+	assertTranspositionKeyConsistency(board);
+	const auto closeFile = [](FILE *file) { std::fclose(file); };
+	std::unique_ptr<FILE, decltype(closeFile)> stream(std::tmpfile(), closeFile);
+	ASSERT_NE(stream.get(), nullptr);
+	board.toStream(stream.get());
+	EXPECT_GT(std::ftell(stream.get()), 0);
 }
 } // namespace morphy_chess

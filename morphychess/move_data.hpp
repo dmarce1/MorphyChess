@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <morphychess/bits.hpp>
 #include <morphychess/integers.hpp>
 #include <morphychess/params.hpp>
@@ -27,13 +28,13 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 Bitboard whitePawnAttacks(int);
 Bitboard blackPawnAttacks(int);
 Bitboard knightAttacks(int);
-Bitboard bishopAttacks(const Bitboard *, int);
-Bitboard rookAttacks(const Bitboard *, int);
-Bitboard queenAttacks(const Bitboard *, int);
-Bitboard rankMoves(const Bitboard *, int);
-Bitboard fileMoves(const Bitboard *, int);
-Bitboard diag1Moves(const Bitboard *, int);
-Bitboard diag2Moves(const Bitboard *, int);
+Bitboard bishopAttacks(const std::array<Bitboard, 4> &, int);
+Bitboard rookAttacks(const std::array<Bitboard, 4> &, int);
+Bitboard queenAttacks(const std::array<Bitboard, 4> &, int);
+Bitboard rankMoves(const std::array<Bitboard, 4> &, int);
+Bitboard fileMoves(const std::array<Bitboard, 4> &, int);
+Bitboard diag1Moves(const std::array<Bitboard, 4> &, int);
+Bitboard diag2Moves(const std::array<Bitboard, 4> &, int);
 Bitboard kingAttacks(int);
 void initMoveData(void);
 

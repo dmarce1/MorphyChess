@@ -1,5 +1,6 @@
 #include <morphychess/xboard.hpp>
 
+#include <array>
 #include <chrono>
 #include <gtest/gtest.h>
 #include <hpx/modules/async_local.hpp>
@@ -233,8 +234,8 @@ TEST_F(XboardTest, SendsRematchAndThreeSeeksOnlyForIcsSessions) {
 }
 
 TEST_F(XboardTest, InputLoopHandlesEofAndUnterminatedLastCommand) {
-	int descriptors[2];
-	ASSERT_EQ(::pipe(descriptors), 0);
+	std::array<int, 2> descriptors;
+	ASSERT_EQ(::pipe(descriptors.data()), 0);
 	const std::string commands = "xboard\nprotover 2\nping 17";
 	ASSERT_EQ(::write(descriptors[1], commands.data(), commands.size()),
 			  static_cast<ssize_t>(commands.size()));
@@ -246,8 +247,8 @@ TEST_F(XboardTest, InputLoopHandlesEofAndUnterminatedLastCommand) {
 }
 
 TEST_F(XboardTest, InputLoopYieldsSoOneWorkerCanDeliverCommands) {
-	int descriptors[2];
-	ASSERT_EQ(::pipe(descriptors), 0);
+	std::array<int, 2> descriptors;
+	ASSERT_EQ(::pipe(descriptors.data()), 0);
 	auto writer = hpx::async([writeFd = descriptors[1]] {
 		hpx::this_thread::sleep_for(std::chrono::milliseconds(5));
 		const std::string commands = "new\neasy\nsd 1\nst 0.01\ngo\n";

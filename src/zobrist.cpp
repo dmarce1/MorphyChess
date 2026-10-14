@@ -1,3 +1,4 @@
+#include <array>
 #include <morphychess/board.hpp>
 #include <morphychess/debug.hpp>
 #include <morphychess/zobrist.hpp>
@@ -24,10 +25,10 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-static std::uint64_t keys[2][6][64];
-static std::uint64_t epKeys[8];
-static std::uint64_t kingCastleKeys[2];
-static std::uint64_t queenCastleKeys[2];
+static std::array<std::array<std::array<std::uint64_t, 64>, 6>, 2> keys;
+static std::array<std::uint64_t, 8> epKeys;
+static std::array<std::uint64_t, 2> kingCastleKeys;
+static std::array<std::uint64_t, 2> queenCastleKeys;
 
 static std::uint64_t rand64(void);
 
@@ -82,47 +83,47 @@ std::uint64_t zobristEpKey(int square) {
 	return epKeys[square & 0x7];
 }
 
-std::uint64_t computePositionKey(const Board *board) {
+std::uint64_t computePositionKey(const Board &board) {
 	std::uint64_t key;
 	int i;
 
 	key = 0LL;
 	for (i = 0; i < 64; i++) {
-		key ^= zobristKey(board->pieceValue(i), i);
+		key ^= zobristKey(board.pieceValue(i), i);
 	}
-	if (board->flags().whiteKingSide() == 0) {
+	if (board.flags().whiteKingSide() == 0) {
 		key ^= zobristKingSideCastleKey(white);
 	}
-	if (board->flags().whiteQueenSide() == 0) {
+	if (board.flags().whiteQueenSide() == 0) {
 		key ^= zobristQueenSideCastleKey(white);
 	}
-	if (board->flags().blackKingSide() == 0) {
+	if (board.flags().blackKingSide() == 0) {
 		key ^= zobristKingSideCastleKey(black);
 	}
-	if (board->flags().blackQueenSide() == 0) {
+	if (board.flags().blackQueenSide() == 0) {
 		key ^= zobristQueenSideCastleKey(black);
 	}
-	if (board->flags().epCaptureSquare() != 0) {
-		key ^= zobristEpKey(board->flags().epCaptureSquare());
+	if (board.flags().epCaptureSquare() != 0) {
+		key ^= zobristEpKey(board.flags().epCaptureSquare());
 	}
-	//	key ^= zobrist_repeat_key( board->flags().repeat_count() );
+	//	key ^= zobrist_repeat_key( board.flags().repeat_count() );
 
 	return key;
 }
 
-std::uint64_t computePawnKey(const Board *board) {
+std::uint64_t computePawnKey(const Board &board) {
 	std::uint64_t key;
 	int i;
 
 	key = 0LL;
 	for (i = 0; i < 64; i++) {
-		if ((abs(board->pieceValue(i)) == pawn) ||
-			(abs(board->pieceValue(i)) == king)) {
-			key ^= zobristKey(board->pieceValue(i), i);
+		if ((abs(board.pieceValue(i)) == pawn) ||
+			(abs(board.pieceValue(i)) == king)) {
+			key ^= zobristKey(board.pieceValue(i), i);
 		}
 	}
-	if (board->flags().epCaptureSquare() != 0) {
-		key ^= zobristEpKey(board->flags().epCaptureSquare());
+	if (board.flags().epCaptureSquare() != 0) {
+		key ^= zobristEpKey(board.flags().epCaptureSquare());
 	}
 
 	return key;

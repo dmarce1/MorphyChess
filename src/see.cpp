@@ -1,4 +1,5 @@
-#include <morphychess/board.hpp>
+#include <array>
+#include <morphychess/see.hpp>
 #include <stdlib.h>
 
 namespace morphy_chess {
@@ -21,23 +22,23 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-int materialScore[7] = {0, 100, 300, 300, 500, 900, 1000};
+std::array<int, 7> materialScore = {0, 100, 300, 300, 500, 900, 1000};
 
-int see(Board *board, Move move, int score) {
+int see(Board &board, Move move, int score) {
 	Move reply;
 	int replyScore;
 	int capture;
 
-	capture = abs(board->pieceValue(move.to()));
-	if ((board)->makeMove(move)) {
+	capture = abs(board.pieceValue(move.to()));
+	if (board.makeMove(move)) {
 		score += materialScore[capture];
-		if ((board)->genLvaAttackToSquare(&reply, move.to())) {
+		if (board.genLvaAttackToSquare(reply, move.to())) {
 			replyScore = -see(board, reply, -score);
 			if (replyScore < score) {
 				score = replyScore;
 			}
 		}
-		(board)->undoMove();
+		board.undoMove();
 	}
 	return score;
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <morphychess/bitboard.hpp>
 #include <morphychess/integers.hpp>
 #include <morphychess/params.hpp>
@@ -183,17 +184,17 @@ public:
 	Move makeTextMove(const char *text);
 	Result result();
 	void reset();
-	void copy(const Board *s);
+	void copy(const Board &s);
 	void toStream(FILE *fp) const;
 	bool positionIsRepeat();
 	bool lastMoveWasCapture();
 	bool moveIsCapture(Move move);
 	bool nextMoveIsForced();
 	int repetitions();
-	bool genLvaAttackToSquare(Move *move, int square);
+	bool genLvaAttackToSquare(Move &move, int square);
 	bool kingInCheck(int color) const;
 	bool checkForDraw();
-	int pseudolegalMoveCount(Bitboard *control, int color) const;
+	int pseudolegalMoveCount(Bitboard &control, int color) const;
 	int pieceValue(int square) const noexcept {
 		return pieceValuesData[square];
 	}
@@ -203,7 +204,7 @@ public:
 	Bitboard pieceBoard(int color, int piece) const noexcept {
 		return pieceBoardsData[color][piece];
 	}
-	const Bitboard *occupiedSquares() const noexcept {
+	const std::array<Bitboard, 4> &occupiedSquares() const noexcept {
 		return occupiedSquaresData;
 	}
 	std::uint64_t positionKey() const noexcept { return positionKeyData; }
@@ -247,17 +248,17 @@ private:
 	void handleEnPassantUndo(Move move);
 	void handlePawnPromotion(Move move);
 	void handlePromotionUndo(Move move);
-	void storeUndoInfo(UndoInfo *undo);
-	UndoInfo undoInfoData[maxHalfMoves]{};
-	I8 pieceCountsData[2][7]{};
-	Bitboard pieceBoardsData[2][7]{};
-	I8 pieceValuesData[64]{};
-	Bitboard occupiedSquaresData[4]{};
+	void storeUndoInfo(const UndoInfo &undo);
+	std::array<UndoInfo, maxHalfMoves> undoInfoData{};
+	std::array<std::array<I8, 7>, 2> pieceCountsData{};
+	std::array<std::array<Bitboard, 7>, 2> pieceBoardsData{};
+	std::array<I8, 64> pieceValuesData{};
+	std::array<Bitboard, 4> occupiedSquaresData{};
 	std::uint64_t positionKeyData = 0;
 	std::uint64_t pawnKeyData = 0;
 	BoardFlags flagsData;
-	bool hasKsideCastledData[2]{};
-	bool hasQsideCastledData[2]{};
+	std::array<bool, 2> hasKsideCastledData{};
+	std::array<bool, 2> hasQsideCastledData{};
 	int fiftyMoveRuleData = 0;
 };
 
