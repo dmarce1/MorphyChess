@@ -1,8 +1,13 @@
 #include <array>
+#include <string>
+
 #include <morphychess/bits.hpp>
 #include <morphychess/egtb.hpp>
-#include <string>
+
 namespace morphy_chess {
+// Decode a mixed-radix placement index: 64 choices for the stronger king,
+// then 63 and 62 remaining squares. Illegal arrangements remain holes in
+// the index space. This is indexing support, not a retrograde tablebase solver.
 bool Board::loadEgtbIndex(int thirdMan, int index, int sideToMove) {
 	if (thirdMan < pawn || thirdMan > queen || index < 0 ||
 		index >= threeManPositionCount ||
@@ -71,12 +76,15 @@ int Board::threeManEgtbIndex(int thirdMan, int pieceColor) const {
 	int whiteKing = pieceBoard(pieceColor, king).firstOne();
 	int blackKing = pieceBoard(colorFlip(pieceColor), king).firstOne();
 	int thirdSquare = pieceBoard(pieceColor, thirdMan).firstOne();
+	// Canonicalize the side with the extra piece as white. Reflect ranks
+	// when swapping colors so pawn movement keeps the same direction.
 	if (pieceColor == black) {
 		whiteKing ^= 56;
 		blackKing ^= 56;
 		thirdSquare ^= 56;
 	}
 	const int blackIndex = blackKing - (blackKing > whiteKing);
+	// Remove the occupied king squares from the third piece's ordinal.
 	const int thirdIndex =
 		thirdSquare - (thirdSquare > whiteKing) - (thirdSquare > blackKing);
 	return (whiteKing * 63 + blackIndex) * 62 + thirdIndex;

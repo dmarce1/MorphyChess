@@ -7,7 +7,8 @@
 
 namespace morphy_chess {
 
-// One bit per square, with each rank occupying one byte.
+// One bit per square: a1 is bit 0, h1 bit 7, and h8 bit 63. Each rank
+// occupies one byte, so a shift by eight moves one rank without file wrap.
 class Bitboard {
 public:
 	constexpr Bitboard() noexcept = default;
@@ -23,14 +24,17 @@ public:
 		return std::popcount(bits);
 	}
 	[[nodiscard]] constexpr int firstOne() const noexcept {
+		// An empty board returns 64; callers must test it before indexing.
 		return std::countr_zero(bits);
 	}
 	[[nodiscard]] constexpr int lastOne() const noexcept {
+		// The corresponding empty-board sentinel is -1.
 		return 63 - std::countl_zero(bits);
 	}
 
 	constexpr int removeFirstOne() noexcept {
 		const int square = firstOne();
+		// Clearing the least significant set bit visits only occupied squares.
 		bits &= bits - 1;
 		return square;
 	}
@@ -44,6 +48,8 @@ public:
 
 	constexpr void verticalFlip() noexcept { bits = std::byteswap(bits); }
 	constexpr void horizontalFlip() noexcept {
+		// Reverse bits within every rank byte in parallel: nibbles, pairs,
+		// then adjacent bits. Byte order (the ranks) remains unchanged.
 		bits = ((bits & 0xf0f0f0f0f0f0f0f0ULL) >> 4) |
 			   ((bits & 0x0f0f0f0f0f0f0f0fULL) << 4);
 		bits = ((bits & 0xccccccccccccccccULL) >> 2) |

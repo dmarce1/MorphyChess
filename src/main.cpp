@@ -1,14 +1,16 @@
 #include <exception>
-#include <hpx/init_runtime_local/init_runtime_local.hpp>
-#include <hpx/runtime_local/config_entry.hpp>
 #include <iostream>
-#include <morphychess/bench.hpp>
-#include <morphychess/command_line.hpp>
-#include <morphychess/xboard.hpp>
 #include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <hpx/init_runtime_local/init_runtime_local.hpp>
+#include <hpx/runtime_local/config_entry.hpp>
+
+#include <morphychess/bench.hpp>
+#include <morphychess/command_line.hpp>
+#include <morphychess/xboard.hpp>
 
 namespace {
 int runApplication(hpx::program_options::variables_map &values) {
@@ -50,6 +52,7 @@ int main(int argc, char **argv) {
 		}
 		arguments.push_back(std::move(argument));
 	}
+	// Build argv only after the owning strings stop moving in the vector.
 	for (auto &argument : arguments) {
 		pointers.push_back(argument.data());
 	}
@@ -57,6 +60,7 @@ int main(int argc, char **argv) {
 	const auto description = morphy_chess::CommandLineOptions::description();
 	hpx::local::init_params parameters;
 	parameters.desc_cmdline = description;
+	// Recursive search needs an HPX task stack independent of worker count.
 	parameters.cfg = {
 		"hpx.os_threads=" + std::to_string(morphy_chess::defaultThreadCount),
 		"hpx.stacks.small_size=0x400000", "hpx.commandline.allow_unknown=0"};

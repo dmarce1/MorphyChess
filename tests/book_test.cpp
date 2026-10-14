@@ -3,10 +3,12 @@
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
-#include <morphychess/book.hpp>
 #include <string>
 #include <vector>
+
+#include <gtest/gtest.h>
+
+#include <morphychess/book.hpp>
 
 namespace morphy_chess {
 namespace {
@@ -188,6 +190,59 @@ TEST(Book, FailedMissingBookFallbackPreservesPreviousFile) {
 	EXPECT_EQ(original.entryCount(), 1);
 	Board board;
 	EXPECT_EQ(original.findMove(board), Move(12, 28));
+}
+
+TEST(Book, FailedSavePreservesBookAndExistingTemporaryFile) {
+	TemporaryBookFiles files;
+	files.writePgn("1.e4 *\n");
+	Book book;
+	ASSERT_TRUE(book.open(files.path("book.bin")));
+	files.writePgn("1.d4 d5 *\n");
+	ASSERT_EQ(book.digest(files.path("eco.pgn")), 1);
+	ASSERT_EQ(book.entryCount(), 2);
+	{
+		std::ofstream reserved(files.path("book.bin.tmp"));
+		reserved << "another writer's file";
+	}
+	EXPECT_FALSE(book.save(files.path("book.bin")));
+	std::ifstream reserved(files.path("book.bin.tmp"));
+	const std::string contents(std::istreambuf_iterator<char>(reserved), {});
+	EXPECT_EQ(contents, "another writer's file");
+	Book previous;
+	ASSERT_TRUE(previous.open(files.path("book.bin")));
+	EXPECT_EQ(previous.entryCount(), 1);
+	Board initial;
+	EXPECT_EQ(previous.findMove(initial), Move(12, 28));
+	std::filesystem::remove(files.path("book.bin.tmp"));
+	EXPECT_TRUE(book.close());
+	Book updated;
+	ASSERT_TRUE(updated.open(files.path("book.bin")));
+	EXPECT_EQ(updated.entryCount(), 2);
+	EXPECT_EQ(updated.findMove(initial), Move(11, 27));
+}
+
+TEST(Book, FailedRenameRemovesOnlyOwnedTemporaryAndKeepsLoadedFilename) {
+	TemporaryBookFiles files;
+	files.writePgn("1.e4 *\n");
+	Book book;
+	ASSERT_TRUE(book.open(files.path("book.bin")));
+	files.writePgn("1.d4 d5 *\n");
+	ASSERT_EQ(book.digest(files.path("eco.pgn")), 1);
+	std::filesystem::create_directory(files.path("blocked"));
+	{
+		std::ofstream marker(files.path("blocked/marker"));
+		marker << "keep";
+	}
+	EXPECT_FALSE(book.save(files.path("blocked")));
+	EXPECT_FALSE(std::filesystem::exists(files.path("blocked.tmp")));
+	EXPECT_TRUE(std::filesystem::exists(files.path("blocked/marker")));
+	Book previous;
+	ASSERT_TRUE(previous.open(files.path("book.bin")));
+	EXPECT_EQ(previous.entryCount(), 1);
+	EXPECT_TRUE(book.close());
+	Book updated;
+	ASSERT_TRUE(updated.open(files.path("book.bin")));
+	EXPECT_EQ(updated.entryCount(), 2);
 }
 
 TEST(Book, RejectsTruncatedAndInvalidFilesWithoutLosingLoadedBook) {

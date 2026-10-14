@@ -1,10 +1,11 @@
-#include <morphychess/bitboard.hpp>
-
 #include <array>
 #include <cstdint>
-#include <gtest/gtest.h>
 #include <limits>
 #include <type_traits>
+
+#include <gtest/gtest.h>
+
+#include <morphychess/bitboard.hpp>
 
 namespace morphy_chess {
 namespace {

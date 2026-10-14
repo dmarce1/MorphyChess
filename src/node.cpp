@@ -1,12 +1,13 @@
+#include <stdexcept>
+#include <stdlib.h>
+#include <string.h>
+
 #include <morphychess/debug.hpp>
 #include <morphychess/history.hpp>
 #include <morphychess/integers.hpp>
 #include <morphychess/material_values.hpp>
 #include <morphychess/node.hpp>
 #include <morphychess/params.hpp>
-#include <stdexcept>
-#include <stdlib.h>
-#include <string.h>
 
 namespace morphy_chess {
 
@@ -48,6 +49,9 @@ Node::Node(Search &searchValue, Move move) :
 	(killer).setEmpty();
 }
 
+// Generate stages only as needed: hash move, promotions, non-losing captures,
+// one available killer, losing captures, then history-ranked quiet moves.
+// Selecting just the best remaining move avoids sorting moves after a cutoff.
 int Node::doNextMove(Move &branch) {
 	Move move;
 	int i, rc, bestScore, score, bestI;
@@ -178,6 +182,8 @@ tryAgain:
 	}
 	branch = move;
 	if (rc == kNodeMovesAvailable) {
+		// Generators are pseudolegal. makeMove rejects exposed kings and
+		// restores failed attempts; suppress the hash move when seen again.
 		if (((move == tableMove)) && (mgStage != GenStage::table)) {
 			goto tryAgain;
 		} else if (!(search.boardPtr)->makeMove(move)) {
@@ -192,6 +198,8 @@ tryAgain:
 	return rc;
 }
 
+// Quiescence includes every promotion and capture, including captures scored
+// as losing. Check evasions instead use the full picker in quiescentTest().
 int Node::doNextNonquiescentMove(Move &branch) {
 	Move move;
 	int i, rc, bestScore, score, bestI;
@@ -261,6 +269,8 @@ void Node::restore() {
 	(search.boardPtr)->undoMove();
 }
 
+// Cheap victim/attacker ordering with a defended-square penalty. This does not
+// enumerate recaptures and is not a static exchange evaluation (SEE).
 int Node::captureMoveValue(Move move) const {
 	const Board &board = *search.boardPtr;
 	constexpr const auto &pvals = captureMaterialValues;
@@ -280,6 +290,10 @@ int Node::captureMoveValue(Move move) const {
 
 bool Node::noMovesGenerated() const { return (bool)(totalMovesGenerated == 0); }
 
+// Called after the child move is made: kingInCheck() therefore identifies a
+// move giving check. Preserve early quiet moves and all tactical stages at full
+// depth; the caller re-searches a reduced move that exceeds the threshold.
+// See bibliography.md [late_move_reductions].
 bool Node::okToReduce(int depth) const {
 	bool rc;
 #ifdef LATE_MOVE_REDUCTION_OFF
@@ -301,6 +315,8 @@ bool Node::okToReduce(int depth) const {
 	return rc;
 }
 
+// Legacy material-plus-margin futility estimate; the current search does not
+// call this helper, so its presence does not imply active futility pruning.
 bool Node::moveIsFutile(int materialBalance, int testValue) const {
 	bool rc;
 	Move move;

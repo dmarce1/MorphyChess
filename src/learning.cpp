@@ -2,11 +2,16 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
-#include <morphychess/learning.hpp>
-#include <morphychess/parallel_search.hpp>
 #include <stdexcept>
 
+#include <morphychess/learning.hpp>
+#include <morphychess/parallel_search.hpp>
+
 namespace morphy_chess {
+// For delta_t = prediction_(t+1) - prediction_t, return
+// sum_(j=t..T-1) lambda^(j-t) * delta_j, with prediction_T = target.
+// The backward recurrence computes all TD(lambda) weights in O(T) time.
+// See bibliography.md [td_learning].
 std::vector<double>
 temporalDifferenceWeights(const std::vector<double> &predictions, double target,
 						  double lambda) {
@@ -53,12 +58,17 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 		throw std::invalid_argument("Invalid learning perspective");
 	}
 	const double perspective = computerSide == white ? 1.0 : -1.0;
+	// Predictions and the terminal result must use the same player's view:
+	// +1 for this engine's win, -1 for its loss, and zero for a draw.
 	const double target = perspective * (result == whiteWin	  ? 1.0
 										 : result == blackWin ? -1.0
 															  : 0.0);
 	std::vector<double> predictions;
 	std::vector<EvaluatorParameters> jacobians;
 	MemoryTable scratch(4096, 16, 1);
+	// The stored boards are principal-variation leaves. Re-evaluate each with
+	// quiescence before applying TD(lambda), a TDLeaf-style adaptation rather
+	// than training only on the root positions. See bibliography.md [tdleaf].
 	auto evaluate = [&](const Board &position,
 						const EvaluatorParameters &parameters) {
 		Board copy = position;
@@ -67,12 +77,17 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 		Search search(copy, value, scratch);
 		search.setGrainSize(delta);
 		scratch.reset();
+		// quiescentValue returns a White-relative centipawn score. Convert to
+		// pawns, squash with tanh, then adopt the engine's fixed perspective.
 		const double score = search.quiescentValue(0);
 		return perspective * std::tanh(value.beta() * score / 100.0);
 	};
 	for (const auto &position : learningPositions) {
 		predictions.push_back(evaluate(position, evalParams));
 		EvaluatorParameters jacobian;
+		// Centered finite differences estimate sensitivity through the actual
+		// quantized evaluator and quiescence search, not a symbolic derivative.
+		// Resetting scratch above prevents reuse of scores from other weights.
 		for (size_t index = 0; index < evalParams.size(); ++index) {
 			EvaluatorParameters perturbed = evalParams;
 			perturbed[index] += delta;
@@ -84,6 +99,8 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 		jacobians.push_back(jacobian);
 	}
 	const auto weights = temporalDifferenceWeights(predictions, target, lambda);
+	// Batch update: every prediction and derivative uses the old parameters;
+	// apply alpha * sum_t(weight_t * gradient_t) only after the game is over.
 	EvaluatorParameters updatedParameters = evalParams;
 	for (size_t index = 0; index < evalParams.size(); ++index) {
 		double update = 0.0;
@@ -95,6 +112,9 @@ void ParallelSearch::triggerLearning(int computerSide, Result result) {
 	// Validate the complete candidate before changing the live evaluator or
 	// saved parameters.
 	StaticEvaluator validated(updatedParameters);
+	// Keep the original brain file until the complete native-double payload
+	// and text history have been written. Rename publishes the candidate;
+	// live weights and cached evaluations change only after that succeeds.
 	const std::filesystem::path temporaryBrain = "brain.dat.tmp";
 	try {
 		std::ofstream brain(temporaryBrain, std::ios::binary | std::ios::trunc);

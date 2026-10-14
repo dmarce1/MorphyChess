@@ -1,9 +1,9 @@
-#include <morphychess/history.hpp>
-
 #include <algorithm>
 #include <cmath>
 #include <limits>
 #include <stdexcept>
+
+#include <morphychess/history.hpp>
 
 namespace morphy_chess {
 namespace {
@@ -39,6 +39,8 @@ void History::reset() {
 }
 
 void History::halveScores() {
+	// Rescale every move together to preserve relative ordering while making
+	// room for another depth-weighted bonus.
 	for (auto &row : scores) {
 		for (int &score : row) {
 			score /= 2;
@@ -47,6 +49,8 @@ void History::halveScores() {
 }
 
 void History::update(Move move, bool test, int depth, int ply, bool isNonCap) {
+	// Reward only successful quiet cutoffs, with deeper proofs carrying more
+	// weight. Killer slots retain the two latest distinct moves at this ply.
 	if (!test || move.isEmpty() || !isNonCap) {
 		return;
 	}

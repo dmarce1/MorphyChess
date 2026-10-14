@@ -1,6 +1,7 @@
+#include <stdlib.h>
+
 #include <morphychess/board.hpp>
 #include <morphychess/material_values.hpp>
-#include <stdlib.h>
 
 namespace morphy_chess {
 
@@ -27,13 +28,28 @@ constexpr MaterialValues materialScore({0, 100, 300, 300, 500, 900, 1000});
 } // namespace
 
 int Board::see(Move move, int score) {
+	// Recursive swap-off/SEE: force this move, then follow least-valued legal
+	// recaptures on its destination. Negating the accumulated score changes
+	// viewpoint; taking the smaller reply lets the opponent stop exchanging.
+	// Actual make/undo operations reveal x-ray attackers and enforce king
+	// safety. This is a material heuristic, not a full tactical search; see
+	// bibliography.md [static_exchange].
 	Move reply;
 	int replyScore;
 	int capture;
 
 	capture = abs(pieceValue(move.to()));
+	if (capture == empty && moveIsCapture(move)) {
+		// En passant removes a pawn behind the otherwise empty target square.
+		capture = pawn;
+	}
 	if (makeMove(move)) {
 		score += materialScore[capture];
+		if (!move.isEmpty() && move.promo() != empty) {
+			// The promoted piece replaces a pawn even on a quiet move. A later
+			// recapture then removes the full promoted-piece value normally.
+			score += materialScore[move.promo()] - materialScore[pawn];
+		}
 		if (genLvaAttackToSquare(reply, move.to())) {
 			replyScore = -see(reply, -score);
 			if (replyScore < score) {

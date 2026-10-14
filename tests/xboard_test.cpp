@@ -1,13 +1,14 @@
-#include <morphychess/xboard.hpp>
-
 #include <array>
 #include <chrono>
+#include <sstream>
+#include <string>
+
 #include <gtest/gtest.h>
 #include <hpx/modules/async_local.hpp>
 #include <hpx/modules/threading.hpp>
-#include <sstream>
-#include <string>
 #include <unistd.h>
+
+#include <morphychess/xboard.hpp>
 
 namespace morphy_chess {
 namespace {

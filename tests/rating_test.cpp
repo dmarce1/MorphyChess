@@ -1,7 +1,9 @@
-#include <gtest/gtest.h>
 #include <limits>
-#include <morphychess/rating.hpp>
 #include <stdexcept>
+
+#include <gtest/gtest.h>
+
+#include <morphychess/rating.hpp>
 
 namespace morphy_chess {
 namespace {

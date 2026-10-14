@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+
 #include <morphychess/board.hpp>
 #include <morphychess/params.hpp>
 
@@ -30,6 +31,9 @@ inline constexpr auto kRemoveRepeatKey = ~(0x0000000000000003LL);
 
 // Immutable keys preserve the legacy glibc srand(0x33333333)/rand64
 // sequence, including hashes persisted in existing opening books.
+// A position is the XOR of its feature keys, so XORing a changed feature
+// both removes its old contribution and adds its new one. See bibliography.md
+// [zobrist]. These deterministic keys are identifiers, not cryptographic keys.
 class ZobristData {
 public:
 	constexpr ZobristData() noexcept = default;
@@ -55,6 +59,7 @@ public:
 	}
 	[[nodiscard]] constexpr std::uint64_t
 	enPassantKey(int square) const noexcept {
+		// Only the file is encoded; Board stores the capturable pawn's square.
 		assert(square >= 0 && square <= 64);
 		return keys[768 + (square & 0x7)];
 	}

@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+
 #include <morphychess/bitboard.hpp>
 #include <morphychess/move_data.hpp>
 
@@ -31,13 +32,17 @@ inline constexpr auto kFileIndex = 1;
 inline constexpr auto kDiag1Index = 2;
 inline constexpr auto kDiag2Index = 3;
 
-// Immutable masks for the four rank, file, and diagonal representations.
+// Immutable masks for four occupancy representations. Each relevant line
+// becomes a byte, enabling lookup by its 8-bit occupancy rather than scanning
+// sliding-piece rays at runtime. See bibliography.md [rotated_bitboards].
 class BitboardMasks {
 public:
 	constexpr BitboardMasks() noexcept {
 		for (int square = 0; square < 64; ++square) {
 			const int rank = square / 8;
 			const int file = square % 8;
+			// Diagonal bytes wrap modulo eight; MoveData clips their attacks to
+			// the actual diagonal so unrelated wrapped squares cannot be reached.
 			rotatedIndices[square] = {
 				static_cast<std::int8_t>(square),
 				static_cast<std::int8_t>(rank + 8 * file),
@@ -75,6 +80,8 @@ inline constexpr BitboardMasks bitboardMasks;
 // Retained for callers that explicitly initialized the old runtime tables.
 inline constexpr void initBits(void) noexcept {}
 
+// All four views must change together. Index zero is ordinary occupancy;
+// the other views are derived layouts, not separate pieces or colors.
 class RotatedBitboard {
 public:
 	constexpr RotatedBitboard() noexcept = default;
@@ -122,6 +129,8 @@ public:
 		return indexFromRotation(square, kDiag2Index);
 	}
 	constexpr Bitboard rankMoves(int square) const noexcept {
+		// Tables include the first blocker. The caller removes friendly pieces
+		// or intersects with enemy pieces to obtain quiet moves or captures.
 		return moveData.rankMoves(square, indexFromRank(square));
 	}
 	constexpr Bitboard fileMoves(int square) const noexcept {

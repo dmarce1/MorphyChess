@@ -1,6 +1,8 @@
 #include <cmath>
-#include <morphychess/command_line.hpp>
 #include <stdexcept>
+
+#include <morphychess/command_line.hpp>
+
 namespace morphy_chess {
 hpx::program_options::options_description CommandLineOptions::description() {
 	namespace po = hpx::program_options;
@@ -31,6 +33,8 @@ CommandLineOptions::CommandLineOptions(
 	showVersion(values["version"].as<bool>()),
 	bookEnabled(!values["no-book"].as<bool>()),
 	openingBookPath(values["book"].as<std::string>()) {
+	// Reject invalid dimensions and nonfinite time limits before allocating
+	// caches or constructing asynchronous search tasks.
 	if (searchWorkers < 1 || searchWorkers > kTableSize / 8) {
 		throw std::invalid_argument(
 			"--threads must be positive and fit the transposition table");

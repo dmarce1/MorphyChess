@@ -1,8 +1,13 @@
 #pragma once
-#include <hpx/modules/program_options.hpp>
-#include <morphychess/params.hpp>
 #include <string>
+
+#include <hpx/modules/program_options.hpp>
+
+#include <morphychess/params.hpp>
+
 namespace morphy_chess {
+// Validated application options. Search-task count and HPX worker count are
+// separate: several cooperative searches may share a single runtime worker.
 class CommandLineOptions {
 public:
 	explicit CommandLineOptions(

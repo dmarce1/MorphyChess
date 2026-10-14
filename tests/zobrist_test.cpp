@@ -1,6 +1,8 @@
 #include <array>
 #include <cstdint>
+
 #include <gtest/gtest.h>
+
 #include <morphychess/board.hpp>
 #include <morphychess/zobrist.hpp>
 

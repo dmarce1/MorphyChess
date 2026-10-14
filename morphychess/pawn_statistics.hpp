@@ -1,6 +1,10 @@
 #pragma once
 #include <morphychess/bitboard.hpp>
+
 namespace morphy_chess {
+// Lightweight holder for caller-defined pawn lane, move, and weakness masks.
+// This type computes no statistics itself; StaticEvaluator currently derives
+// its pawn features directly from Board rather than consuming these masks.
 class PawnStatistics {
 public:
 	constexpr PawnStatistics(Bitboard lanes = {}, Bitboard moves = {},

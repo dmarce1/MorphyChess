@@ -2,10 +2,13 @@
 
 #include <array>
 #include <limits>
+
 #include <morphychess/board.hpp>
 #include <morphychess/params.hpp>
 
 namespace morphy_chess {
+// Compile-time default bonuses grow as 4^(depth-1), saturating below INT_MAX
+// so score accumulation can be made safe by one global halving.
 class HistoryIncrements {
 public:
 	constexpr HistoryIncrements() {
@@ -27,6 +30,9 @@ private:
 	std::array<int, kMaxDepth> increments{};
 };
 
+// Per-worker move ordering learned from quiet cutoffs. The from/to history
+// table is shared across plies and colors, while two killer slots are per ply.
+// See bibliography.md [history_heuristic].
 class History {
 public:
 	explicit History(double branchFactor = kDefaultHistoryBranchFactor);

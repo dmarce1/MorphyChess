@@ -1,13 +1,14 @@
-#include <morphychess/parallel_search.hpp>
-
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
-#include <hpx/modules/threading.hpp>
 #include <limits>
 #include <stdexcept>
 #include <vector>
+
+#include <gtest/gtest.h>
+#include <hpx/modules/threading.hpp>
+
+#include <morphychess/parallel_search.hpp>
 
 namespace morphy_chess {
 namespace {

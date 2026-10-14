@@ -4,11 +4,13 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
-#include <gtest/gtest.h>
 #include <limits>
+#include <stdexcept>
+
+#include <gtest/gtest.h>
+
 #include <morphychess/learning.hpp>
 #include <morphychess/parallel_search.hpp>
-#include <stdexcept>
 
 namespace morphy_chess {
 namespace {

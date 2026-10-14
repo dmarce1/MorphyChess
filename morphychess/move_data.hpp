@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdint>
+
 #include <morphychess/bitboard.hpp>
 
 namespace morphy_chess {
@@ -26,6 +27,8 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 // Immutable attack tables. Occupancy bytes use files for ranks and ranks for
 // files/diagonals, matching RotatedBitboard's four occupancy indices.
+// This is rotated-bitboard lookup, with compile-time table construction;
+// see bibliography.md [rotated_bitboards].
 class MoveData {
 public:
 	constexpr MoveData() noexcept;
@@ -63,6 +66,8 @@ public:
 
 private:
 	constexpr auto makeLineAttacks() const noexcept {
+		// The source bit is irrelevant. Walk both directions and include the
+		// first occupied square, which may be an enemy capture or own blocker.
 		std::array<std::array<unsigned, 256>, 8> attacks{};
 		for (int from = 0; from < 8; ++from) {
 			for (int index = 0; index < 256; ++index) {
@@ -103,6 +108,8 @@ private:
 	}
 
 	constexpr Bitboard genWhitePawnAttacks(int square) const noexcept {
+		// Shifts can wrap across files; remove the opposite board edge using
+		// the source's left/right half. Knight masks need two edge files.
 		const int side = (square & 0x7) >> 2;
 		const Bitboard mask = Bitboard::mask(square);
 		return ((mask << 7) | (mask << 9)) & ~(side ? fileA : fileH);
@@ -144,6 +151,8 @@ private:
 };
 
 constexpr MoveData::MoveData() noexcept {
+	// Spread one line byte onto a file or either principal diagonal, then
+	// shift and clip it for each square's particular line.
 	const auto lineAttacks = makeLineAttacks();
 	const auto fileMasks = makeSpreadMasks(8, 0);
 	const auto diag1Masks = makeSpreadMasks(9, 0);

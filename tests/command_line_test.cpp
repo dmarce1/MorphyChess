@@ -1,6 +1,9 @@
-#include <gtest/gtest.h>
-#include <morphychess/command_line.hpp>
 #include <vector>
+
+#include <gtest/gtest.h>
+
+#include <morphychess/command_line.hpp>
+
 namespace morphy_chess {
 namespace {
 CommandLineOptions parse(const std::vector<std::string> &arguments) {

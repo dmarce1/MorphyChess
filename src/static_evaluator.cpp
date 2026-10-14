@@ -1,13 +1,14 @@
 #include <array>
 #include <cmath>
-#include <morphychess/bits.hpp>
-#include <morphychess/debug.hpp>
-#include <morphychess/params.hpp>
-#include <morphychess/static_evaluator.hpp>
 #include <mutex>
 #include <stdexcept>
 #include <stdlib.h>
 #include <vector>
+
+#include <morphychess/bits.hpp>
+#include <morphychess/debug.hpp>
+#include <morphychess/params.hpp>
+#include <morphychess/static_evaluator.hpp>
 
 namespace morphy_chess {
 
@@ -40,6 +41,9 @@ static int
 evaluateBlackKingPawn(const std::array<std::array<int, 10>, 2> &pawnRank,
 					  int file);
 
+// Piece-square tables use Board's a1=0, h8=63 indexing. Their entries are
+// positional centipawn terms before the configurable percentage weights;
+// material values are accounted for separately in materialScore().
 constexpr std::array<int, 64> whitePawnSquareValue = {
 	0, 0,  0,  0,	0,	 0,	 0,	 0, 0, 0, 0,  -40, -40, 0,	0, 0,
 	1, 2,  3,  -10, -10, 3,	 2,	 1, 2, 4, 6,  8,   8,	6,	4, 2,
@@ -112,6 +116,8 @@ void StaticEvaluator::setGrainSize(int value) {
 }
 
 void StaticEvaluator::configure(const EvaluatorParameters &params) {
+	// Check the whole candidate before changing any member. Learning stores
+	// doubles, but the playing evaluator deliberately truncates to integers.
 	for (size_t index = 0; index < params.size(); ++index) {
 		if (!std::isfinite(params[index]) ||
 			std::abs(params[index]) > 10000.0 ||
@@ -144,6 +150,8 @@ void StaticEvaluator::configure(const EvaluatorParameters &params) {
 	rookRank7Bonus = params[15];
 
 	scoreGrain = kDefaultGrainSize;
+	// Keep the lazy-evaluation bound on the same score lattice as the default
+	// evaluator. The later positional clamp is what makes this a valid bound.
 	maximumNonMaterialScore /= scoreGrain;
 	maximumNonMaterialScore *= scoreGrain;
 
@@ -163,6 +171,8 @@ void StaticEvaluator::configure(const EvaluatorParameters &params) {
 
 int StaticEvaluator::materialScore(const Board &board, int &whiteMat,
 								   int &blackMat) {
+	// Build a White-minus-Black score, then convert once to the side to move.
+	// The returned raw material totals also select each king's endgame table.
 	int i, totalMat, winnersPawns, difMat, score, nBonus, rBonus, qBonus;
 	I64 bonus;
 	int totalPawns;
@@ -175,11 +185,15 @@ int StaticEvaluator::materialScore(const Board &board, int &whiteMat,
 	difMat = whiteMat - blackMat;
 	totalMat = whiteMat + blackMat;
 	winnersPawns = board.pieceCount((difMat > 0) ? white : black, pawn);
+	// Reward exchanging material while ahead when the stronger side still
+	// has pawns. Normalize by initial non-pawn material and pawn count.
 	bonus =
 		static_cast<I64>(difMat) * (startingMaterial - totalMat) * winnersPawns;
 	bonus /= (startingMaterial - 1600) * (winnersPawns + 1);
 
 	totalPawns = board.pieceCount(white, pawn) + board.pieceCount(black, pawn);
+	// Knights gain with more pawns; rooks gain as files open. These and the
+	// bishop-pair/duplicate-knight adjustments are engine-specific heuristics.
 	nBonus = 2 * totalPawns - 16;
 	qBonus = totalPawns;
 	qBonus += board.pieceCount(white, bishop);
@@ -215,6 +229,8 @@ int StaticEvaluator::materialScore(const Board &board, int &whiteMat,
 	bonus -= board.pieceCount(black, rook) * rBonus;
 
 	score = difMat;
+	// Saturate material before and after bonuses. With the default piece
+	// values these caps keep evaluations below the search's mate-score range.
 	if (score > maxMaterialWoBonus) {
 		score = maxMaterialWoBonus;
 	}
@@ -242,6 +258,8 @@ int StaticEvaluator::materialBalance(const Board &board) {
 
 int StaticEvaluator::nonMaterialScore(const Board &board, int whiteMat,
 									  int blackMat) {
+	// Accumulate White-minus-Black position terms. Rook file bonuses depend
+	// on both pawn sets, and the seventh-rank bonus uses each rook's own side.
 	int score;
 	int square;
 	int file;
@@ -318,14 +336,18 @@ int StaticEvaluator::nonMaterialScore(const Board &board, int whiteMat,
 	} else if (score < -maximumNonMaterialScore) {
 		score = -maximumNonMaterialScore;
 	}
+	// Dampen either side's positional advantage toward zero as the reversible
+	// move clock grows. Halving small advantages prevents crossing zero and
+	// preserves the bound used by test() for its material-only shortcut.
+	const I64 doubledClock = 2 * static_cast<I64>(board.fiftyMoveRule());
 	if (score > 0) {
-		if (2 * board.fiftyMoveRule() > score) {
+		if (doubledClock > score) {
 			score /= 2;
 		} else {
 			score -= board.fiftyMoveRule();
 		}
 	} else if (score < 0) {
-		if (2 * board.fiftyMoveRule() < score) {
+		if (doubledClock > -score) {
 			score /= 2;
 		} else {
 			score += board.fiftyMoveRule();
@@ -338,6 +360,8 @@ int StaticEvaluator::nonMaterialScore(const Board &board, int whiteMat,
 }
 
 int StaticEvaluator::checkmateValue(int ply) const {
+	// Mate magnitude decreases with root-relative ply: prefer faster wins
+	// and delay unavoidable losses. Round onto the search's score lattice.
 	int score;
 	score = kMinCheckmateValue + 5 * (kMaxDepth - ply);
 	score /= scoreGrain;
@@ -346,6 +370,10 @@ int StaticEvaluator::checkmateValue(int ply) const {
 }
 
 bool StaticEvaluator::test(const Board &board, int testValue) {
+	// Boolean null-window evaluation: first try material +/- the largest
+	// possible positional correction, computing positional features only if
+	// that interval straddles the threshold. Search thresholds lie between
+	// score-grain multiples, so a fully evaluated score must not equal them.
 	int score, materialScore;
 	int whiteMat, blackMat;
 	bool testResult;
@@ -371,6 +399,8 @@ bool StaticEvaluator::test(const Board &board, int testValue) {
 }
 
 void StaticEvaluator::writePawnTable(U32 key, int score) {
+	// Direct-mapped cache with striped locks. Since the slot count is a
+	// multiple of the lock count, all writers to a slot share the same lock.
 	int tableIndex;
 	int lockIndex;
 #ifdef PAWN_TABLE_OFF
@@ -390,6 +420,8 @@ void StaticEvaluator::writePawnTable(U32 key, int score) {
 }
 
 bool StaticEvaluator::readPawnTable(U32 key, int &score) {
+	// Compare the retained key, not just the slot index. Zero is reserved for
+	// an empty entry; a real zero-key position is evaluated without caching.
 	int tableIndex;
 	int lockIndex;
 	bool rc;
@@ -415,6 +447,8 @@ bool StaticEvaluator::readPawnTable(U32 key, int &score) {
 }
 
 void StaticEvaluator::resetPawnTable() {
+	// Hold every stripe in a fixed order to exclude readers/writers while
+	// invalidating scores after a parameter change.
 	std::vector<std::unique_lock<hpx::mutex>> guards;
 	guards.reserve(kPawnTableLocks);
 	for (auto &mutex : locks) {
@@ -427,6 +461,8 @@ void StaticEvaluator::resetPawnTable() {
 
 int StaticEvaluator::evaluatePawnsAndKings(const Board &board, int whiteMat,
 										   int blackMat) {
+	// Files 1..8 hold each side's least advanced pawn; sentinel files 0 and 9
+	// let the same neighbor-file tests handle edge pawns without branching.
 	int i;
 	int score;
 	int kingScore;
@@ -441,6 +477,9 @@ int StaticEvaluator::evaluatePawnsAndKings(const Board &board, int whiteMat,
 		pawnRank[black][i] = 0;
 	}
 	key = board.pawnKey() & 0xFFFFFFFF;
+	// Board::pawnKey() includes kings and en passant as well as pawns. Add
+	// the two material-phase flags because king placement scores use them;
+	// the precise material totals do not otherwise enter this cached score.
 	if (whiteMat < kEndgameDefinition) {
 		key ^= 0xFFFF0000;
 	}
@@ -467,6 +506,9 @@ int StaticEvaluator::evaluatePawnsAndKings(const Board &board, int whiteMat,
 			}
 		}
 		score = 0;
+		// Passed pawns have no enemy pawn ahead on their own/adjacent files;
+		// doubled pawns have a friendly pawn behind on their own file. The
+		// remaining rank tests are inexpensive pawn-weakness heuristics.
 		pawns = board.pieceBoard(white, pawn);
 		while (pawns) {
 			square = pawns.removeFirstOne();
@@ -515,6 +557,9 @@ int StaticEvaluator::evaluatePawnsAndKings(const Board &board, int whiteMat,
 		}
 
 		kingScore = 0;
+		// Use the opponent's material to choose active endgame king placement
+		// versus middlegame shelter. Wing kings inspect the nearest three
+		// files, giving the innermost shelter file half weight.
 		square = board.pieceBoard(white, king).firstOne();
 		if (blackMat < kEndgameDefinition) {
 			kingScore += endgameKingSquareValue[square];
@@ -558,6 +603,8 @@ int StaticEvaluator::evaluatePawnsAndKings(const Board &board, int whiteMat,
 static int
 evaluateWhiteKingPawn(const std::array<std::array<int, 10>, 2> &pawnRank,
 					  int file) {
+	// Penalize advanced/missing friendly shelter and approaching enemy
+	// pawns; a file with no enemy pawn also permits heavier-piece attacks.
 	int kingScore;
 	kingScore = 0;
 	if (pawnRank[white][file + 1] == 1) {

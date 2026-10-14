@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+
 #include <morphychess/evaluate.hpp>
 #include <morphychess/params.hpp>
 
@@ -23,8 +24,8 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-using std::min;
-
+// Fixed-value material helper retained on Board. The search uses the
+// configurable StaticEvaluator instead; this helper is White-relative.
 constexpr std::array<int, 7> pieceValues = {0, 100, 325, 350, 500, 900, kInfty};
 constexpr int maxMaterial = 3100;
 constexpr int maxMaterialWoBonus = 2400;
@@ -60,11 +61,15 @@ int Board::evaluateMaterial() const {
 	materialDifference = material[white] - material[black];
 	totalMaterial = material[white] + material[black];
 	winningSidePawns = pieceCount(materialDifference > 0 ? white : black, pawn);
+	// Favor material exchanges for the leading side while it retains pawns,
+	// then limit ordinary scores symmetrically for either color.
 	bonus = materialDifference * winningSidePawns *
 			(startingMaterial - totalMaterial);
 	bonus /= startingMaterialWoPawns * (winningSidePawns + 1);
-	score = min(materialDifference, maxMaterialWoBonus) + bonus;
-	score = min(score, maxMaterial);
+	score = std::clamp(materialDifference, -maxMaterialWoBonus,
+					   maxMaterialWoBonus) +
+			bonus;
+	score = std::clamp(score, -maxMaterial, maxMaterial);
 
 	return score;
 }

@@ -1,9 +1,10 @@
-#include <morphychess/bits.hpp>
-#include <morphychess/move_data.hpp>
-
 #include <array>
 #include <cstddef>
+
 #include <gtest/gtest.h>
+
+#include <morphychess/bits.hpp>
+#include <morphychess/move_data.hpp>
 
 namespace morphy_chess {
 namespace {

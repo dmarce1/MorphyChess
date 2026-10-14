@@ -1,11 +1,13 @@
 #include <atomic>
 #include <chrono>
-#include <gtest/gtest.h>
-#include <hpx/modules/threading.hpp>
-#include <morphychess/seek_bot.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <gtest/gtest.h>
+#include <hpx/modules/threading.hpp>
+
+#include <morphychess/seek_bot.hpp>
 
 namespace morphy_chess {
 namespace {

@@ -2,11 +2,13 @@
 #include <array>
 #include <cmath>
 #include <ctime>
-#include <hpx/modules/async_local.hpp>
-#include <hpx/modules/threading.hpp>
-#include <morphychess/parallel_search.hpp>
 #include <mutex>
 #include <stdexcept>
+
+#include <hpx/modules/async_local.hpp>
+#include <hpx/modules/threading.hpp>
+
+#include <morphychess/parallel_search.hpp>
 
 namespace morphy_chess {
 ParallelSearch::ParallelSearch(Board &board, StaticEvaluator &evaluator,
@@ -164,6 +166,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 		// future.
 		workers.reserve(workerCount);
 		Move fallback;
+		// Keep a legal move even if time expires before any iteration finishes.
 		std::array<Move, maxMoves> moves;
 		const int moveCount = rootBoard.genPseudolegalMoves(moves.data());
 		for (int index = 0; index < moveCount; ++index) {
@@ -226,6 +229,7 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 		if (error) {
 			std::rethrow_exception(error);
 		}
+		// Partial deeper bounds are not a completed score or best move.
 		Move selected =
 			completedDepth > 0 ? bestMoves[completedDepth] : fallback;
 		if (selected.isEmpty() || !rootBoard.isLegalMove(selected)) {
@@ -261,6 +265,10 @@ SearchResult ParallelSearch::runImpl(int, double, int) {
 }
 // Retain the original bound-splitting search scheduler. The mutex protects
 // scheduling metadata; each task searches its own board outside this lock.
+// Start successive depths from the preceding score estimate, then distribute
+// distinct neighboring thresholds among workers. A deeper iteration can begin
+// while shallower probes remain in flight. See bibliography.md [mtdf] for the
+// memory-enhanced test framework; this parallel scheduling policy is local.
 bool ParallelSearch::nextSearch(int index, int &testValue, int &selectedDepth,
 								std::vector<SearchResult> &notifications) {
 	if (searchDone || stopRequested.load() ||
@@ -275,6 +283,8 @@ bool ParallelSearch::nextSearch(int index, int &testValue, int &selectedDepth,
 			stages[depth] = Stage::searching;
 			found = true;
 		} else if (stages[depth] == Stage::searching) {
+			// Probe just beyond thresholds already being searched, so workers
+			// do not independently repeat the same unresolved question.
 			int high = lowerBounds[depth];
 			int low = upperBounds[depth];
 			for (int other = 0; other < workerCount; ++other) {
@@ -305,6 +315,7 @@ bool ParallelSearch::nextSearch(int index, int &testValue, int &selectedDepth,
 		}
 		if (!found && stages[depth] == Stage::finalSearching &&
 			upperBounds[depth] - lowerBounds[depth] <= grainSize) {
+			// Adjacent threshold bounds enclose exactly one quantized score.
 			stages[depth] = Stage::complete;
 			completedDepth = std::max(completedDepth, depth);
 			if (progressHandler) {
@@ -330,6 +341,8 @@ bool ParallelSearch::nextSearch(int index, int &testValue, int &selectedDepth,
 	return false;
 }
 void ParallelSearch::removeOutliers(int depth, int workerIndex) {
+	// A new bound can make an in-flight question redundant. Cancellation is
+	// cooperative; that worker's partial answer must not update the bounds.
 	for (int index = 0; index < workerCount; ++index) {
 		if (index != workerIndex && depths[index] == depth &&
 			(testValues[index] >= upperBounds[depth] ||
@@ -370,6 +383,8 @@ void ParallelSearch::worker(int index) {
 		nodeCount += search.nodeCount();
 		search.resetCounters();
 		depths[index] = -1;
+		// Only a finished answer strictly inside the remaining interval adds
+		// information; cancellation also returns false from Search::test().
 		if (!search.stopped() && testValue < upperBounds[depth] &&
 			testValue > lowerBounds[depth]) {
 			if (result && !search.bestMove().isEmpty()) {

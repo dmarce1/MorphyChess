@@ -1,9 +1,11 @@
 #include <array>
 #include <cstdio>
 #include <cstdlib>
+
 #include <morphychess/bits.hpp>
 #include <morphychess/debug.hpp>
 #include <morphychess/zobrist.hpp>
+
 namespace morphy_chess {
 namespace {
 thread_local const Board *registeredBoard = nullptr;
@@ -33,6 +35,8 @@ void Board::assertTranspositionKeyConsistency(
 void Board::assertBoardConsistency(
 	[[maybe_unused]] const std::source_location &location) const {
 #ifndef NDEBUG
+	// Reconstruct redundant caches from the square array rather than checking
+	// them against each other, then independently recompute the hash keys.
 	std::array<std::array<int, 7>, 2> counts{};
 	std::array<std::array<Bitboard, 7>, 2> pieces{};
 	RotatedBitboard occupied;

@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+
 namespace morphy_chess {
 using U32 = std::uint32_t;
 using U16 = std::uint16_t;
@@ -18,6 +19,7 @@ template <class T, class U> constexpr auto minimum(T a, U b) {
 }
 template <class T, class U, class V>
 constexpr auto restrictRange(T a, U value, V b) {
+	// Inclusive clamp; callers supply ordered bounds and compatible types.
 	return minimum(maximum(a, value), b);
 }
 } // namespace morphy_chess

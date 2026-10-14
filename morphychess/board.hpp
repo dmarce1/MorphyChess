@@ -1,13 +1,14 @@
 #pragma once
 
 #include <array>
+#include <source_location>
+#include <stdio.h>
+#include <string>
+
 #include <morphychess/bitboard.hpp>
 #include <morphychess/bits.hpp>
 #include <morphychess/integers.hpp>
 #include <morphychess/params.hpp>
-#include <source_location>
-#include <stdio.h>
-#include <string>
 
 namespace morphy_chess {
 
@@ -31,6 +32,8 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 inline constexpr auto initialPosition =
 	"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+// Piece type zero means empty; signed square values use + for white and -
+// for black. Color indices deliberately use white=1 and black=0.
 inline constexpr auto empty = 0;
 inline constexpr auto pawn = 1;
 inline constexpr auto knight = 2;
@@ -88,6 +91,8 @@ enum Result {
 	invalid = 5
 };
 
+// Compact coordinate move. Promotion=1 is the empty/list-end/null-search
+// sentinel, since a real promotion can only be knight through queen.
 class Move {
 public:
 	constexpr Move() noexcept = default;
@@ -112,6 +117,9 @@ private:
 };
 
 class Board;
+// halfMoveCount indexes local undo history, independent of the FEN move
+// number. epCaptureSquare records the pawn to remove, not its landing target;
+// zero means no en-passant right because a capturable pawn cannot be on a1.
 class BoardFlags {
 public:
 	constexpr int halfMoveCount() const noexcept { return halfMoveCountValue; }
@@ -149,6 +157,8 @@ private:
 	U32 whiteQueenSideValue : 1 = 0;
 };
 
+// Snapshot the irreversible metadata before each move; piece placement is
+// reversed from the move and captured piece type instead of copying a board.
 class UndoInfo {
 public:
 	std::uint64_t positionKey() const noexcept { return positionKeyData; }
@@ -172,6 +182,9 @@ public:
 	bool kingInCheck() const;
 	bool kingInCheckmate(int color);
 	bool kingInStalemate(int color);
+	// Takes a generated/pseudolegal move (or the null sentinel), applies it,
+	// and rolls it back if it exposes the moving king. Use isLegalMove for
+	// arbitrary input; makeMove does not fully validate movement geometry.
 	bool makeMove(Move move);
 	bool undoMove();
 	bool squareUnderAttackBy(int square, int color) const;
@@ -180,6 +193,8 @@ public:
 	bool isLegalMove(Move m);
 	bool loadFen(const char *fen);
 	char *moveToStr(char *buffer, Move move);
+	// Lists require maxMoves slots; counts exclude the final empty sentinel.
+	// King safety is deferred to makeMove, including the castle destination.
 	int genPseudolegalMoves(Move *mList) const;
 	int genPseudolegalCaptures(Move *mList) const;
 	int genPseudolegalNoncaptures(Move *mList) const;
@@ -195,6 +210,7 @@ public:
 	bool moveIsCapture(Move move);
 	bool nextMoveIsForced();
 	int repetitions();
+	// Select a legal recapture without changing the board; used by see().
 	bool genLvaAttackToSquare(Move &move, int square);
 	bool kingInCheck(int color) const;
 	bool checkForDraw();
@@ -266,6 +282,7 @@ private:
 	void handlePromotionUndo(Move move);
 	void storeUndoInfo(const UndoInfo &undo);
 	std::array<UndoInfo, maxHalfMoves> undoInfoData{};
+	// Slot zero is the aggregate count/bitboard for that color, not empties.
 	std::array<std::array<I8, 7>, 2> pieceCountsData{};
 	std::array<std::array<Bitboard, 7>, 2> pieceBoardsData{};
 	std::array<I8, 64> pieceValuesData{};

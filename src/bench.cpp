@@ -1,9 +1,11 @@
 #include <array>
 #include <chrono>
-#include <morphychess/bench.hpp>
-#include <morphychess/parallel_search.hpp>
 #include <ostream>
 #include <stdexcept>
+
+#include <morphychess/bench.hpp>
+#include <morphychess/parallel_search.hpp>
+
 namespace morphy_chess {
 int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
 	constexpr std::array<const char *, kNumBenchmarks> positions{
@@ -30,6 +32,7 @@ int runBenchmark(const CommandLineOptions &options, std::ostream &output) {
 			throw std::runtime_error("Invalid benchmark position " +
 									 std::to_string(index + 1));
 		}
+		// Empty caches and no book keep positions independent of earlier FENs.
 		search.resetMemory();
 		const auto result =
 			search.run(options.depth(), options.benchmarkSeconds());

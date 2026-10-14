@@ -2,9 +2,13 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
-#include <hpx/modules/futures.hpp>
 #include <string>
+
+#include <hpx/modules/futures.hpp>
+
 namespace morphy_chess {
+// Owns one periodic ICS seek task. stop() joins it and propagates callback
+// errors; callers must keep callback captures alive until that join completes.
 class SeekBot {
 public:
 	SeekBot() = default;

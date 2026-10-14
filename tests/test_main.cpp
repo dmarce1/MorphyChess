@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <hpx/init_runtime_local/init_runtime_local.hpp>
+
 namespace {
 int runTests() {
 	const int result = RUN_ALL_TESTS();

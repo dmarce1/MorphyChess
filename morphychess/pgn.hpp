@@ -1,10 +1,11 @@
 #pragma once
 
-#include <morphychess/board.hpp>
 #include <stddef.h>
 #include <string>
 #include <string_view>
 #include <vector>
+
+#include <morphychess/board.hpp>
 
 /*********************************************************************************
 MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
@@ -26,6 +27,10 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 namespace morphy_chess {
 
+// Stateful PGN main-line reader; annotations and variations are skipped.
+// next() distinguishes ordinary EOF from malformed input through hasError().
+// SAN, tags, and FEN follow the formats described in bibliography.md [pgn],
+// with permissive import handling (for example, an omitted final result).
 class Pgn {
 public:
 	bool load(const std::string &filename, Board &board);

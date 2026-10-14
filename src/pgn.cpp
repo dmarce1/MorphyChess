@@ -1,10 +1,10 @@
-#include <morphychess/pgn.hpp>
-
 #include <cctype>
 #include <charconv>
 #include <fstream>
 #include <iterator>
 #include <utility>
+
+#include <morphychess/pgn.hpp>
 
 /*********************************************************************************
 MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
@@ -92,6 +92,8 @@ void Pgn::resetMetadata() {
 }
 
 bool Pgn::skipIgnored() {
+	// Only the main line is replayed. Count nested variations so their moves,
+	// result markers, and annotations never affect the caller's position.
 	int variationDepth = 0;
 	while (cursor < stream.size()) {
 		const char value = stream[cursor];
@@ -131,6 +133,8 @@ bool Pgn::skipIgnored() {
 }
 
 bool Pgn::readTag() {
+	// Consume quoted values before looking for ']' so escaped quotes and
+	// bracket characters inside metadata cannot terminate a tag early.
 	++cursor;
 	while (cursor < stream.size() && isSpace(stream[cursor])) {
 		++cursor;
@@ -216,6 +220,8 @@ bool Pgn::next(Board &board) {
 			return false;
 		}
 	}
+	// Parse transactionally: a malformed later move must leave the caller's
+	// board intact. The parser's own metadata may describe the failed game.
 	Board parsedBoard;
 	if (!fenValue.empty() && !parsedBoard.loadFen(fenValue.c_str())) {
 		errorValue = true;
@@ -228,11 +234,35 @@ bool Pgn::next(Board &board) {
 		if (cursor == stream.size() || stream[cursor] == '[') {
 			break;
 		}
+		// NAGs terminate at the first non-digit, even without whitespace:
+		// e4$1e5 is two moves and one annotation. See bibliography.md [pgn].
+		if (stream[cursor] == '$') {
+			const auto digits = ++cursor;
+			while (cursor < stream.size() && stream[cursor] >= '0' &&
+				   stream[cursor] <= '9') {
+				++cursor;
+			}
+			const int nag = parseNumber(
+				std::string_view(stream).substr(digits, cursor - digits));
+			if (nag < 0 || nag > 255) {
+				errorValue = true;
+				return false;
+			}
+			continue;
+		}
+		// The unfinished-game marker is also a standalone PGN token.
+		if (stream[cursor] == '*') {
+			++cursor;
+			resultValue = inProgress;
+			board = parsedBoard;
+			return true;
+		}
 		const auto start = cursor;
 		while (cursor < stream.size() && !isSpace(stream[cursor]) &&
 			   stream[cursor] != '{' && stream[cursor] != ';' &&
 			   stream[cursor] != '(' && stream[cursor] != ')' &&
-			   stream[cursor] != '[') {
+			   stream[cursor] != '[' && stream[cursor] != '$' &&
+			   stream[cursor] != '*') {
 			++cursor;
 		}
 		std::string token = stream.substr(start, cursor - start);
@@ -245,7 +275,7 @@ bool Pgn::next(Board &board) {
 			board = parsedBoard;
 			return true;
 		}
-		if (token.front() == '$' || token == "e.p.") {
+		if (token == "e.p.") {
 			continue;
 		}
 		const auto period = token.find_last_of('.');

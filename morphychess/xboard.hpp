@@ -3,11 +3,15 @@
 #include <atomic>
 #include <chrono>
 #include <iostream>
-#include <morphychess/parallel_search.hpp>
 #include <string>
+
+#include <morphychess/parallel_search.hpp>
 
 namespace morphy_chess {
 
+// CECP/XBoard command state machine; see bibliography.md [xboard_protocol].
+// The protocol task owns the live board and joins searches before changing it.
+// Worker progress callbacks only publish output through emit().
 class Xboard {
 public:
 	explicit Xboard(int workers = defaultThreadCount, bool useBook = true,

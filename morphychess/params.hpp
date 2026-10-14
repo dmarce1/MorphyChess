@@ -50,6 +50,8 @@ true.
 
 ******************************************************/
 
+// Compile-time defaults and legacy tuning constants. Runtime options choose
+// the actual worker count; this default also sizes the pawn-cache lock array.
 inline constexpr int defaultThreadCount = 8;
 inline constexpr auto kMinDepth = 4;
 inline constexpr auto kFullDepthMoves = 4;
@@ -57,13 +59,19 @@ inline constexpr auto kReductionLimit = 2;
 inline constexpr auto kFutilityMargin = 300;
 inline constexpr auto kMaxDepth = 64;
 inline constexpr auto kMaxSearchDepth = 32;
+// Search sentinels and mate scores are separate from ordinary centipawn
+// evaluations. Mate magnitude decreases by five per root-relative ply.
 inline constexpr auto kInfty = 100000;
 inline constexpr auto kMinCheckmateValue = (10000 - (5 * kMaxDepth));
 inline constexpr auto kDefaultHistoryBranchFactor = 4.0;
 inline constexpr auto kNullReduction = 3;
+// Search/evaluation operate on a lattice of this many centipawns, with
+// null-window thresholds between consecutive multiples.
 inline constexpr auto kDefaultGrainSize = 8;
 inline constexpr auto kDefaultPollFrequency = 1024;
 inline constexpr auto kName = "Morphy Chess 1.0.5";
+// Batch TD(lambda) step size; lambda and finite-difference spacing are in
+// learning.cpp. See bibliography.md [td_learning] and [tdleaf].
 inline constexpr auto kLearningAlpha = 100.0;
 inline constexpr auto kTableSize = (8 * 1024 * 1024);
 inline constexpr auto kTableLocksPerThread = 16;
@@ -71,6 +79,8 @@ inline constexpr auto kPawnTableSize = 1024;
 inline constexpr auto kPawnTableLocksPerThread = 16;
 inline constexpr auto kNumBenchmarks = 10;
 inline constexpr auto kBenchTime = 60;
+// This capacity is also part of the legacy book.bin disk format: changing
+// it requires migrating the codec, not merely growing an in-memory vector.
 inline constexpr auto kBookSize = 4096;
 inline constexpr auto kTimeCut1 = 0;
 inline constexpr auto kTimeCut2 = (-50);

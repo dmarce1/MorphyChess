@@ -3,15 +3,15 @@
 #include <ctype.h>
 #include <limits>
 #include <memory>
-#include <morphychess/bits.hpp>
-#include <morphychess/board.hpp>
-#include <morphychess/debug.hpp>
-#include <morphychess/move_data.hpp>
 #include <sstream>
 #include <stdlib.h>
 #include <string.h>
 #include <string>
 
+#include <morphychess/bits.hpp>
+#include <morphychess/board.hpp>
+#include <morphychess/debug.hpp>
+#include <morphychess/move_data.hpp>
 #include <morphychess/zobrist.hpp>
 
 namespace morphy_chess {
@@ -303,6 +303,9 @@ bool Board::isDraw() const {
 }
 
 bool Board::loadFen(const char *text) {
+	// Parse the six FEN fields into a separate board so every rejection leaves
+	// the caller's position/history intact. See bibliography.md [pgn]. The
+	// fullmove number is validated but local undo history starts at zero.
 	if (text == nullptr) {
 		return false;
 	}
@@ -410,6 +413,8 @@ bool Board::loadFen(const char *text) {
 		return false;
 	}
 	if (enPassant != "-") {
+		// FEN stores the empty target square; internal state stores the pawn
+		// that would disappear when an en-passant capture is made.
 		if (enPassant.size() != 2 || enPassant[0] < 'a' || enPassant[0] > 'h' ||
 			enPassant[1] != (candidate.sideToMove() == white ? '6' : '3')) {
 			return false;
@@ -458,6 +463,9 @@ bool Board::nextMoveIsForced() {
 }
 
 bool Board::makeMove(Move move) {
+	// Generated moves already satisfy piece geometry and castling transit
+	// restrictions. This final check uses the resulting occupancy, which also
+	// handles discovered checks caused by en-passant's two vacated squares.
 	if (halfMoveCount() >= maxHalfMoves) {
 		return false;
 	}
@@ -492,6 +500,9 @@ bool Board::makeMove(Move move) {
 	opposingColor = colorFlip(movingColor);
 	b.fiftyMoveRuleData++;
 	if (!move.isEmpty()) {
+		// Keep square values, per-piece/aggregate boards, counts, rotated
+		// occupancy, and both incremental hashes synchronized. XOR removes
+		// old feature keys and inserts new ones; see bibliography.md [zobrist].
 		b.pieceBoardsData[movingColor][0].clear(move.from());
 		b.pieceBoardsData[movingColor][movingPiece].clear(move.from());
 		b.occupiedSquaresData.clear(move.from());
@@ -546,6 +557,7 @@ bool Board::makeMove(Move move) {
 		}
 	}
 	if (b.flagsData.epCaptureSquareValue != 0) {
+		// En-passant eligibility lasts one ply, including a null-search move.
 		b.positionKeyData ^= zobristEpKey(b.flagsData.epCaptureSquareValue);
 		b.pawnKeyData ^= zobristEpKey(b.flagsData.epCaptureSquareValue);
 		b.flagsData.epCaptureSquareValue = noEpCapture;
@@ -571,6 +583,9 @@ bool Board::makeMove(Move move) {
 }
 
 bool Board::squareUnderAttackBy(int square, int color) const {
+	// Generate rays outward from the target and intersect attacking pieces.
+	// Pawn directions are reversed: a black pawn attacking this square lies
+	// on one of the squares a white pawn here could attack, and vice versa.
 	auto &b = *this;
 	Bitboard bb1, bb2;
 	if (color == black) {
@@ -601,6 +616,8 @@ bool Board::squareUnderAttackBy(int square, int color) const {
 }
 
 bool Board::undoMove() {
+	// Restore metadata/hashes verbatim before reversing piece placement.
+	// The restored side and en-passant state identify special-move undo paths.
 	auto &b = *this;
 	int movingPiece, capturedPiece, movingColor, opposingColor, rc;
 	Move move;
@@ -653,6 +670,8 @@ bool Board::undoMove() {
 }
 
 char *Board::moveToStr(char *buffer, Move move) {
+	// Emit the engine's long algebraic form with explicit source squares,
+	// then temporarily make/undo the move to append check or mate notation.
 	auto &b = *this;
 	const std::array<char, 7> pieceChars = {'\0', '\0', 'N', 'B',
 											'R',  'Q',	'K'};
@@ -719,6 +738,9 @@ char *Board::moveToStr(char *buffer, Move move) {
 }
 
 int Board::genPseudolegalMoves(Move *mList) const {
+	// Stages overwrite the preceding empty sentinel. Queen promotions go
+	// first; underpromotions, including capture underpromotions, are appended
+	// by the nominal "noncaptures" stage for the search's move-ordering policy.
 	auto &b = *this;
 	int moveCnt;
 
@@ -858,6 +880,9 @@ int Board::genPseudolegalCaptures(Move *mList) const {
 }
 
 int Board::pseudolegalMoveCount(Bitboard &control, int color) const {
+	// Evaluation mobility estimate, not a legal-move count: it omits castling
+	// and en passant and counts a promotion square only once. Its control
+	// output contains all nonpawn attacks but only occupied pawn captures.
 	auto &b = *this;
 	int attackColor, from, count;
 	Bitboard toBoard, fromBoard, tempBoard;
@@ -1004,6 +1029,8 @@ int Board::genPseudolegalNoncaptures(Move *mList) const {
 		toBoard &= ~b.occupiedSquaresData[0];
 		toBoard &= ~rank8;
 		tempBoard = toBoard;
+		// Starting from legal single pushes also guarantees the intermediate
+		// square is clear for double pushes; rank4 selects rank2 origins.
 		while (toBoard) {
 			to = toBoard.removeFirstOne();
 			storeMove(mList, to - 8, to, 0);
@@ -1279,6 +1306,10 @@ int Board::genPseudolegalUnderPromotions(Move *mList) const {
 }
 
 Move Board::makeTextMove(const char *text) {
+	// This legacy parser accepts algebraic and explicit-coordinate forms.
+	// Validate coordinates before packing them into Move's six-bit fields,
+	// then require a unique legal candidate (ignoring pinned alternatives).
+	// It is not a complete SAN grammar validator; see bibliography.md [pgn].
 	std::array<char, 32> mt;
 	if (text == nullptr || strlen(text) >= mt.size()) {
 		return {};
@@ -1321,7 +1352,11 @@ Move Board::makeTextMove(const char *text) {
 
 	else {
 		b.genPseudolegalMoves(moves.data());
-		if (isupper(*ptr)) {
+		const bool hasPiecePrefix = isupper(static_cast<unsigned char>(*ptr));
+		if (hasPiecePrefix) {
+			if (strchr("PNBRQK", *ptr) == nullptr) {
+				return {};
+			}
 			piece = charToPiece(*ptr);
 			ptr++;
 		} else {
@@ -1329,20 +1364,28 @@ Move Board::makeTextMove(const char *text) {
 		}
 		ff = fr = tf = tr = -1;
 		for (i = 0; (i < 5) && (*ptr != '\0') && (*ptr != '='); i++) {
-			if (isalpha(*ptr) && *ptr != 'x') {
+			if (isalpha(static_cast<unsigned char>(*ptr)) && *ptr != 'x') {
+				if (*ptr < 'a' || *ptr > 'h' || ff != -1) {
+					return {};
+				}
 				if (tf == -1) {
 					tf = *ptr - 'a';
 				} else {
 					ff = tf;
 					tf = *ptr - 'a';
 				}
-			} else if (isdigit(*ptr)) {
+			} else if (isdigit(static_cast<unsigned char>(*ptr))) {
+				if (*ptr < '1' || *ptr > '8' || fr != -1) {
+					return {};
+				}
 				if (tr == -1) {
 					tr = *ptr - '1';
 				} else {
 					fr = tr;
 					tr = *ptr - '1';
 				}
+			} else if (strchr("x-+#!?", *ptr) == nullptr) {
+				return {};
 			}
 			ptr++;
 		}
@@ -1352,39 +1395,25 @@ Move Board::makeTextMove(const char *text) {
 		} else {
 			m.setPromo(0);
 		}
+		if (tf < 0 || tf > 7 || tr < 0 || tr > 7) {
+			return {};
+		}
 		m.setTo(8 * tr + tf);
-		if ((fr == -1) || (ff == -1)) {
-			matchFound = false;
-			for (i = 0; !moves[i].isEmpty(); i++) {
-
-				if ((moves[i].to() == m.to()) &&
-					(moves[i].promo() == m.promo()) &&
-					(abs(b.pieceValuesData[moves[i].from()]) == piece) &&
-					isLegalMove(moves[i])) {
-					if ((fr == -1) && (ff == -1)) {
-						m.setFrom(moves[i].from());
-						matchFound = true;
-						break;
-					}
-					if ((ff == -1) && (fr != -1)) {
-						if (moves[i].from() / 8 == fr) {
-							m.setFrom(moves[i].from());
-							matchFound = true;
-							break;
-						}
-					}
-					if ((ff != -1) && (fr == -1)) {
-						if (moves[i].from() % 8 == ff) {
-							m.setFrom(moves[i].from());
-							matchFound = true;
-							break;
-						}
-					}
+		matchFound = false;
+		for (i = 0; !moves[i].isEmpty(); i++) {
+			const bool pieceMatches =
+				abs(b.pieceValuesData[moves[i].from()]) == piece ||
+				(!hasPiecePrefix && fr != -1 && ff != -1);
+			if (moves[i].to() == m.to() && moves[i].promo() == m.promo() &&
+				pieceMatches && (fr == -1 || moves[i].from() / 8 == fr) &&
+				(ff == -1 || moves[i].from() % 8 == ff) &&
+				isLegalMove(moves[i])) {
+				if (matchFound) {
+					return {};
 				}
+				m.setFrom(moves[i].from());
+				matchFound = true;
 			}
-		} else {
-			m.setFrom(8 * fr + ff);
-			matchFound = true;
 		}
 	}
 	if (matchFound && b.isLegalMove(m)) {
@@ -1478,6 +1507,9 @@ Result Board::result() {
 }
 
 std::uint64_t Board::computePositionKey() const {
+	// Rebuild the legacy Zobrist signature for consistency checks and FEN
+	// loading. Absent castle rights contribute keys. Side to move is omitted;
+	// consumers distinguish it separately. See bibliography.md [zobrist].
 	std::uint64_t key;
 	int i;
 
@@ -1506,6 +1538,8 @@ std::uint64_t Board::computePositionKey() const {
 }
 
 std::uint64_t Board::computePawnKey() const {
+	// Pawn evaluation also depends on king locations and en-passant state,
+	// so this cache signature deliberately contains more than pawns alone.
 	std::uint64_t key;
 	int i;
 
@@ -1556,6 +1590,8 @@ void Board::toStream(FILE *fp) const {
 }
 
 bool Board::drawByMaterial() const {
+	// Recognize selected dead-material cases: bare kings, a lone minor
+	// versus king, and one bishop each on the same square color.
 	auto &b = *this;
 	bool rc;
 	rc = false;
@@ -1630,6 +1666,9 @@ bool Board::positionIsRepeat() {
 }
 
 void Board::adjustRepeatCount() {
+	// Earlier occurrences must have the same side to move, hence a stride
+	// of two. No repetition can cross the last pawn move or capture; stop
+	// after two prior occurrences, the engine's threefold-draw threshold.
 	auto &b = *this;
 	int i, start, stop;
 	std::uint64_t thisKey;
@@ -1968,6 +2007,8 @@ void Board::handleCastleUndo(Move m) {
 }
 
 void Board::handleEnPassant(Move move) {
+	// The destination was empty, so mostRecentCapture remains zero. Undo
+	// relies on that to avoid restoring a second pawn on the landing square.
 	auto &b = *this;
 	if (b.flagsData.sideToMoveValue == white) {
 		b.occupiedSquaresData.clear(move.to() - 8);
@@ -2052,17 +2093,26 @@ void Board::storeUndoInfo(const UndoInfo &undo) {
 }
 
 bool Board::lastMoveWasCapture() {
-	auto &board = *this;
-	if (board.flagsData.mostRecentCaptureValue == 0) {
+	const Move move = lastMove();
+	if (move.isEmpty()) {
 		return false;
-	} else {
-		return true;
 	}
+	// An en-passant capture leaves a pawn on a different file but keeps the
+	// destination-capture field zero for undoMove's special restoration path.
+	return flagsData.mostRecentCaptureValue != 0 ||
+		   (abs(pieceValue(move.to())) == pawn &&
+			move.from() % 8 != move.to() % 8);
 }
 
 bool Board::moveIsCapture(Move move) {
-	auto &board = *this;
-	return (board.pieceValuesData[move.to()] != 0);
+	if (move.isEmpty()) {
+		return false;
+	}
+	return pieceValue(move.to()) != empty ||
+		   (flags().epCaptureSquare() != noEpCapture &&
+			move.to() == flags().epCaptureSquare() +
+						 (sideToMove() == white ? 8 : -8) &&
+			isEnPassantMove(move));
 }
 
 int Board::repetitions() {
@@ -2070,6 +2120,11 @@ int Board::repetitions() {
 	return board.flagsData.repeatCountValue;
 }
 bool Board::genLvaAttackToSquare(Move &move, int square) {
+	// SEE follows one least-valued legal recapture at each ply. Try every
+	// attacker of a type before moving to the next type: the lowest-index
+	// attacker may be pinned while another recapture is legal. Recompute
+	// attacks after each capture to expose newly opened rays. See
+	// bibliography.md [static_exchange].
 	auto &board = *this;
 	bool rc;
 	int stm;
@@ -2078,6 +2133,17 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 	move.setPromo(empty);
 	move.setTo(square);
 	stm = board.flagsData.sideToMoveValue;
+	const auto selectLegalAttacker = [&](Bitboard candidates, int promotion) {
+		move.setPromo(promotion);
+		while (candidates) {
+			move.setFrom(candidates.removeFirstOne());
+			if (board.makeMove(move)) {
+				board.undoMove();
+				return true;
+			}
+		}
+		return false;
+	};
 	if (rc == false) {
 		if (board.flagsData.sideToMoveValue == white) {
 			attackers =
@@ -2087,49 +2153,42 @@ bool Board::genLvaAttackToSquare(Move &move, int square) {
 				whitePawnAttacks(square) & board.pieceBoardsData[black][pawn];
 		}
 		if (attackers) {
-			rc = true;
-			move.setFrom(attackers.firstOne());
-			if ((move.to() / 8 == 0) || (move.to() / 8 == 7)) {
-				move.setPromo(queen);
-			}
+			const int promotion =
+				(square / 8 == 0 || square / 8 == 7) ? queen : empty;
+			rc = selectLegalAttacker(attackers, promotion);
 		}
 	}
 	if (rc == false) {
 		attackers = knightAttacks(square) & board.pieceBoardsData[stm][knight];
 		if (attackers) {
-			rc = true;
-			move.setFrom(attackers.firstOne());
+			rc = selectLegalAttacker(attackers, empty);
 		}
 	}
 	if (rc == false) {
 		attackers = board.occupiedSquaresData.bishopAttacks(square) &
 					board.pieceBoardsData[stm][bishop];
 		if (attackers) {
-			rc = true;
-			move.setFrom(attackers.firstOne());
+			rc = selectLegalAttacker(attackers, empty);
 		}
 	}
 	if (rc == false) {
 		attackers = board.occupiedSquaresData.rookAttacks(square) &
 					board.pieceBoardsData[stm][rook];
 		if (attackers) {
-			rc = true;
-			move.setFrom(attackers.firstOne());
+			rc = selectLegalAttacker(attackers, empty);
 		}
 	}
 	if (rc == false) {
 		attackers = board.occupiedSquaresData.queenAttacks(square) &
 					board.pieceBoardsData[stm][queen];
 		if (attackers) {
-			rc = true;
-			move.setFrom(attackers.firstOne());
+			rc = selectLegalAttacker(attackers, empty);
 		}
 	}
 	if (rc == false) {
 		attackers = kingAttacks(square) & board.pieceBoardsData[stm][king];
 		if (attackers) {
-			rc = true;
-			move.setFrom(attackers.firstOne());
+			rc = selectLegalAttacker(attackers, empty);
 		}
 	}
 	if (rc) {

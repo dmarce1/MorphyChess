@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+
 #include <morphychess/board.hpp>
 #include <morphychess/history.hpp>
 #include <morphychess/params.hpp>
@@ -20,6 +21,9 @@ inline constexpr int kNodeTerminal = 1;
 inline constexpr int kNodeMovesAvailable = 2;
 inline constexpr int kNodeNoMoreMoves = 3;
 
+// Stateful, staged move picker for a single parent position. Successful next
+// calls leave a legal child on Search's board; the caller must restore() before
+// asking for another move. Use either the full or tactical picker per instance.
 class Node {
 public:
 	Node(Search &search, Move move);

@@ -1,16 +1,17 @@
+#include <chrono>
+#include <cmath>
+#include <limits>
+#include <set>
+#include <utility>
+
+#include <gtest/gtest.h>
+#include <hpx/modules/async_local.hpp>
+#include <hpx/modules/threading.hpp>
+
 #include <morphychess/history.hpp>
 #include <morphychess/node.hpp>
 #include <morphychess/search.hpp>
 #include <morphychess/static_evaluator.hpp>
-
-#include <chrono>
-#include <cmath>
-#include <gtest/gtest.h>
-#include <hpx/modules/async_local.hpp>
-#include <hpx/modules/threading.hpp>
-#include <limits>
-#include <set>
-#include <utility>
 
 namespace morphy_chess {
 namespace {
@@ -195,6 +196,49 @@ TEST_F(SearchTest, TranspositionEntriesAreSharedAcrossWorkers) {
 	EXPECT_EQ(lower, 16);
 }
 
+TEST_F(SearchTest, TranspositionBoundsRequireMatchingFiftyMoveClock) {
+	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
+	const auto key = board.positionKey();
+	const Move stored(3, 11);
+	table.write(search, stored, true, 12, 3);
+	table.write(search, stored, false, 20, 3);
+	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 99 1"));
+	ASSERT_EQ(board.positionKey(), key);
+	Move move;
+	int lower, upper;
+	EXPECT_FALSE(table.read(search, move, lower, upper, 3, 12));
+	EXPECT_TRUE(move.isEmpty());
+	EXPECT_EQ(lower, -kInfty);
+	EXPECT_EQ(upper, kInfty);
+	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
+	ASSERT_TRUE(table.read(search, move, lower, upper, 3, 12));
+	EXPECT_EQ(move, stored);
+	EXPECT_EQ(lower, 16);
+	EXPECT_EQ(upper, 16);
+}
+
+TEST_F(SearchTest, TranspositionClockMismatchFallsBackToLocalBounds) {
+	const Move stored(3, 11);
+	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
+	table.write(search, stored, true, 12, 4);
+	table.write(search, stored, false, 20, 4);
+	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 99 1"));
+	// Shallower writes replace this worker's local entries, but leave the
+	// deeper global entries from the other clock in place.
+	table.write(search, stored, true, 28, 3);
+	table.write(search, stored, false, 36, 3);
+	Move move;
+	int lower, upper;
+	ASSERT_TRUE(table.read(search, move, lower, upper, 3, 28));
+	EXPECT_EQ(move, stored);
+	EXPECT_EQ(lower, 32);
+	EXPECT_EQ(upper, 32);
+	ASSERT_TRUE(board.loadFen("4k3/8/8/8/8/8/8/3QK3 w - - 0 1"));
+	ASSERT_TRUE(table.read(search, move, lower, upper, 4, 12));
+	EXPECT_EQ(lower, 16);
+	EXPECT_EQ(upper, 16);
+}
+
 TEST_F(SearchTest, TranspositionPrunesOnlyUntouchedEntries) {
 	const Move stored(12, 28);
 	Move move;
@@ -272,6 +316,40 @@ TEST_F(SearchTest, QuiescentCountsEveryLeafExactlyOnce) {
 	search.resetCounters();
 	EXPECT_TRUE(search.quiescentTest(-4));
 	EXPECT_EQ(search.nodeCount(), 1);
+}
+
+TEST_F(SearchTest, QuiescentStalemateIsDrawDespiteMaterialDisadvantage) {
+	for (const char *fen : {"7k/5K2/6Q1/8/8/8/8/8 b - - 0 1",
+							"8/8/8/8/8/6q1/5k2/7K w - - 0 1"}) {
+		ASSERT_TRUE(board.loadFen(fen));
+		ASSERT_FALSE(board.isDraw());
+		ASSERT_TRUE(board.kingInStalemate(board.sideToMove()));
+		ASSERT_FALSE(evaluator.test(board, -4));
+		const auto key = board.positionKey();
+		const auto ply = board.halfMoveCount();
+		for (const int threshold : {-2004, -4, 4}) {
+			search.resetCounters();
+			EXPECT_EQ(search.quiescentTest(threshold), threshold < 0);
+			EXPECT_EQ(search.nodeCount(), 1);
+			EXPECT_EQ(board.positionKey(), key);
+			EXPECT_EQ(board.halfMoveCount(), ply);
+		}
+	}
+}
+
+TEST_F(SearchTest, QuiescentStalemateOverridesPositiveStandPat) {
+	// White's rook is pinned by Bc3, every pawn is blocked, and Kc1 covers
+	// the king's only unoccupied exit. White still has a material advantage.
+	ASSERT_TRUE(board.loadFen(
+		"6n1/6P1/6P1/6P1/1p4P1/pPb3P1/PR4P1/K1k5 w - - 0 1"));
+	ASSERT_TRUE(board.kingInStalemate(white));
+	ASSERT_TRUE(evaluator.test(board, 4));
+	const auto key = board.positionKey();
+	const auto ply = board.halfMoveCount();
+	EXPECT_FALSE(search.quiescentTest(4));
+	EXPECT_EQ(search.nodeCount(), 1);
+	EXPECT_EQ(board.positionKey(), key);
+	EXPECT_EQ(board.halfMoveCount(), ply);
 }
 
 TEST_F(SearchTest, QuiescentEvaluationRestoresCaptureSequence) {

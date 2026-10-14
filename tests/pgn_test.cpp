@@ -1,6 +1,8 @@
-#include <gtest/gtest.h>
-#include <morphychess/pgn.hpp>
 #include <string>
+
+#include <gtest/gtest.h>
+
+#include <morphychess/pgn.hpp>
 
 namespace morphy_chess {
 namespace {
@@ -61,6 +63,33 @@ TEST(Pgn, AdvancesGamesAndResetsMetadata) {
 	EXPECT_EQ(board.halfMoveCount(), 2);
 	EXPECT_FALSE(pgn.next(board));
 	EXPECT_FALSE(pgn.next(board));
+}
+
+TEST(Pgn, ParsesAdjacentAnnotationAndResultTokens) {
+	Board board;
+	Pgn pgn;
+	ASSERT_TRUE(pgn.loadText("1.e4$1e5$2 2.Nf3$0$255Nc6*1.d4*", board));
+	EXPECT_EQ(pgn.moveCount(), 4);
+	EXPECT_EQ(board.halfMoveCount(), 4);
+	EXPECT_EQ(pgn.result(), inProgress);
+	ASSERT_TRUE(pgn.next(board));
+	EXPECT_EQ(pgn.moveCount(), 1);
+	EXPECT_EQ(board.pieceValue(27), pawn);
+	EXPECT_FALSE(pgn.next(board));
+	EXPECT_FALSE(pgn.hasError());
+}
+
+TEST(Pgn, RejectsMalformedNumericAnnotationsWithoutReplacingBoard) {
+	Board board;
+	ASSERT_TRUE(board.makeMove(Move(11, 27)));
+	const auto key = board.positionKey();
+	Pgn pgn;
+	for (const auto *text : {"1.e4$ *", "1.e4$-1 *", "1.e4$256 *",
+							 "1.e4$999999999999999999999999 *"}) {
+		EXPECT_FALSE(pgn.loadText(text, board)) << text;
+		EXPECT_TRUE(pgn.hasError());
+		EXPECT_EQ(board.positionKey(), key);
+	}
 }
 
 TEST(Pgn, AcceptsFinalGameWithoutResultOrFinalNewline) {

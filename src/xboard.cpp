@@ -16,21 +16,22 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
-#include <morphychess/xboard.hpp>
-
 #include <algorithm>
 #include <array>
 #include <cerrno>
 #include <charconv>
 #include <cmath>
-#include <hpx/modules/threading.hpp>
 #include <limits>
 #include <mutex>
-#include <poll.h>
 #include <random>
 #include <sstream>
 #include <string_view>
+
+#include <hpx/modules/threading.hpp>
+#include <poll.h>
 #include <unistd.h>
+
+#include <morphychess/xboard.hpp>
 
 namespace morphy_chess {
 namespace {
@@ -178,6 +179,9 @@ void Xboard::applySearchResult(const SearchResult &result) {
 }
 
 double Xboard::searchSeconds() const {
+	// Allocate a share of the remaining clock plus most of the increment.
+	// The 80% cap retains time for later moves and protocol overhead; 30 moves
+	// is the engine's planning horizon for sudden-death controls.
 	if (fixedMoveSeconds > 0.0) {
 		return fixedMoveSeconds;
 	}
@@ -206,6 +210,9 @@ void Xboard::showProgress(const SearchResult &result) {
 }
 
 void Xboard::pollSearch() {
+	// Completion and move application happen here, never in a search worker.
+	// Completed ponder/analysis flags prevent restarting the same position
+	// every time the nonblocking input loop polls.
 	if (quitRequested) {
 		return;
 	}
@@ -254,6 +261,7 @@ void Xboard::pollSearch() {
 }
 
 void Xboard::showBookMoves() {
+	// Display the share of recorded games; actual book selection weights wins.
 	stopSearch();
 	struct Choice {
 		Move move;
@@ -311,6 +319,8 @@ void Xboard::sendIcsSeeks() {
 }
 
 bool Xboard::processCommand(const std::string &command) {
+	// Validate commands before changing state where possible. Lifecycle
+	// commands join the current search so callbacks cannot outlive its inputs.
 	if (quitRequested) {
 		return false;
 	}
@@ -561,6 +571,9 @@ bool Xboard::processCommand(const std::string &command) {
 }
 
 int Xboard::run(int inputFd) {
+	// poll() never blocks an HPX OS worker. The short cooperative sleep lets
+	// search, timers, and input-producing tasks progress even with one worker.
+	// Keep partial lines across reads; EOF may terminate the last command.
 	std::string pending;
 	while (!quitRequested) {
 		pollSearch();

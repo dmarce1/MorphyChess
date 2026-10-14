@@ -1,8 +1,11 @@
 #include <array>
 #include <cstdint>
 #include <cstdio>
-#include <gtest/gtest.h>
 #include <memory>
+#include <string>
+
+#include <gtest/gtest.h>
+
 #include <morphychess/bitboard.hpp>
 #include <morphychess/bits.hpp>
 #include <morphychess/board.hpp>
@@ -11,7 +14,9 @@
 #include <morphychess/evaluate.hpp>
 #include <morphychess/move_data.hpp>
 #include <morphychess/pawn_statistics.hpp>
+#include <morphychess/static_evaluator.hpp>
 #include <morphychess/zobrist.hpp>
+
 namespace morphy_chess {
 TEST(Bits, CountsScansAndRemovesEdgeBits) {
 	initBits();
@@ -141,6 +146,56 @@ TEST(Evaluation, MaterialBalanceAndStaticExchangeRestoreBoard) {
 	EXPECT_EQ(board.positionKey(), original);
 	EXPECT_EQ(board.halfMoveCount(), 0);
 }
+TEST(Evaluation, MaterialHelperCapsLargeAdvantagesSymmetrically) {
+	Board whiteAhead;
+	Board blackAhead;
+	ASSERT_TRUE(whiteAhead.loadFen("7k/8/8/8/8/8/Q1Q1Q1Q1/K7 w - - 0 1"));
+	ASSERT_TRUE(blackAhead.loadFen("k7/q1q1q1q1/8/8/8/8/8/7K b - - 0 1"));
+	EXPECT_EQ(whiteAhead.evaluate(), 2400);
+	EXPECT_EQ(blackAhead.evaluate(), -2400);
+	EXPECT_EQ(whiteAhead.evaluate(), -blackAhead.evaluate());
+	// The leading side's pawns activate the trade-down bonus and the outer
+	// cap, independently of which color has the material advantage.
+	ASSERT_TRUE(whiteAhead.loadFen("7k/8/8/8/8/8/QPQ1Q1Q1/K7 w - - 0 1"));
+	ASSERT_TRUE(blackAhead.loadFen("k7/qpq1q1q1/8/8/8/8/8/7K b - - 0 1"));
+	EXPECT_EQ(whiteAhead.evaluate(), 3100);
+	EXPECT_EQ(blackAhead.evaluate(), -3100);
+}
+TEST(Evaluation, ReversibleMoveClockDampsBothColorsWithoutChangingSign) {
+	auto parameters = defaultEvaluatorParameters;
+	parameters[4] = 8.0;
+	for (size_t index = 5; index < parameters.size(); ++index) {
+		parameters[index] = 0.0;
+	}
+	parameters[11] = 100.0;
+	StaticEvaluator evaluator(parameters);
+	// A central knight contributes ten points, capped to eight. Disable
+	// other positional terms so this checks damping independently of tuning.
+	const std::array<int, 6> clocks{0, 3, 4, 5, 99, 1000000};
+	const std::array<int, 6> expected{8, 5, 4, 4, 4, 4};
+	for (size_t index = 0; index < clocks.size(); ++index) {
+		for (const std::string &side : {std::string("w"), std::string("b")}) {
+			const std::string suffix =
+				" " + side + " - - " + std::to_string(clocks[index]) + " 1";
+			Board whiteKnight;
+			Board blackKnight;
+			ASSERT_TRUE(
+				whiteKnight.loadFen(("7k/8/8/8/3N4/8/8/K7" + suffix).c_str()));
+			ASSERT_TRUE(
+				blackKnight.loadFen(("k7/8/8/3n4/8/8/8/7K" + suffix).c_str()));
+			int whiteMaterial, blackMaterial;
+			evaluator.materialScore(whiteKnight, whiteMaterial, blackMaterial);
+			const int whiteScore = evaluator.nonMaterialScore(
+				whiteKnight, whiteMaterial, blackMaterial);
+			evaluator.materialScore(blackKnight, whiteMaterial, blackMaterial);
+			const int blackScore = evaluator.nonMaterialScore(
+				blackKnight, whiteMaterial, blackMaterial);
+			const int perspective = side == "w" ? 1 : -1;
+			EXPECT_EQ(whiteScore, perspective * expected[index]);
+			EXPECT_EQ(blackScore, -whiteScore);
+		}
+	}
+}
 TEST(PawnStatistics, EncapsulatedValueFields) {
 	constexpr PawnStatistics statistics(Bitboard{3}, Bitboard{5}, Bitboard{8});
 	static_assert(statistics.lanes() == Bitboard{3});
@@ -165,7 +220,8 @@ TEST(Debug, ConsistentBoardAndReadableStream) {
 	board.assertBoardConsistency();
 	board.assertTranspositionKeyConsistency();
 	const auto closeFile = [](FILE *file) { std::fclose(file); };
-	std::unique_ptr<FILE, decltype(closeFile)> stream(std::tmpfile(), closeFile);
+	std::unique_ptr<FILE, decltype(closeFile)> stream(std::tmpfile(),
+													  closeFile);
 	ASSERT_NE(stream.get(), nullptr);
 	board.toStream(stream.get());
 	EXPECT_GT(std::ftell(stream.get()), 0);

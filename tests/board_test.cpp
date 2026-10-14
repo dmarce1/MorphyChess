@@ -1,10 +1,12 @@
 #include <array>
 #include <cstdint>
+#include <string>
+
 #include <gtest/gtest.h>
+
 #include <morphychess/board.hpp>
 #include <morphychess/debug.hpp>
 #include <morphychess/zobrist.hpp>
-#include <string>
 
 namespace morphy_chess {
 namespace {
@@ -115,6 +117,93 @@ TEST(Board, MoveUndoCastlingEnPassantPromotionAndHashConsistency) {
 	}
 	EXPECT_FALSE(board.undoMove());
 }
+TEST(Board, EnPassantIsACaptureAndSeeRestoresBothColors) {
+	const std::array<std::pair<const char *, Move>, 2> examples{
+		{{"4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1", Move(36, 43)},
+		 {"4k3/8/8/8/3Pp3/8/8/4K3 b - d3 0 1", Move(28, 19)}}};
+	for (const auto &[fen, move] : examples) {
+		SCOPED_TRACE(fen);
+		Board board;
+		ASSERT_TRUE(board.loadFen(fen));
+		const Board original = board;
+		EXPECT_TRUE(board.moveIsCapture(move));
+		EXPECT_EQ(board.see(move, 0), 100);
+		expectSamePosition(board, original);
+		ASSERT_TRUE(board.makeMove(move));
+		EXPECT_TRUE(board.lastMoveWasCapture());
+		// The ordinary destination-capture field stays empty for EP undo.
+		EXPECT_EQ(board.mostRecentCapture(), empty);
+		EXPECT_EQ(board.pieceCount(colorFlip(original.sideToMove()), pawn), 0);
+		EXPECT_EQ(board.positionKey(), board.computePositionKey());
+		EXPECT_EQ(board.pawnKey(), board.computePawnKey());
+		ASSERT_TRUE(board.undoMove());
+		expectSamePosition(board, original);
+		EXPECT_EQ(board.pieceCount(white, pawn), 1);
+		EXPECT_EQ(board.pieceCount(black, pawn), 1);
+		EXPECT_FALSE(board.lastMoveWasCapture());
+	}
+}
+TEST(Board, NullMoveDoesNotInheritThePreviousCapture) {
+	Board board;
+	EXPECT_FALSE(board.moveIsCapture(Move{}));
+	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/p7/R6K w - - 0 1"));
+	ASSERT_TRUE(board.makeMove(Move(kA1, 8)));
+	EXPECT_TRUE(board.lastMoveWasCapture());
+	ASSERT_TRUE(board.makeMove(Move{}));
+	EXPECT_FALSE(board.lastMoveWasCapture());
+	ASSERT_TRUE(board.undoMove());
+	EXPECT_TRUE(board.lastMoveWasCapture());
+}
+TEST(Board, SeeTriesLegalRecapturesAfterPinnedAttackers) {
+	const std::array<std::pair<const char *, Move>, 2> examples{
+		{{"3rk3/4p3/3n4/2B5/8/8/8/K3R3 w - - 0 1", Move(kD8, 43)},
+		 {"2k5/2p1p3/3n4/2B5/8/8/8/K1R5 w - - 0 1", Move(52, 43)}}};
+	for (const auto &[fen, recapture] : examples) {
+		SCOPED_TRACE(fen);
+		Board board;
+		ASSERT_TRUE(board.loadFen(fen));
+		const Board original = board;
+		const Move capture(34, 43);
+		// The bishop wins a knight and is recaptured: material is equal.
+		EXPECT_EQ(board.see(capture, 0), 0);
+		expectSamePosition(board, original);
+		ASSERT_TRUE(board.makeMove(capture));
+		const Board afterCapture = board;
+		Move selected;
+		ASSERT_TRUE(board.genLvaAttackToSquare(selected, 43));
+		EXPECT_EQ(selected, recapture);
+		expectSamePosition(board, afterCapture);
+		EXPECT_EQ(board.positionKey(), board.computePositionKey());
+		EXPECT_EQ(board.pawnKey(), board.computePawnKey());
+		ASSERT_TRUE(board.undoMove());
+		expectSamePosition(board, original);
+	}
+}
+TEST(Board, SeeIncludesPromotionGainAndSubsequentRecapture) {
+	struct Example {
+		const char *fen;
+		Move move;
+		int score;
+	};
+	const std::array<Example, 6> examples{
+		{{"7k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, queen), 800},
+		 {"7k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, knight), 200},
+		 {"1r5k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 57, queen), 1300},
+		 {"1r5k/P7/8/8/8/8/8/7K w - - 0 1", Move(48, 56, queen), -100},
+		 {"7K/8/8/8/8/8/p7/7k b - - 0 1", Move(8, 0, queen), 800},
+		 {"7k/8/8/8/8/R6K/1p6/b7 w - - 0 1", Move(16, 0), -1000}}};
+	for (const auto &[fen, move, score] : examples) {
+		SCOPED_TRACE(fen);
+		Board board;
+		ASSERT_TRUE(board.loadFen(fen));
+		const Board original = board;
+		ASSERT_TRUE(board.isLegalMove(move));
+		EXPECT_EQ(board.see(move, 0), score);
+		expectSamePosition(board, original);
+		EXPECT_EQ(board.positionKey(), board.computePositionKey());
+		EXPECT_EQ(board.pawnKey(), board.computePawnKey());
+	}
+}
 TEST(Board, PromotedArmyUsesMoreThanLegacyMoveBuffer) {
 	Board board;
 	ASSERT_TRUE(board.loadFen("7k/4QQ2/Q5Q1/2Q5/5Q1Q/3Q4/2Q5/K7 w - - 0 1"));
@@ -154,6 +243,41 @@ TEST(Board, SanDisambiguationIgnoresPinnedCandidates) {
 		ASSERT_FALSE(board.makeTextMove(move).isEmpty()) << move;
 	}
 	EXPECT_EQ(board.makeTextMove("Nb4"), Move(42, 25));
+}
+TEST(Board, TextMovesRejectWrappedCoordinatesWithoutChangingPosition) {
+	Board board;
+	const Board initial = board;
+	for (const char *text :
+		 {"e2u2", "e0e4", "e2e9", "e", "", "Xe4", "e2ee4", "\xFF" "e4"}) {
+		SCOPED_TRACE(text);
+		EXPECT_TRUE(board.makeTextMove(text).isEmpty());
+		expectSamePosition(board, initial);
+	}
+	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/8/R6K w - - 0 1"));
+	const Board rookPosition = board;
+	for (const char *text : {"a9a2", "a1a0"}) {
+		SCOPED_TRACE(text);
+		EXPECT_TRUE(board.makeTextMove(text).isEmpty());
+		expectSamePosition(board, rookPosition);
+	}
+	// Fully specified coordinate moves retain support for nonpawn pieces.
+	EXPECT_EQ(board.makeTextMove("a1a2"), Move(kA1, 8));
+}
+TEST(Board, TextMovesRequireUniqueLegalDisambiguation) {
+	Board board;
+	ASSERT_TRUE(board.loadFen("7k/8/8/8/8/8/8/KN3N2 w - - 0 1"));
+	const Board original = board;
+	for (const char *text : {"Nd2", "N1d2"}) {
+		SCOPED_TRACE(text);
+		EXPECT_TRUE(board.makeTextMove(text).isEmpty());
+		expectSamePosition(board, original);
+	}
+	EXPECT_EQ(board.makeTextMove("Nbd2"), Move(1, 11));
+	ASSERT_TRUE(board.undoMove());
+	EXPECT_EQ(board.makeTextMove("Nfd2"), Move(5, 11));
+	ASSERT_TRUE(board.loadFen("4r2k/8/8/8/8/8/2N1N3/4K3 w - - 0 1"));
+	// e2 is pinned by the rook, leaving c2 as the only legal source for Nd4.
+	EXPECT_EQ(board.makeTextMove("Nd4"), Move(10, 27));
 }
 TEST(Board, TextMovesAndBlackStalemate) {
 	Board board;

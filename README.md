@@ -72,6 +72,9 @@ updates opening-book statistics when rated game results are supplied.
 
 ## Source and tests
 
+See [algorithms.md](algorithms.md) for the algorithm map and
+[bibliography.md](bibliography.md) for references cited in source comments.
+
 Public headers live in `morphychess/`, implementations in `src/`, and GoogleTest
 tests in `tests/`. Include headers as `<morphychess/board.hpp>`. Code uses the
 `morphy_chess` namespace, PascalCase types, camelCase functions and variables,

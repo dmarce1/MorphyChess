@@ -2,6 +2,8 @@
 #include <morphychess/search.hpp>
 
 namespace morphy_chess {
+// Convert a series of threshold tests back to a quantized score. The public
+// guess/result use White's perspective; quiescentTest uses the side to move.
 int Search::quiescentValue(int guess) {
 	if (boardPtr->kingInCheckmate(white)) {
 		return -evaluatorRef.checkmateValue(currentPly);
@@ -44,6 +46,9 @@ int Search::quiescentValue(int guess) {
 	return boardPtr->sideToMove() == black ? -score : score;
 }
 
+// Extend the horizon through captures/promotions so a static evaluation is
+// not taken halfway through an exchange. In check, search all legal evasions
+// and disallow stand-pat. See bibliography.md [quiescence].
 bool Search::quiescentTest(int testValue) {
 	checkKill();
 	if (boardPtr->isDraw()) {
@@ -53,10 +58,18 @@ bool Search::quiescentTest(int testValue) {
 	const bool inCheck = boardPtr->kingInCheck();
 	if (currentPly >= kMaxDepth) {
 		++nodesVisited;
+		if (!inCheck && boardPtr->kingInStalemate(boardPtr->sideToMove())) {
+			return 0 > testValue;
+		}
 		return evaluatorRef.test(*boardPtr, testValue);
 	}
 	if (!inCheck && evaluatorRef.test(*boardPtr, testValue)) {
 		++nodesVisited;
+		// Stand-pat presumes at least one legal move exists. A stalemate is
+		// a draw even when the static material/position score exceeds the test.
+		if (boardPtr->kingInStalemate(boardPtr->sideToMove())) {
+			return 0 > testValue;
+		}
 		return true;
 	}
 	Node node(*this, Move{});
@@ -74,6 +87,12 @@ bool Search::quiescentTest(int testValue) {
 	}
 	if (inCheck && !anyMove) {
 		return -evaluatorRef.checkmateValue(currentPly) > testValue;
+	}
+	// A legal tactical move already rules out stalemate. Only an empty
+	// tactical list needs the additional full legal-move probe on this path.
+	if (!inCheck && !anyMove &&
+		boardPtr->kingInStalemate(boardPtr->sideToMove())) {
+		return 0 > testValue;
 	}
 	return false;
 }

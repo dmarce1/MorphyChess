@@ -22,9 +22,12 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 	along with this program.  If not, see [http://www.gnu.org/licenses/].
 **********************************************************************************/
 
+// Established-player Elo changes with a fixed K=32. See bibliography.md [elo].
 int ratingChangeWin(int engineRating, int opponentRating);
 int ratingChangeLoss(int engineRating, int opponentRating);
 int ratingChangeDraw(int engineRating, int opponentRating);
+// result is +1/0/-1 for win/draw/loss from the player's perspective;
+// numGames includes this game and selects provisional scoring through 20.
 int ratingComputeNewRating(int oldRating, int opponentRating, int result,
 						   int numGames);
 

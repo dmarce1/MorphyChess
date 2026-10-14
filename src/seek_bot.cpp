@@ -1,9 +1,12 @@
 #include <algorithm>
-#include <hpx/modules/async_local.hpp>
-#include <hpx/modules/threading.hpp>
-#include <morphychess/seek_bot.hpp>
 #include <random>
 #include <stdexcept>
+
+#include <hpx/modules/async_local.hpp>
+#include <hpx/modules/threading.hpp>
+
+#include <morphychess/seek_bot.hpp>
+
 namespace morphy_chess {
 SeekBot::~SeekBot() {
 	try {
@@ -33,6 +36,8 @@ void SeekBot::start(std::function<void(const std::string &)> output,
 						std::chrono::steady_clock::now() + interval;
 					while (!stopRequested.load() &&
 						   std::chrono::steady_clock::now() < next) {
+						// Bound cancellation latency independently of the seek
+						// interval, yielding the HPX worker between checks.
 						hpx::this_thread::sleep_for(
 							std::chrono::milliseconds(10));
 					}

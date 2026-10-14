@@ -3,15 +3,19 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <memory>
+#include <vector>
+
 #include <hpx/modules/futures.hpp>
 #include <hpx/synchronization/mutex.hpp>
-#include <memory>
+
 #include <morphychess/board.hpp>
 #include <morphychess/book.hpp>
 #include <morphychess/search.hpp>
-#include <vector>
 
 namespace morphy_chess {
+// Score is relative to the root side to move. Depth zero denotes a book or
+// fallback move; otherwise depth identifies the deepest completed iteration.
 class SearchResult {
 public:
 	SearchResult() = default;
@@ -32,6 +36,10 @@ private:
 	int visitedNodes{};
 };
 
+// Coordinate independent null-window root searches over score thresholds.
+// Workers own board/search state and share evaluation/transposition caches;
+// the scheduler combines their answers into bounds for each search depth.
+// This is the engine's bound-splitting policy, not subtree splitting.
 class ParallelSearch {
 public:
 	ParallelSearch(Board &board, StaticEvaluator &evaluator, MemoryTable &table,
@@ -74,6 +82,8 @@ private:
 	std::vector<std::unique_ptr<Search>> searches;
 	std::vector<int> depths;
 	std::vector<int> testValues;
+	// Scheduler bounds are inter-grain thresholds; a gap of one grain pins
+	// down a score. Entry zero supplies the initial guess for depth one.
 	std::array<int, kMaxDepth> upperBounds{};
 	std::array<int, kMaxDepth> lowerBounds{};
 	std::array<Stage, kMaxDepth> stages{};

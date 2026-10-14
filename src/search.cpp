@@ -1,10 +1,12 @@
 #include <array>
+#include <stdexcept>
+#include <stdlib.h>
+
 #include <hpx/modules/threading.hpp>
+
 #include <morphychess/debug.hpp>
 #include <morphychess/node.hpp>
 #include <morphychess/search.hpp>
-#include <stdexcept>
-#include <stdlib.h>
 
 namespace morphy_chess {
 
@@ -36,6 +38,8 @@ void Search::setKillTime(std::time_t value) {
 	killTime.store(value, std::memory_order_relaxed);
 }
 
+// Follow depth-qualified table moves, optionally copying the leaf position,
+// then undo this traversal so the caller retains its original board.
 void Search::reconstructPrincipalVariation(Board *leafNode,
 										   std::array<Move, kMaxDepth + 1> &pv,
 										   int depth, bool print) {
@@ -92,6 +96,10 @@ void Search::resetCounters() {
 	lateMoveReductionCount = 0;
 }
 
+// Repeated memory-enhanced threshold tests bracket the score around a guess.
+// This is an MTD-style driver, but its boolean interface advances one score
+// grain at a time rather than using fail-soft returned scores as in MTD(f).
+// See bibliography.md [mtdf].
 int Search::serialTestDriver(Move &move, int depth, int initialGuess) {
 	bool testResult;
 	int upperBound;
@@ -126,6 +134,10 @@ int Search::serialTestDriver(Move &move, int depth, int initialGuess) {
 	return lowerBound;
 }
 
+// Try giving the opponent a free move at reduced depth. A surviving advantage
+// suggests a cutoff, but zugzwang can invalidate this assumption; the material,
+// check, repetition, and verification guards restrict its use. This local
+// verified-null-move variant is related to bibliography.md [null_move].
 bool Search::nullTest(int testValue, int depth) {
 	Move nullMove;
 	bool testResult;
@@ -152,6 +164,8 @@ bool Search::nullTest(int testValue, int depth) {
 		}
 	}
 	if ((testResult == true) && (verifyNullMove == true)) {
+		// Verify the original position one ply shallower. Disable another null
+		// probe at this node and nested verification within its subtree.
 		verifyNullMove = false;
 		nullVerification = true;
 		testResult = testChild(testValue, depth - 1);
@@ -161,6 +175,8 @@ bool Search::nullTest(int testValue, int depth) {
 	return testResult;
 }
 
+// Spend an extra ply on checks, promotions, and pawns reaching the seventh
+// rank. The absolute ply cap in testChild bounds chains of extensions.
 bool Search::extensionNeeded() {
 	const Board &b = *boardPtr;
 	bool rc;
@@ -230,6 +246,9 @@ bool Search::testChild(int testValue, int depth) {
 							if (extension || !(node).okToReduce(depth)) {
 								testResult = !testChild(-testValue, depth - 1);
 							} else {
+								// Late quiet moves get a one-ply reduction. A reduced
+								// cutoff must survive a full-depth re-search.
+								// See bibliography.md [late_move_reductions].
 								lateMoveReductionCount++;
 								testResult = !testChild(-testValue, depth - 2);
 								if (testResult == true) {
@@ -316,6 +335,8 @@ bool Search::test(int testValue, int depth) {
 					testResult = !testChild(-testValue, depth - 1);
 				} else {
 					lateMoveReductionCount++;
+					// Root moves use the same reduce-and-verify policy as
+					// interior nodes; Node decides which quiet moves qualify.
 					testResult = !testChild(-testValue, depth - 2);
 					if (testResult == true) {
 						testResult = !testChild(-testValue, depth - 1);
@@ -336,6 +357,8 @@ bool Search::test(int testValue, int depth) {
 			tableRef.write(*this, bestMoveValue, testResult, testValue, depth);
 		}
 	} catch (const SearchCancelled &) {
+		// Cancellation may bypass several Node::restore() calls. currentPly
+		// tracks exactly how many speculative moves still need to be undone.
 		bestMoveValue.setEmpty();
 		testResult = false;
 		verifyNullMove = true;

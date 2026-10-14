@@ -3,6 +3,8 @@
 #include <array>
 
 namespace morphy_chess {
+// Piece-type indexed scores (empty through king). Callers choose the scale
+// and pass a nonnegative piece type, usually abs(Board::pieceValue(...)).
 class MaterialValues {
 public:
 	constexpr explicit MaterialValues(std::array<int, 7> pieceValues) :

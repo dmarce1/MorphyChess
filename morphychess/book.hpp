@@ -1,11 +1,12 @@
 #pragma once
 
 #include <array>
-#include <morphychess/board.hpp>
 #include <random>
 #include <stddef.h>
 #include <string>
 #include <vector>
+
+#include <morphychess/board.hpp>
 
 /*********************************************************************************
 MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
@@ -27,6 +28,8 @@ MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
 
 namespace morphy_chess {
 
+// One reached position, keyed by hash and side to move. Outcome counters
+// describe the player who made the preceding move; ECO is null terminated.
 class BookEntry {
 public:
 	std::uint64_t key() const noexcept { return keyValue; }
@@ -48,6 +51,9 @@ private:
 	int ratingValue = kInitialBookRating;
 };
 
+// Sorted in-memory opening positions with an explicit legacy binary codec.
+// Public operations are used by the stopped-search controller; this class
+// does not synchronize concurrent mutation. An empty Move means no book hit.
 class Book {
 public:
 	Book() = default;
@@ -57,6 +63,8 @@ public:
 
 	bool open(const std::string &filename = kBookName);
 	bool close();
+	// A failed save preserves the destination and the loaded filename/dirty
+	// state. A preexisting sibling .tmp file or symlink destination is refused.
 	bool save(const std::string &filename);
 	int digest(const std::string &filename);
 	Move findMove(Board &board);

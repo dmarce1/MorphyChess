@@ -1,7 +1,3 @@
-#include <morphychess/book.hpp>
-#include <morphychess/pgn.hpp>
-#include <morphychess/rating.hpp>
-
 #include <algorithm>
 #include <array>
 #include <bit>
@@ -12,6 +8,10 @@
 #include <limits>
 #include <numeric>
 #include <utility>
+
+#include <morphychess/book.hpp>
+#include <morphychess/pgn.hpp>
+#include <morphychess/rating.hpp>
 
 /*********************************************************************************
 MorphyChess 1.0.5 Copyright (C) 2008 Dominic C. Marcello
@@ -76,6 +76,8 @@ Book::~Book() {
 }
 
 bool Book::entryLess(const BookEntry &left, const BookEntry &right) {
+	// Include side to move explicitly: the legacy position hash does not
+	// encode it. Both load and digest restore this ordering before lookup.
 	if (left.colorValue != right.colorValue) {
 		return left.colorValue < right.colorValue;
 	}
@@ -101,6 +103,8 @@ const BookEntry *Book::findEntry(const Board &board) const {
 }
 
 bool Book::addEntry(const Board &board, const std::string &eco) {
+	// During PGN ingestion entries are unsorted, so use a linear lookup.
+	// Repeated appearances seed the same counter later used for played wins.
 	const auto found = std::find_if(
 		entries.begin(), entries.end(), [&](const BookEntry &entry) {
 			return entry.keyValue == board.positionKey() &&
@@ -126,6 +130,9 @@ bool Book::addEntry(const Board &board, const std::string &eco) {
 }
 
 int Book::digest(const std::string &filename) {
+	// Walk each parsed game backward, recording the position after every
+	// move. Restore the old book if input fails or exceeds fixed disk capacity.
+	// ECO is the PGN opening-classification tag; see bibliography.md [pgn].
 	Pgn pgn;
 	Board board;
 	if (!pgn.load(filename, board)) {
@@ -155,6 +162,9 @@ int Book::digest(const std::string &filename) {
 }
 
 bool Book::open(const std::string &filename) {
+	// Parse and validate into separate storage so a malformed file cannot
+	// partially replace the loaded book. Missing books are built from eco.pgn
+	// beside the requested binary file, not from the process's current folder.
 	std::ifstream input(filename, std::ios::binary);
 	if (!input) {
 		const auto pgnPath =
@@ -231,13 +241,27 @@ bool Book::save(const std::string &filename) {
 	writeInteger(bytes.data() + kBookSize * entryBytes, entries.size(), 4);
 	std::copy_n(lastEcoValue.begin(), std::min<size_t>(3, lastEcoValue.size()),
 				bytes.begin() + kBookSize * entryBytes + 4);
-	std::ofstream output(filename, std::ios::binary | std::ios::trunc);
+	// Publish a complete sibling file by rename, preserving the last good
+	// book if writing or closing fails. Exclusive creation neither truncates
+	// nor later removes another writer's temporary file. Do not replace links.
+	std::error_code error;
+	if (std::filesystem::is_symlink(filename, error)) {
+		return false;
+	}
+	const std::filesystem::path temporary = filename + ".tmp";
+	std::ofstream output(temporary, std::ios::binary | std::ios::noreplace);
 	if (!output) {
 		return false;
 	}
 	output.write(reinterpret_cast<const char *>(bytes.data()), bytes.size());
 	output.close();
 	if (!output) {
+		std::filesystem::remove(temporary, error);
+		return false;
+	}
+	std::filesystem::rename(temporary, filename, error);
+	if (error) {
+		std::filesystem::remove(temporary, error);
 		return false;
 	}
 	filenameValue = filename;
@@ -250,6 +274,8 @@ bool Book::close() {
 }
 
 Move Book::findMove(Board &board) {
+	// A move's statistics live at its successor position. Probe legal
+	// successors and restore the caller's board after every trial move.
 	if (board.halfMoveCount() != 0 && findEntry(board) == nullptr) {
 		return {};
 	}
@@ -273,6 +299,8 @@ Move Book::findMove(Board &board) {
 	if (choices.empty()) {
 		return {};
 	}
+	// Sample in proportion to wins (including PGN seed counts), falling
+	// back to uniform choice when every candidate has zero weight.
 	if (std::accumulate(weights.begin(), weights.end(), 0.0) == 0.0) {
 		std::fill(weights.begin(), weights.end(), 1.0);
 	}
@@ -285,6 +313,9 @@ Move Book::findMove(Board &board) {
 
 void Book::learning(const Board &finalBoard, int computerColor, Result result,
 					int opponentRating) {
+	// Update positions reached just after the engine's own moves: their side
+	// to move is the opponent. Outcomes therefore describe the previous mover,
+	// which is the perspective used when selecting a successor in findMove().
 	if (result != whiteWin && result != blackWin && result != draw) {
 		return;
 	}
@@ -308,6 +339,8 @@ void Book::learning(const Board &finalBoard, int computerColor, Result result,
 		} else {
 			entry.drawsValue = incrementCount(entry.drawsValue);
 		}
+		// Preserve the legacy policy: White's entries always use the
+		// established Elo update; Black's use provisional game counts.
 		const int ratingGames =
 			computerColor == white
 				? 100
@@ -323,6 +356,8 @@ void Book::learning(const Board &finalBoard, int computerColor, Result result,
 }
 
 void Book::showBookMoves(Board &board) const {
+	// This display ranks total recorded outcomes (including PGN seed counts).
+	// Its percentages describe that frequency, while findMove() samples wins.
 	struct Choice {
 		Move move;
 		long long games;

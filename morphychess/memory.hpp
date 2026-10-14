@@ -1,13 +1,13 @@
 #pragma once
 
-#include <morphychess/board.hpp>
-
-#include <hpx/synchronization/mutex.hpp>
-
 #include <array>
 #include <memory>
 #include <mutex>
 #include <vector>
+
+#include <hpx/synchronization/mutex.hpp>
+
+#include <morphychess/board.hpp>
 
 namespace morphy_chess {
 class Search;
@@ -18,11 +18,17 @@ private:
 	std::uint64_t key{};
 	I32 score{};
 	Move move{};
-	int depth{-1};
 	bool nullMovesVerified{};
 	bool touched{};
+	int depth{-1};
+	// The repetition key omits this clock, but search/evaluation depend on it.
+	int fiftyMoveRule{};
 };
 
+// Transposition bounds for repeated threshold searches (bibliography.md
+// [mtdf]). Each color has separate upper/lower stores: per-worker slots always
+// take the latest result, while shared slots prefer deeper verified results.
+// A worker's Search/threadNumber pair must not be used concurrently.
 class MemoryTable {
 public:
 	explicit MemoryTable(int entryCount = kTableSize,
